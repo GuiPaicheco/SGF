@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Solicitação de Férias - Prefeitura de Betim</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background: #f5f7fa; }
+    button, input, select { -webkit-tap-highlight-color: transparent; }
+    .fade-in { animation: fade .2s ease-out; }
+    @keyframes fade {
+      from { opacity: .15; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .calendar-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .day-btn { min-height: 48px; }
+    .touch { min-height: 48px; }
+    .logo-img { max-height: 52px; width: auto; object-fit: contain; }
+    .sheet-preview { background: white; }
+    @media (min-width: 768px) {
+      .day-btn { min-height: 56px; }
+      .logo-img { max-height: 62px; }
+    }
+    @media print {
+      body { background: #fff !important; }
+      .screen-only { display: none !important; }
+      .print-area { display: block !important; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-slate-800">
+  <main class="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-3 py-4 sm:px-6 sm:py-8">
+
+    <header class="screen-only mb-5 flex items-center justify-between px-1 sm:mb-7">
+      <div class="flex min-w-0 items-center gap-3">
+        <div class="flex h-12 w-28 shrink-0 items-center justify-start rounded-xl bg-white px-2 ring-1 ring-slate-200">
+          <img src="logo.png" alt="Prefeitura de Betim" class="logo-img w-full"
+               onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=&quot;text-xs font-bold text-slate-700&quot;>PREFEITURA MUNICIPAL DE<br>BETIM</span>';">
+        </div>
+        <div class="hidden sm:block">
+          <div class="text-sm font-bold text-slate-900">Ferramenta de Solicitação de Férias</div>
+          <div class="text-xs text-slate-500">Formulário de solicitação</div>
+        </div>
+      </div>
+
+      <div id="progress" class="rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 shadow-sm ring-1 ring-slate-200">
+        Etapa 1
+      </div>
+    </header>
+
+    <section id="app" class="flex-1"></section>
+
+    <footer class="screen-only mobile-safe mt-7 border-t border-slate-200 pt-4 text-center text-[11px] leading-5 text-slate-500 sm:mt-8">
+      <strong>Diretoria IV de Atenção Primária à Saúde — Secretaria de Saúde</strong><br>
+      Prefeitura Municipal de Betim
+    </footer>
+  </main>
+
+<script>
+/* =========================================================
+   CONFIGURAÇÃO
+   ========================================================= */
+const CONFIG = {
+  antecedenciaFerias: 60,
+  antecedenciaReprogramacao: 45,
+  inicioNovaRegra: '2025-12-02',
+  feriasNovasDias: 25,
+  feriasReduzidasDias: 16,
+  feriasAntigasDias: 30
+};
+
+/*
+  Integre aqui sua base oficial de feriados até 2030.
+  Estrutura:
+  [data, tipo, nome]
+  tipo: "feriado" | "ponto_facultativo"
+*/
+const calendarioBetim = [
+  ['2026-01-01','feriado','Confraternização Universal'],
+  ['2026-02-16','ponto_facultativo','Carnaval'],
+  ['2026-02-17','ponto_facultativo','Carnaval'],
+  ['2026-02-18','ponto_facultativo','Quarta-feira de Cinzas'],
+  ['2026-04-03','feriado','Paixão de Cristo'],
+  ['2026-04-21','feriado','Tiradentes'],
+  ['2026-05-01','feriado','Dia Mundial do Trabalho'],
+  ['2026-06-04','feriado','Corpus Christi'],
+  ['2026-07-16','feriado','Nossa Senhora do Carmo'],
+  ['2026-09-07','feriado','Independência do Brasil'],
+  ['2026-10-12','feriado','Nossa Senhora Aparecida'],
+  ['2026-10-28','ponto_facultativo','Dia do Servidor Público'],
+  ['2026-11-02','feriado','Finados'],
+  ['2026-11-15','feriado','Proclamação da República'],
+  ['2026-11-20','feriado','Dia da Consciência Negra'],
+  ['2026-12-24','ponto_facultativo','Véspera de Natal'],
+  ['2026-12-25','feriado','Natal'],
+  ['2026-12-31','ponto_facultativo','Véspera de Ano Novo']
+];
+
+const lotacoes = [];
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const state = {
+  screen: 'inicio',
+  history: [],
+  answers: {
+    tipo: null,
+    vinculo: '',
+    dataAdmissao: '',
+    nascimento: '',
+    cpf: '',
+    matricula: '',
+    nome: '',
+    cargo: '',
+    funcao: '',
+    lotacao: '',
+
+    periodAquisitivoFim: '',
+    faltas: null,
+    efetivo: null,
+    fracionar: null,
+    fracaoPrimeiro: null,
+    segundoInicio: '',
+
+    premioDireitoConfirmado: null,
+    premioDias: null,
+
+    reprogramacao: false
+  },
+  currentMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+  selectedStart: null,
+  selectedSecondStart: null,
+  periods: [],
+  returnDates: [],
+  screenStep: 1
+};
+
+const app = document.getElementById('app');
+const progress = document.getElementById('progress');
+
+/* =========================================================
+   DATAS
+   ========================================================= */
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function toISO(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+}
+
+function fromISO(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+function formatDate(date) {
+  return date ? date.toLocaleDateString('pt-BR') : '—';
+}
+
+function formatInputDate(iso) {
+  return iso ? formatDate(fromISO(iso)) : '';
+}
+
+function cloneDate(d) {
+  return new Date(d.getTime());
+}
+
+function addCalendarDays(date, amount) {
+  const d = cloneDate(date);
+  d.setDate(d.getDate() + amount);
+  return d;
+}
+
+function holidayInfo(date) {
+  const item = calendarioBetim.find(x => x[0] === toISO(date));
+  return item ? { tipo: item[1], nome: item[2] } : null;
+}
+
+function isWeekend(date) {
+  const day = date.getDay();
+  return day === 0 || day === 6;
+}
+
+function isBusinessDay(date) {
+  return !isWeekend(date) && holidayInfo(date)?.tipo !== 'feriado';
+}
+
+function addBusinessDaysInclusive(start, numberOfDays) {
+  let cursor = cloneDate(start), count = 0;
+  while (true) {
+    if (isBusinessDay(cursor)) {
+      count++;
+      if (count === numberOfDays) return cursor;
+    }
+    cursor.setDate(cursor.getDate()+1);
+  }
+}
+
+function subtractBusinessDaysForStart(returnDate, numberOfDays) {
+  let cursor = cloneDate(returnDate);
+  let count = 0;
+  cursor.setDate(cursor.getDate()-1);
+  while (true) {
+    if (isBusinessDay(cursor)) {
+      count++;
+      if (count === numberOfDays) return cursor;
+    }
+    cursor.setDate(cursor.getDate()-1);
+  }
+}
+
+function nextWorkDay(date) {
+  let d = cloneDate(date);
+  while (!isBusinessDay(d)) d = addCalendarDays(d, 1);
+  return d;
+}
+
+function minStartDate() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return addCalendarDays(today, state.answers.reprogramacao
+    ? CONFIG.antecedenciaReprogramacao
+    : CONFIG.antecedenciaFerias);
+}
+
+/* =========================================================
+   REGRAS
+   ========================================================= */
+function isNewRegularRule() {
+  const fim = state.answers.periodAquisitivoFim;
+  return fim && fim >= CONFIG.inicioNovaRegra;
+}
+
+function currentRegularRule() {
+  const isEffective = state.answers.vinculo === 'efetivo';
+
+  if (!isNewRegularRule()) {
+    return {
+      label: 'Férias Regulamentares',
+      total: CONFIG.feriasAntigasDias,
+      unit: 'corridos',
+      regime: 'anterior',
+      fractionAllowed: true
+    };
+  }
+
+  if (state.answers.faltas === true) {
+    return {
+      label: 'Férias Regulamentares',
+      total: CONFIG.feriasReduzidasDias,
+      unit: 'úteis',
+      regime: 'novo',
+      fractionAllowed: false
+    };
+  }
+
+  return {
+    label: 'Férias Regulamentares',
+    total: CONFIG.feriasNovasDias,
+    unit: 'úteis',
+    regime: 'novo',
+    fractionAllowed: isEffective
+  };
+}
+
+function currentRule() {
+  if (state.answers.tipo === 'premio') {
+    return {
+      label: 'Férias-Prêmio',
+      total: state.answers.premioDias || 0,
+      unit: 'corridos',
+      regime: 'premio',
+      fractionAllowed: true
+    };
+  }
+  return currentRegularRule();
+}
+
+function calculatePeriod(start, days, unit) {
+  let end;
+
+  if (unit === 'corridos') {
+    end = addCalendarDays(start, days - 1);
+  } else {
+    end = addBusinessDaysInclusive(start, days);
+  }
+
+  const returnDate = nextWorkDay(addCalendarDays(end, 1));
+  return { start: cloneDate(start), end, returnDate, days, unit };
+}
+
+function datesAreValid(start) {
+  if (!start) return false;
+  return start >= minStartDate();
+}
+
+function calculatePeriods() {
+  state.periods = [];
+  state.returnDates = [];
+
+  const rule = currentRule();
+  if (!rule.total) return;
+
+  if (state.answers.tipo === 'regular' &&
+      isNewRegularRule() &&
+      state.answers.fracionar === true &&
+      state.answers.vinculo === 'efetivo' &&
+      state.answers.faltas === false) {
+
+    if (state.selectedStart) {
+      const firstDays = Number(state.answers.fracaoPrimeiro);
+      const secondDays = 25 - firstDays;
+      const first = calculatePeriod(state.selectedStart, firstDays, 'úteis');
+      state.periods.push(first);
+    }
+    if (state.selectedSecondStart) {
+      const firstDays = Number(state.answers.fracaoPrimeiro);
+      const secondDays = 25 - firstDays;
+      const firstEnd = state.periods[0]?.end;
+      if (firstEnd && state.selectedSecondStart <= firstEnd) {
+        state.selectedSecondStart = null;
+        return;
+      }
+      const second = calculatePeriod(state.selectedSecondStart, secondDays, 'úteis');
+      state.periods.push(second);
+    }
+  } else if (state.selectedStart) {
+    state.periods.push(calculatePeriod(state.selectedStart, rule.total, rule.unit));
+  }
+
+  state.returnDates = state.periods.map(p => p.returnDate);
+}
+
+/* =========================================================
+   NAVEGAÇÃO
+   ========================================================= */
+function setProgress(label) {
+  progress.textContent = label;
+}
+
+function go(screen, push = true) {
+  if (push && state.screen !== screen) state.history.push(state.screen);
+  state.screen = screen;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function back() {
+  if (state.history.length) {
+    state.screen = state.history.pop();
+    render();
+  } else {
+    go('inicio', false);
+  }
+}
+
+function restart() {
+  location.reload();
+}
+
+/* =========================================================
+   COMPONENTES
+   ========================================================= */
+function shell(content) {
+  return `<div class="fade-in rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:p-8">${content}</div>`;
+}
+
+function field(label, id, value='', type='text', placeholder='', required=true, hint='') {
+  return `
+    <label class="block">
+      <span class="mb-2 block text-sm font-semibold text-slate-700">${label}${required ? ' <span class="text-slate-400">*</span>' : ''}</span>
+      <input id="${id}" type="${type}" value="${value || ''}" ${required ? 'required' : ''}
+        placeholder="${placeholder}"
+        class="touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-[15px] outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:bg-white" />
+      ${hint ? `<span class="mt-1.5 block text-[11px] leading-5 text-slate-400">${hint}</span>` : ''}
+    </label>
+  `;
+}
+
+function selectField(label, id, value, options, required=true) {
+  return `
+    <label class="block">
+      <span class="mb-2 block text-sm font-semibold text-slate-700">${label}${required ? ' <span class="text-slate-400">*</span>' : ''}</span>
+      <select id="${id}" ${required ? 'required' : ''}
+        class="touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-[15px] outline-none transition focus:border-slate-500 focus:bg-white">
+        <option value="">Selecione</option>
+        ${options.map(([v,t]) => `<option value="${v}" ${String(v)===String(value)?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </label>
+  `;
+}
+
+function actionButton(label, action, primary=true, extra='') {
+  return `<button data-action="${action}" class="touch w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition active:scale-[.99] ${primary
+    ? 'bg-slate-900 text-white hover:bg-slate-800'
+    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'} ${extra}">${label}</button>`;
+}
+
+/* =========================================================
+   TELAS
+   ========================================================= */
+function render() {
+  if (state.screen === 'inicio') return renderInicio();
+  if (state.screen === 'tipo') return renderTipo();
+  if (state.screen === 'dados') return renderDados();
+  if (state.screen === 'periodo') return renderPeriodo();
+  if (state.screen === 'regras') return renderRegras();
+  if (state.screen === 'calendario') return renderCalendario();
+  if (state.screen === 'confirmacao') return renderConfirmacao();
+  if (state.screen === 'final') return renderFinal();
+  if (state.screen === 'premio-bloqueado') return renderPremioBloqueado();
+}
+
+function renderInicio() {
+  setProgress('Início');
+  app.innerHTML = `
+    <div class="fade-in">
+      <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-10">
+        <div class="mx-auto max-w-xl text-center">
+          <div class="mb-6 flex justify-center sm:hidden">
+            <div class="flex h-14 w-36 items-center justify-center rounded-2xl bg-slate-50 px-3 ring-1 ring-slate-200">
+              <img src="logo.png" alt="Prefeitura de Betim" class="logo-img w-full"
+                onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=&quot;text-xs font-bold text-slate-700&quot;>PREFEITURA DE BETIM</span>';">
+            </div>
+          </div>
+
+          <div class="mb-5 inline-flex rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-semibold text-slate-600">
+            Prefeitura Municipal de Betim
+          </div>
+
+          <h2 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Solicite suas férias.</h2>
+          <p class="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
+            Responda algumas perguntas, escolha as datas no calendário e receba uma solicitação pronta para o envio.
+          </p>
+
+          <div class="mt-7 grid gap-3">
+            ${actionButton('Começar solicitação →', 'inicio:continuar', true)}
+          </div>
+
+          <details class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left">
+            <summary class="cursor-pointer text-sm font-semibold text-slate-700">Em quais regras esta ferramenta se baseia?</summary>
+            <div class="mt-3 space-y-2 text-xs leading-5 text-slate-600">
+              <p>As férias regulamentares seguem a <strong>Lei Municipal nº 7.989/2025</strong> e o <strong>Decreto nº 51.744/2025</strong>, que disciplinam o novo regime de 25 dias úteis, a redução para 16 dias em caso de mais de 9 faltas injustificadas, o fracionamento e a antecedência.</p>
+              <p>As férias-prêmio seguem o <strong>art. 75 da Lei Municipal nº 884/1969</strong> e sua regulamentação específica.</p>
+              <p class="border-t border-slate-200 pt-2 text-[11px] text-slate-400">A ferramenta orienta e prepara a solicitação; não substitui a análise, autorização ou programação do RH e da chefia imediata.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTipo() {
+  setProgress('1 de 7');
+  app.innerHTML = shell(`
+    <div class="mx-auto max-w-xl">
+      <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500 hover:text-slate-900">← Voltar</button>
+      <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Que tipo de férias você quer solicitar?</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-500">Escolha uma opção para que o sistema faça as perguntas certas.</p>
+
+      <div class="mt-7 grid gap-3">
+        <button data-action="tipo:regular" class="touch group rounded-2xl border border-slate-200 px-4 py-4 text-left hover:border-slate-400 hover:bg-slate-50">
+          <div class="flex items-center justify-between"><span class="font-semibold">Férias Regulamentares</span><span>→</span></div>
+          <div class="mt-1 text-xs leading-5 text-slate-500">Férias anuais do servidor.</div>
+        </button>
+        <button data-action="tipo:premio" class="touch group rounded-2xl border border-slate-200 px-4 py-4 text-left hover:border-slate-400 hover:bg-slate-50">
+          <div class="flex items-center justify-between"><span class="font-semibold">Férias-Prêmio</span><span>→</span></div>
+          <div class="mt-1 text-xs leading-5 text-slate-500">Benefício adquirido após quinquênio de efetivo exercício, atendidos os requisitos legais.</div>
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+
+function onlyDigits(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+function formatCPF(value) {
+  const digits = onlyDigits(value).slice(0, 11);
+
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0,3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6)}`;
+  return `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6,9)}-${digits.slice(9,11)}`;
+}
+
+function validateCPF(value) {
+  const cpf = onlyDigits(value);
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+  let sum = 0;
+  for (let i=0; i<9; i++) sum += Number(cpf[i]) * (10-i);
+  let digit = (sum * 10) % 11;
+  if (digit === 10) digit = 0;
+  if (digit !== Number(cpf[9])) return false;
+
+  sum = 0;
+  for (let i=0; i<10; i++) sum += Number(cpf[i]) * (11-i);
+  digit = (sum * 10) % 11;
+  if (digit === 10) digit = 0;
+  return digit === Number(cpf[10]);
+}
+
+function formatName(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/\b([a-zà-ÿ])/gi, (m) => m.toUpperCase());
+}
+
+function validISODate(value) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = fromISO(value);
+  return toISO(d) === value;
+}
+
+function todayStart() {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function validateServidorDados(values) {
+  const errors = [];
+  const today = todayStart();
+
+  if (!values.nome || values.nome.length < 5) {
+    errors.push('Informe o nome completo do servidor.');
+  }
+
+  if (!validateCPF(values.cpf)) {
+    errors.push('Informe um CPF válido.');
+  }
+
+  if (!validISODate(values.nascimento)) {
+    errors.push('Informe uma data de nascimento válida.');
+  } else {
+    const nascimento = fromISO(values.nascimento);
+    if (nascimento > today) errors.push('A data de nascimento não pode ser posterior à data de hoje.');
+  }
+
+  if (!values.matricula) errors.push('Informe a matrícula.');
+  if (!values.vinculo) errors.push('Selecione o vínculo.');
+
+  if (!validISODate(values.dataAdmissao)) {
+    errors.push('Informe uma data de admissão válida.');
+  } else {
+    const admissao = fromISO(values.dataAdmissao);
+    if (admissao > today) errors.push('A data de admissão não pode ser posterior à data de hoje.');
+
+    if (validISODate(values.nascimento) && admissao < fromISO(values.nascimento)) {
+      errors.push('A data de admissão não pode ser anterior à data de nascimento.');
+    }
+  }
+
+  if (!values.cargo) errors.push('Informe o cargo.');
+  if (!values.funcao) errors.push('Informe a função/atividade.');
+  if (!values.lotacao) errors.push('Informe a lotação.');
+
+  return errors;
+}
+
+function lotacaoField() {
+  if (Array.isArray(lotacoes) && lotacoes.length > 0) {
+    return selectField('Lotação','lotacao',state.answers.lotacao,lotacoes.map(x=>[x,x]));
+  }
+  return field(
+    'Lotação',
+    'lotacao',
+    state.answers.lotacao,
+    'text',
+    'Ex.: UBS Petrovale, UPA Guanabara, Diretoria IV',
+    true,
+    'Informe a unidade/setor onde o servidor está lotado.'
+  );
+}
+
+function renderDados() {
+  setProgress('2 de 7');
+  app.innerHTML = shell(`
+    <div class="mx-auto max-w-xl">
+      <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500 hover:text-slate-900">← Voltar</button>
+      <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Primeiro, seus dados.</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-500">Essas informações serão usadas na solicitação e na planilha de controle do RH.</p>
+
+      <div class="mt-7 grid gap-4">
+        ${field('Nome completo do servidor','nome',state.answers.nome,'text','Ex.: Maria da Silva','true','Informe o nome completo, sem abreviações.')}
+        ${field('CPF','cpf',state.answers.cpf,'text','000.000.000-00','true','Digite apenas os números; a formatação será feita automaticamente.') .replace('type="text"', 'type="text" inputmode="numeric" autocomplete="off" maxlength="14"')}
+        ${field('Data de nascimento','nascimento',state.answers.nascimento,'date','',true,'A data não pode ser futura.')}
+        ${field('Matrícula','matricula',state.answers.matricula,'text','Sua matrícula funcional')}
+        ${selectField('Vínculo','vinculo',state.answers.vinculo,[
+          ['efetivo','Servidor efetivo'],
+          ['comissionado','Comissionado sem vínculo efetivo'],
+          ['contratado','Contratado'],
+          ['funcao_publica','Função pública']
+        ])}
+        ${field('Data de admissão','dataAdmissao',state.answers.dataAdmissao,'date','',true,'Não pode ser futura nem anterior à data de nascimento.')}
+        ${field('Cargo','cargo',state.answers.cargo,'text','Ex.: Oficial de Apoio à Saúde I')}
+        ${field('Função / atividade','funcao',state.answers.funcao,'text','Ex.: Recepção','true','Informe a atividade que exerce atualmente.')}
+        ${lotacaoField()}
+      </div>
+
+      <div class="mt-6">
+        ${actionButton('Continuar →','dados:continuar',true)}
+      </div>
+    </div>
+  `);
+}
+
+function renderPeriodo() {
+  setProgress('3 de 7');
+  if (state.answers.tipo === 'premio') {
+    return renderPremioInfo();
+  }
+
+  app.innerHTML = shell(`
+    <div class="mx-auto max-w-xl">
+      <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500 hover:text-slate-900">← Voltar</button>
+      <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Agora, sobre o seu período aquisitivo.</h2>
+
+      <div class="mt-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">O que é?</div>
+        <p class="mt-2 text-sm leading-6 text-slate-600">
+          É o período de <strong>12 meses de trabalho</strong> usado para adquirir suas férias.
+        </p>
+        <p class="mt-2 text-sm leading-6 text-slate-600">
+          <strong>Exemplo:</strong> se sua admissão foi em 10/03/2025, o primeiro período aquisitivo vai de 10/03/2025 a 09/03/2026. Como a data de admissão já foi informada, use aqui a data em que terminou o período aquisitivo referente às férias que você deseja solicitar.
+        </p>
+      </div>
+
+      <div class="mt-6">
+        ${field(
+          'Em que data terminou seu período aquisitivo?',
+          'periodAquisitivoFim',
+          state.answers.periodAquisitivoFim,
+          'date',
+          '',
+          true,
+          'Essa data é importante porque define qual regra de férias regulamentares se aplica.'
+        )}
+      </div>
+
+      <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900">
+        <strong>Não sabe a data?</strong> Não informe uma estimativa. Consulte o RH da sua lotação ou seu registro funcional antes de continuar.
+      </div>
+
+      <div class="mt-6">
+        ${actionButton('Continuar →','periodo:continuar',true)}
+      </div>
+
+      <div class="mt-4 text-center text-[11px] text-slate-400">Base: Lei nº 7.989/2025 e Decreto nº 51.744/2025.</div>
+    </div>
+  `);
+}
+
+function renderPremioInfo() {
+  app.innerHTML = shell(`
+    <div class="mx-auto max-w-xl">
+      <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500 hover:text-slate-900">← Voltar</button>
+      <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Sobre suas férias-prêmio.</h2>
+
+      <div class="mt-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+        <p class="text-sm leading-6 text-slate-600">
+          Férias-prêmio são um benefício adquirido, em regra, após cada <strong>5 anos de efetivo exercício</strong>, quando os requisitos legais do quinquênio forem cumpridos.
+        </p>
+        <p class="mt-2 text-sm leading-6 text-slate-600">
+          Cada quinquênio gera <strong>3 meses</strong> de férias-prêmio. O gozo deve observar a divisão prevista no Estatuto.
+        </p>
+      </div>
+
+      <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div class="font-semibold text-amber-900">Antes de continuar</div>
+        <p class="mt-1 text-xs leading-5 text-amber-900">
+          Para abrir uma solicitação, confirme que o RH já reconheceu o seu direito ao quinquênio que será utilizado.
+        </p>
+      </div>
+
+      <div class="mt-6 grid gap-3">
+        <button data-action="premio:confirmado" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">
+          Sim, meu direito já foi confirmado pelo RH →
+        </button>
+        <button data-action="premio:nao-confirmado" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">
+          Ainda não
+        </button>
+      </div>
+
+      <div class="mt-5 text-[11px] leading-5 text-slate-400">
+        Fonte: art. 75 da Lei Municipal nº 884/1969 e Decreto nº 35.731/2014.
+      </div>
+    </div>
+  `);
+}
+
+function renderPremioBloqueado() {
+  setProgress('Atenção');
+  app.innerHTML = shell(`
+    <div class="mx-auto max-w-xl text-center">
+      <div class="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-xl text-amber-700">!</div>
+      <h2 class="text-2xl font-bold tracking-tight">Antes de solicitar, confirme seu direito.</h2>
+      <p class="mt-3 text-sm leading-6 text-slate-500">
+        Esta ferramenta não consegue confirmar sozinha o histórico funcional do quinquênio. Procure o RH da sua unidade e confirme se o direito está disponível.
+      </p>
+      <div class="mt-6 grid gap-3">
+        ${actionButton('Voltar','back',false)}
+        ${actionButton('Iniciar novamente','inicio:novo',true)}
+      </div>
+    </div>
+  `);
+}
+
+function renderRegras() {
+  setProgress('4 de 7');
+  const isPremio = state.answers.tipo === 'premio';
+
+  if (isPremio) {
+    app.innerHTML = shell(`
+      <div class="mx-auto max-w-xl">
+        <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500 hover:text-slate-900">← Voltar</button>
+        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Como deseja usar o período?</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-500">O período adquirido é de 3 meses. Para cada etapa de gozo, informe 30 ou 60 dias.</p>
+        <div class="mt-6 grid grid-cols-2 gap-3">
+          <button data-action="premio:dias30" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-5 text-left font-semibold hover:bg-slate-50">30 dias</button>
+          <button data-action="premio:dias60" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-5 text-left font-semibold hover:bg-slate-50">60 dias</button>
+        </div>
+        <div class="mt-5 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500">
+          O outro saldo do quinquênio deverá ser gozado em outro período, observando as regras de anos subsequentes.
+        </div>
+      </div>
+    `);
+    return;
+  }
+
+  const rule = currentRegularRule();
+
+  if (state.answers.faltas === null && isNewRegularRule()) {
+    app.innerHTML = shell(`
+      <div class="mx-auto max-w-xl">
+        <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500">← Voltar</button>
+        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Você teve mais de 9 faltas injustificadas neste período?</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-500">A resposta pode alterar seu período para 16 dias úteis.</p>
+        <div class="mt-7 grid gap-3">
+          <button data-action="faltas:nao" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">Não</button>
+          <button data-action="faltas:sim" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">Sim</button>
+        </div>
+        <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900">
+          Não informe uma estimativa. Se você não souber, consulte o RH antes de continuar.
+        </div>
+      </div>
+    `);
+    return;
+  }
+
+  if (isNewRegularRule() && state.answers.faltas === false && state.answers.vinculo === 'efetivo' && state.answers.fracionar === null) {
+    app.innerHTML = shell(`
+      <div class="mx-auto max-w-xl">
+        <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500">← Voltar</button>
+        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Como você quer tirar suas férias?</h2>
+        <div class="mt-7 grid gap-3">
+          <button data-action="fracionar:nao" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">
+            Período integral — 25 dias úteis
+          </button>
+          <button data-action="fracionar:sim" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">
+            Fracionar — 15 + 10 ou 10 + 15 dias úteis
+          </button>
+        </div>
+        <div class="mt-5 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500">
+          No fracionamento, os <strong>dois períodos precisam ser informados no requerimento</strong>.
+        </div>
+      </div>
+    `);
+    return;
+  }
+
+  if (isNewRegularRule() && state.answers.faltas === false && state.answers.vinculo === 'efetivo' && state.answers.fracionar === true && state.answers.fracaoPrimeiro === null) {
+    app.innerHTML = shell(`
+      <div class="mx-auto max-w-xl">
+        <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500">← Voltar</button>
+        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Como você quer dividir as férias?</h2>
+        <p class="mt-2 text-sm text-slate-500">Escolha qual período será solicitado primeiro.</p>
+        <div class="mt-7 grid gap-3">
+          <button data-action="fracao:15" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">15 dias úteis agora + 10 dias úteis depois</button>
+          <button data-action="fracao:10" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left font-semibold hover:bg-slate-50">10 dias úteis agora + 15 dias úteis depois</button>
+        </div>
+        <div class="mt-5 text-[11px] leading-5 text-slate-400">Fonte: Decreto nº 51.744/2025, art. 10.</div>
+      </div>
+    `);
+    return;
+  }
+
+  // Para servidores não efetivos no novo regime, ou demais caminhos válidos:
+  const summary = rule.total ? `${rule.total} dias ${rule.unit}` : 'verificação necessária';
+  app.innerHTML = shell(`
+    <div class="mx-auto max-w-xl">
+      <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500">← Voltar</button>
+      <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Sua regra foi identificada.</h2>
+      <div class="mt-6 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">${rule.label}</div>
+        <div class="mt-1 text-2xl font-black text-slate-900">${summary}</div>
+        <div class="mt-2 text-sm leading-6 text-slate-500">
+          ${rule.regime === 'anterior'
+            ? 'Seu período aquisitivo terminou até 01/12/2025. A Prefeitura informa que esses períodos permanecem submetidos à regra anterior.'
+            : rule.total === 16
+              ? 'Foi informada a existência de mais de 9 faltas injustificadas no período aquisitivo.'
+              : 'Foi aplicado o novo regime de férias regulamentares.'}
+        </div>
+      </div>
+      <div class="mt-6">
+        ${actionButton('Escolher datas →','regras:continuar',true)}
+      </div>
+      <div class="mt-5 text-[11px] leading-5 text-slate-400">Base: Lei nº 7.989/2025 e Decreto nº 51.744/2025.</div>
+    </div>
+  `);
+}
+
+/* =========================================================
+   CALENDÁRIO
+   ========================================================= */
+function calendarMonthHtml() {
+  const y = state.currentMonth.getFullYear();
+  const m = state.currentMonth.getMonth();
+  const first = new Date(y,m,1);
+  const total = new Date(y,m+1,0).getDate();
+  const min = minStartDate();
+  const cells = [];
+
+  for (let i=0;i<first.getDay();i++) cells.push('<div></div>');
+
+  for (let d=1;d<=total;d++) {
+    const date = new Date(y,m,d);
+    const iso = toISO(date);
+    const h = holidayInfo(date);
+    const weekend = isWeekend(date);
+    const locked = date < min;
+    const isFirst = state.selectedStart && iso === toISO(state.selectedStart);
+    const isSecond = state.selectedSecondStart && iso === toISO(state.selectedSecondStart);
+
+    const inFirst = state.periods[0] && date >= state.periods[0].start && date <= state.periods[0].end;
+    const inSecond = state.periods[1] && date >= state.periods[1].start && date <= state.periods[1].end;
+
+    const isReturn = state.returnDates.some(r => toISO(r) === iso);
+
+    let cls = 'text-slate-700';
+    if (locked) cls += ' opacity-30';
+    else if (weekend) cls += ' text-slate-400';
+    if (inFirst || inSecond) cls += ' bg-slate-900 text-white';
+    if (isReturn && !inFirst && !inSecond) cls += ' bg-emerald-100 text-emerald-900';
+    if (h?.tipo === 'feriado' && !inFirst && !inSecond) cls += ' bg-amber-50 text-amber-800';
+    if (isFirst || isSecond) cls += ' ring-2 ring-slate-900 ring-offset-1';
+
+    cells.push(`
+      <button ${locked?'disabled':''} data-date="${iso}" data-action="calendar:date"
+        title="${locked?'Data bloqueada pela antecedência mínima':h?`${h.tipo==='feriado'?'Feriado':'Ponto facultativo'} — ${h.nome}`:weekend?'Fim de semana':''}"
+        class="day-btn rounded-xl border border-transparent p-1 text-sm font-semibold transition hover:border-slate-300 ${cls}">
+        ${d}
+        ${h ? `<span class="mx-auto mt-0.5 block h-1 w-1 rounded-full ${h.tipo==='feriado'?'bg-amber-500':'bg-blue-500'}"></span>` : '<span class="mx-auto mt-0.5 block h-1 w-1 rounded-full opacity-0"></span>'}
+      </button>
+    `);
+  }
+
+  return `
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white">
+      <div class="flex items-center justify-between border-b border-slate-100 px-3 py-3 sm:px-5">
+        <button data-action="month:prev" class="touch grid h-10 w-10 place-items-center rounded-xl border border-slate-200">←</button>
+        <div class="text-center">
+          <div class="font-bold capitalize">${state.currentMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</div>
+          <div class="text-[10px] text-slate-400">Mínimo: ${formatDate(min)}</div>
+        </div>
+        <button data-action="month:next" class="touch grid h-10 w-10 place-items-center rounded-xl border border-slate-200">→</button>
+      </div>
+      <div class="grid calendar-grid gap-1 px-2 py-3 text-center text-[10px] font-semibold uppercase text-slate-400">
+        ${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>`<div>${x}</div>`).join('')}
+      </div>
+      <div class="grid calendar-grid gap-1 px-2 pb-3 sm:gap-2 sm:px-4 sm:pb-4">${cells.join('')}</div>
+      <div class="flex flex-wrap gap-x-3 gap-y-1 border-t border-slate-100 px-3 py-3 text-[10px] text-slate-500 sm:px-5">
+        <span>■ Férias</span><span class="text-amber-700">● Feriado</span><span class="text-blue-600">● Ponto facultativo</span><span class="text-emerald-700">■ Retorno</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderCalendario() {
+  setProgress('6 de 7');
+  calculatePeriods();
+
+  const isFraction = state.answers.tipo === 'regular' &&
+    isNewRegularRule() &&
+    state.answers.fracionar === true &&
+    state.answers.vinculo === 'efetivo' &&
+    state.answers.faltas === false;
+
+  const selectedLabel = isFraction
+    ? state.selectedStart && !state.selectedSecondStart
+      ? `1º período: ${formatDate(state.selectedStart)}`
+      : state.selectedSecondStart
+        ? 'Os dois períodos foram definidos.'
+        : 'Selecione o início do 1º período.'
+    : state.selectedStart
+      ? `Início: ${formatDate(state.selectedStart)}`
+      : 'Selecione a data de início.';
+
+  app.innerHTML = `
+    <div class="fade-in">
+      <div class="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <button data-action="back" class="touch -ml-2 rounded-xl px-2 text-sm font-semibold text-slate-500">← Voltar</button>
+          <h2 class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Escolha as datas.</h2>
+          <p class="mt-1 text-sm text-slate-500">${selectedLabel}</p>
+        </div>
+      </div>
+
+      ${isFraction ? `
+        <div class="mb-4 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-600 ring-1 ring-slate-200">
+          <strong>Fracionamento:</strong> clique primeiro no início do 1º período e depois no início do 2º período. O sistema calculará automaticamente ${Number(state.answers.fracaoPrimeiro) === 15 ? '15 + 10' : '10 + 15'} dias úteis.
+        </div>` : ''}
+
+      ${calendarMonthHtml()}
+
+      <div class="mt-4 grid gap-3 ${isFraction ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}">
+        ${state.periods.map((p,i)=>`
+          <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+            <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">${isFraction ? `${i+1}º período` : 'Período solicitado'}</div>
+            <div class="mt-1 font-bold">${formatDate(p.start)} → ${formatDate(p.end)}</div>
+            <div class="mt-1 text-xs text-slate-500">Retorno: ${formatDate(p.returnDate)}</div>
+          </div>`).join('')}
+      </div>
+
+      ${!state.answers.reprogramacao ? `
+        <div class="mt-4 rounded-2xl bg-emerald-50 p-4 text-xs leading-5 text-emerald-900 ring-1 ring-emerald-200">
+          A primeira data permitida para esta solicitação é <strong>${formatDate(minStartDate())}</strong>.
+        </div>` : ''}
+
+      <div class="mt-4 grid gap-2 sm:grid-cols-2">
+        <button data-action="calendar:clear" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600">Limpar datas</button>
+        <button data-action="calendar:continue" class="touch rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-30"
+          ${(!state.selectedStart || (isFraction && !state.selectedSecondStart)) ? 'disabled':''}>
+          Confirmar datas →
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   CONFIRMAÇÃO E FINAL
+   ========================================================= */
+function buildRequestText() {
+  const a = state.answers;
+  const rule = currentRule();
+  const lines = [];
+  lines.push(`SOLICITAÇÃO DE ${rule.label.toUpperCase()}`);
+  lines.push('');
+  lines.push(`Servidor(a): ${a.nome}`);
+  lines.push(`CPF: ${a.cpf}`);
+  lines.push(`Data de nascimento: ${formatInputDate(a.nascimento)}`);
+  lines.push(`Matrícula: ${a.matricula}`);
+  lines.push(`Vínculo: ${vinculoLabel(a.vinculo)}`);
+  lines.push(`Cargo: ${a.cargo}`);
+  lines.push(`Função/atividade: ${a.funcao}`);
+  lines.push(`Lotação: ${a.lotacao}`);
+  lines.push('');
+  if (state.periods.length === 1) {
+    const p = state.periods[0];
+    lines.push(`Período solicitado: ${formatDate(p.start)} a ${formatDate(p.end)}`);
+    lines.push(`Retorno previsto: ${formatDate(p.returnDate)}`);
+  } else {
+    state.periods.forEach((p,i)=>{
+      lines.push(`${i+1}º período: ${formatDate(p.start)} a ${formatDate(p.end)} — retorno ${formatDate(p.returnDate)}`);
+    });
+  }
+  lines.push('');
+  lines.push('Solicito o encaminhamento desta solicitação ao RH da lotação para análise e programação das férias.');
+  lines.push('');
+  lines.push('Declaro estar ciente de que esta ferramenta apenas auxilia na preparação do pedido e que a concessão das férias depende da análise e autorização administrativa competente.');
+  lines.push('');
+  lines.push(`Data da solicitação: ${formatDate(new Date())}`);
+  return lines.join('\n');
+}
+
+function vinculoLabel(v) {
+  return ({
+    efetivo:'Servidor efetivo',
+    comissionado:'Comissionado sem vínculo efetivo',
+    contratado:'Contratado',
+    funcao_publica:'Função pública'
+  })[v] || v;
+}
+
+function renderConfirmacao() {
+  setProgress('7 de 7');
+  calculatePeriods();
+
+  const rule = currentRule();
+  const notice = state.answers.reprogramacao ? CONFIG.antecedenciaReprogramacao : CONFIG.antecedenciaFerias;
+
+  app.innerHTML = shell(`
+    <div class="mx-auto max-w-2xl">
+      <button data-action="back" class="touch mb-5 rounded-xl px-2 text-sm font-semibold text-slate-500">← Voltar</button>
+
+      <div class="mb-7 text-center">
+        <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-xl text-emerald-700">✓</div>
+        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Confira antes de enviar ao RH.</h2>
+        <p class="mt-2 text-sm text-slate-500">Esta é a última conferência das informações da sua solicitação.</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+          <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Servidor</div>
+          <div class="mt-1 font-bold">${escapeHtml(state.answers.nome)}</div>
+          <div class="mt-1 text-xs text-slate-500">${escapeHtml(state.answers.cargo)} · ${escapeHtml(state.answers.funcao)} · ${escapeHtml(state.answers.lotacao)}</div>
+        </div>
+
+        <div class="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+          <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">${rule.label}</div>
+          ${state.periods.map((p,i)=>`
+            <div class="mt-2 ${i?'border-t border-slate-200 pt-3':''}">
+              ${state.periods.length>1 ? `<div class="text-xs font-semibold text-slate-500">${i+1}º período</div>`:''}
+              <div class="mt-1 text-lg font-black">${formatDate(p.start)} → ${formatDate(p.end)}</div>
+              <div class="mt-1 text-xs text-slate-500">Retorno: <strong>${formatDate(p.returnDate)}</strong></div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500">
+        <strong>Antecedência:</strong> esta solicitação considera ${notice} dias de antecedência mínima.
+        <br><strong>Base:</strong> ${rule.regime==='premio' ? 'art. 75 da Lei Municipal nº 884/1969 e Decreto nº 35.731/2014' : 'Lei nº 7.989/2025 e Decreto nº 51.744/2025'}.
+      </div>
+
+      <div class="mt-6">
+        ${actionButton('Confirmar e gerar minha solicitação →','confirmar:final',true)}
+      </div>
+    </div>
+  `);
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[c]));
+}
+
+function renderFinal() {
+  setProgress('Concluído');
+  calculatePeriods();
+
+  const rule = currentRule();
+  const text = buildRequestText();
+
+  const periodsRows = state.periods.map((p,i)=>`
+    <div class="rounded-2xl border border-slate-200 p-4">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">${state.periods.length>1 ? `${i+1}º período` : 'Período solicitado'}</div>
+      <div class="mt-1 text-xl font-black">${formatDate(p.start)} → ${formatDate(p.end)}</div>
+      <div class="mt-1 text-xs text-slate-500">Retorno previsto: <strong>${formatDate(p.returnDate)}</strong></div>
+    </div>
+  `).join('');
+
+  app.innerHTML = `
+    <div class="fade-in">
+      <div class="mb-6 text-center screen-only">
+        <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-xl text-emerald-700">✓</div>
+        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Sua solicitação está pronta.</h2>
+        <p class="mt-2 text-sm text-slate-500">Agora você tem exatamente os dois arquivos/formatos necessários para encaminhar ao RH.</p>
+      </div>
+
+      <div class="screen-only mx-auto mb-5 grid max-w-2xl gap-3 sm:grid-cols-2">
+        <button data-action="copy:text" class="touch rounded-2xl bg-slate-900 px-5 py-4 text-sm font-bold text-white hover:bg-slate-800">
+          📋 Copiar solicitação (texto pronto)
+        </button>
+        <button data-action="xlsx:download" class="touch rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50">
+          📊 Baixar planilha do RH
+        </button>
+      </div>
+
+      <div class="screen-only mx-auto mb-5 max-w-2xl rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-900">
+        <strong>Importante:</strong> o texto abaixo <strong>não é uma autorização de férias</strong>. Ele é o pedido que você deverá enviar ao RH da sua Lotação para solicitar efetivamente a programação do período.
+      </div>
+
+      <article class="sheet-preview overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+        <div class="border-b border-slate-200 p-5 sm:p-8">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-12 w-28 items-center justify-center rounded-xl bg-slate-50 px-2">
+                <img src="logo.png" alt="Prefeitura de Betim" class="logo-img w-full"
+                  onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=&quot;text-[10px] font-bold text-slate-700&quot;>PREFEITURA MUNICIPAL DE BETIM</span>';">
+              </div>
+              <div class="hidden sm:block">
+                <div class="text-sm font-bold">Solicitação de Férias</div>
+                <div class="text-[10px] text-slate-400">Assistente de solicitação</div>
+              </div>
+            </div>
+            <div class="text-right text-[10px] text-slate-400">Solicitação<br>${formatDate(new Date())}</div>
+          </div>
+
+          <h1 class="mt-7 text-2xl font-black tracking-tight sm:text-3xl">Solicitação de ${rule.type==='premio' ? 'Férias-Prêmio' : 'Férias Regulamentares'}</h1>
+
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Servidor</div>
+              <div class="mt-1 text-sm font-bold">${escapeHtml(state.answers.nome)}</div>
+              <div class="mt-1 text-xs text-slate-500">CPF: ${escapeHtml(state.answers.cpf)}</div>
+              <div class="mt-1 text-xs text-slate-500">Nascimento: ${formatInputDate(state.answers.nascimento)}</div>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Atuação</div>
+              <div class="mt-1 text-sm font-bold">${escapeHtml(state.answers.cargo)}</div>
+              <div class="mt-1 text-xs text-slate-500">${escapeHtml(state.answers.funcao)} · ${escapeHtml(state.answers.lotacao)}</div>
+              <div class="mt-1 text-xs text-slate-500">Matrícula: ${escapeHtml(state.answers.matricula)}</div>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-3">${periodsRows}</div>
+        </div>
+
+        <div class="p-5 sm:p-8">
+          <div class="text-sm font-bold">Declaração e solicitação</div>
+          <div class="mt-3 whitespace-pre-line rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-600">${escapeHtml(text)}</div>
+        </div>
+
+        <div class="border-t border-slate-200 px-5 py-4 text-[10px] leading-5 text-slate-400 sm:px-8">
+          <strong>Natureza do documento:</strong> pedido preparado pelo "Solicitação de Férias" para encaminhamento ao RH. A concessão e programação dependem da análise e autorização administrativa competente.
+          <br>Base normativa: ${rule.type==='premio' ? 'art. 75 da Lei Municipal nº 884/1969 e Decreto nº 35.731/2014.' : 'Lei nº 7.989/2025 e Decreto nº 51.744/2025.'}
+        </div>
+      </article>
+
+      <div class="screen-only mx-auto mt-5 grid max-w-2xl gap-2 sm:grid-cols-3">
+        <button data-action="copy:text" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold hover:bg-slate-50">📋 Copiar texto</button>
+        <button data-action="xlsx:download" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold hover:bg-slate-50">📊 Planilha</button>
+        <button data-action="print" class="touch rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold hover:bg-slate-50">🖨️ Imprimir</button>
+      </div>
+
+      <div class="screen-only mt-6 text-center">
+        <button data-action="inicio:novo" class="touch rounded-2xl px-4 py-3 text-sm font-semibold text-slate-500 hover:text-slate-900">Fazer nova solicitação</button>
+      </div>
+
+      <textarea id="rawRequestText" class="hidden">${escapeHtml(text)}</textarea>
+    </div>
+  `;
+}
+
+/* =========================================================
+   PLANILHA
+   ========================================================= */
+function downloadSpreadsheet() {
+  if (typeof XLSX === 'undefined') {
+    showToast('A biblioteca de planilha não foi carregada. Verifique a conexão e tente novamente.');
+    return;
+  }
+
+  const a = state.answers;
+  const rule = currentRule();
+
+  const rows = [
+    ['SOLICITAÇÃO DE FÉRIAS — CONTROLE DE SOLICITAÇÃO'],
+    [],
+    ['DADOS DO SERVIDOR','VALOR'],
+    ['Nome completo', a.nome],
+    ['CPF', a.cpf],
+    ['Data de nascimento', formatInputDate(a.nascimento)],
+    ['Matrícula', a.matricula],
+    ['Vínculo', vinculoLabel(a.vinculo)],
+    ['Data de admissão', formatInputDate(a.dataAdmissao)],
+    ['Cargo', a.cargo],
+    ['Função / atividade', a.funcao],
+    ['Lotação', a.lotacao],
+    [],
+    ['DADOS DAS FÉRIAS','VALOR'],
+    ['Tipo', rule.label],
+    ['Regime', rule.regime === 'novo' ? 'Novo regime' : rule.regime === 'anterior' ? 'Regra anterior' : 'Férias-prêmio'],
+    ['Período aquisitivo — final', formatInputDate(a.periodAquisitivoFim)],
+    ['Faltas > 9 injustificadas', a.faltas === true ? 'Sim' : a.faltas === false ? 'Não' : 'Não se aplica'],
+    ['Fracionamento', a.fracionar === true ? 'Sim' : a.fracionar === false ? 'Não' : 'Não se aplica'],
+    ['Antecedência', `${a.reprogramacao ? CONFIG.antecedenciaReprogramacao : CONFIG.antecedenciaFerias} dias`],
+    []
+  ];
+
+  state.periods.forEach((p,i)=>{
+    rows.push([
+      state.periods.length > 1 ? `${i+1}º período — Início` : 'Início',
+      formatDate(p.start)
+    ]);
+    rows.push([
+      state.periods.length > 1 ? `${i+1}º período — Fim` : 'Fim',
+      formatDate(p.end)
+    ]);
+    rows.push([
+      state.periods.length > 1 ? `${i+1}º período — Retorno` : 'Retorno',
+      formatDate(p.returnDate)
+    ]);
+  });
+
+  rows.push([]);
+  rows.push(['STATUS','PENDÊNCIA / AÇÃO']);
+  rows.push(['Para o RH','Receber e analisar esta solicitação.']);
+  rows.push(['Observação','Este arquivo auxilia o controle interno e não representa autorização de férias.']);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:34},{wch:48}];
+
+  // Tabela adicional compacta, uma linha por servidor, útil para o controle mensal.
+  const resumo = [
+    ['Nome','CPF','Matrícula','Nascimento','Lotação','Cargo','Função','Tipo de férias','1º início','1º fim','1º retorno','2º início','2º fim','2º retorno','Status'],
+    [
+      a.nome,a.cpf,a.matricula,formatInputDate(a.nascimento),a.lotacao,a.cargo,a.funcao,rule.label,
+      state.periods[0] ? formatDate(state.periods[0].start) : '',
+      state.periods[0] ? formatDate(state.periods[0].end) : '',
+      state.periods[0] ? formatDate(state.periods[0].returnDate) : '',
+      state.periods[1] ? formatDate(state.periods[1].start) : '',
+      state.periods[1] ? formatDate(state.periods[1].end) : '',
+      state.periods[1] ? formatDate(state.periods[1].returnDate) : '',
+      'Solicitação preparada'
+    ]
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(resumo);
+  ws2['!cols'] = [
+    {wch:28},{wch:18},{wch:16},{wch:15},{wch:25},{wch:30},{wch:28},{wch:24},
+    {wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:24}
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Solicitação');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Controle RH');
+
+  XLSX.writeFile(wb, `SolicitacaoDeFerias_${safeFilename(a.nome)}_${toISO(new Date())}.xlsx`);
+  showToast('Planilha baixada.');
+}
+
+function safeFilename(name) {
+  return String(name || 'servidor')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-zA-Z0-9_-]+/g,'_')
+    .replace(/^_+|_+$/g,'')
+    .slice(0,60) || 'servidor';
+}
+
+function showToast(message) {
+  const el = document.createElement('div');
+  el.className = 'fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl';
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2400);
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+app.addEventListener('click', (event) => {
+  const btn = event.target.closest('[data-action]');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+
+  if (action === 'back') {
+    back();
+    return;
+  }
+
+  if (action === 'inicio:continuar') {
+    go('tipo');
+    return;
+  }
+
+  if (action === 'inicio:novo') {
+    restart();
+    return;
+  }
+
+  if (action === 'tipo:regular') {
+    state.answers.tipo = 'regular';
+    state.answers.reprogramacao = false;
+    go('dados');
+    return;
+  }
+
+  if (action === 'tipo:premio') {
+    state.answers.tipo = 'premio';
+    go('dados');
+    return;
+  }
+
+  if (action === 'dados:continuar') {
+    const ids = ['nome','cpf','nascimento','matricula','vinculo','dataAdmissao','cargo','funcao','lotacao'];
+    const values = Object.fromEntries(ids.map(id => [id, document.getElementById(id)?.value.trim() || '']));
+
+    values.nome = formatName(values.nome);
+    values.cpf = formatCPF(values.cpf);
+    values.matricula = values.matricula.replace(/\s+/g, ' ').trim();
+    values.cargo = values.cargo.replace(/\s+/g, ' ').trim();
+    values.funcao = values.funcao.replace(/\s+/g, ' ').trim();
+    values.lotacao = values.lotacao.replace(/\s+/g, ' ').trim();
+
+    const errors = validateServidorDados(values);
+    if (errors.length) {
+      showToast(errors[0]);
+      return;
+    }
+
+    Object.assign(state.answers, values);
+
+    // O vínculo já informa se o servidor é efetivo.
+    state.answers.efetivo = state.answers.vinculo === 'efetivo';
+
+    // Fracionamento novo é exclusivo do servidor efetivo; evite estado residual.
+    if (!state.answers.efetivo) {
+      state.answers.fracionar = false;
+      state.answers.fracaoPrimeiro = null;
+    }
+
+    go('periodo');
+    return;
+  }
+
+  if (action === 'periodo:continuar') {
+    const val = document.getElementById('periodAquisitivoFim')?.value || '';
+    const today = todayStart();
+
+    if (!validISODate(val)) {
+      showToast('Informe uma data válida para o término do período aquisitivo.');
+      return;
+    }
+
+    const fim = fromISO(val);
+    const admissao = validISODate(state.answers.dataAdmissao) ? fromISO(state.answers.dataAdmissao) : null;
+
+    if (fim > today) {
+      showToast('O período aquisitivo informado ainda não terminou.');
+      return;
+    }
+
+    if (admissao && fim < admissao) {
+      showToast('A data de término do período aquisitivo não pode ser anterior à admissão.');
+      return;
+    }
+
+    state.answers.periodAquisitivoFim = val;
+    go('regras');
+    return;
+  }
+
+  if (action === 'premio:confirmado') {
+    state.answers.premioDireitoConfirmado = true;
+    go('regras');
+    return;
+  }
+
+  if (action === 'premio:nao-confirmado') {
+    state.answers.premioDireitoConfirmado = false;
+    go('premio-bloqueado');
+    return;
+  }
+
+  if (action === 'premio:dias30') {
+    state.answers.premioDias = 30;
+    go('calendario');
+    return;
+  }
+
+  if (action === 'premio:dias60') {
+    state.answers.premioDias = 60;
+    go('calendario');
+    return;
+  }
+
+  if (action === 'faltas:nao') {
+    state.answers.faltas = false;
+    render();
+    return;
+  }
+
+  if (action === 'faltas:sim') {
+    state.answers.faltas = true;
+    state.answers.fracionar = false;
+    render();
+    return;
+  }
+
+  if (action === 'efetivo:sim') {
+    state.answers.efetivo = true;
+    render();
+    return;
+  }
+
+  if (action === 'efetivo:nao') {
+    state.answers.efetivo = false;
+    state.answers.fracionar = false;
+    render();
+    return;
+  }
+
+  if (action === 'fracionar:nao') {
+    state.answers.fracionar = false;
+    go('regras', false);
+    render();
+    return;
+  }
+
+  if (action === 'fracionar:sim') {
+    state.answers.fracionar = true;
+    render();
+    return;
+  }
+
+  if (action === 'fracao:15') {
+    state.answers.fracaoPrimeiro = 15;
+    go('calendario');
+    return;
+  }
+
+  if (action === 'fracao:10') {
+    state.answers.fracaoPrimeiro = 10;
+    go('calendario');
+    return;
+  }
+
+  if (action === 'regras:continuar') {
+    go('calendario');
+    return;
+  }
+
+  if (action === 'month:prev') {
+    state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth()-1, 1);
+    render();
+    return;
+  }
+
+  if (action === 'month:next') {
+    state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth()+1, 1);
+    render();
+    return;
+  }
+
+  if (action === 'calendar:clear') {
+    state.selectedStart = null;
+    state.selectedSecondStart = null;
+    state.periods = [];
+    state.returnDates = [];
+    render();
+    return;
+  }
+
+  if (action === 'calendar:date') {
+    const date = fromISO(btn.dataset.date);
+
+    const isFraction = state.answers.tipo === 'regular' &&
+      isNewRegularRule() &&
+      state.answers.fracionar === true &&
+      state.answers.vinculo === 'efetivo' &&
+      state.answers.faltas === false;
+
+    if (date < minStartDate()) {
+      showToast(`Data bloqueada: mínimo de ${state.answers.reprogramacao ? 45 : 60} dias de antecedência.`);
+      return;
+    }
+
+    if (!isFraction) {
+      state.selectedStart = date;
+    } else if (!state.selectedStart) {
+      state.selectedStart = date;
+    } else if (!state.selectedSecondStart) {
+      calculatePeriods();
+      const firstEnd = state.periods[0]?.end;
+      if (firstEnd && date <= firstEnd) {
+        showToast('O 2º período não pode começar antes do término do 1º.');
+        return;
+      }
+      state.selectedSecondStart = date;
+    } else {
+      state.selectedStart = date;
+      state.selectedSecondStart = null;
+    }
+
+    calculatePeriods();
+    render();
+    return;
+  }
+
+  if (action === 'calendar:continue') {
+    const isFraction = state.answers.tipo === 'regular' &&
+      isNewRegularRule() &&
+      state.answers.fracionar === true &&
+      state.answers.vinculo === 'efetivo' &&
+      state.answers.faltas === false;
+
+    if (!state.selectedStart || (isFraction && !state.selectedSecondStart)) {
+      showToast(isFraction ? 'Defina os dois períodos.' : 'Escolha a data de início.');
+      return;
+    }
+
+    calculatePeriods();
+
+    // Validar antecedência de todos os períodos
+    const invalid = state.periods.find(p => p.start < minStartDate());
+    if (invalid) {
+      showToast('Uma das datas não respeita a antecedência mínima.');
+      return;
+    }
+
+    go('confirmacao');
+    return;
+  }
+
+  if (action === 'confirmar:final') {
+    calculatePeriods();
+    go('final');
+    return;
+  }
+
+  if (action === 'copy:text') {
+    const text = buildRequestText().replace(/\\r?\\n/g, '\n');
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(
+        () => showToast('Solicitação copiada para a área de transferência.'),
+        () => fallbackCopy(text)
+      );
+    } else {
+      fallbackCopy(text);
+    }
+    return;
+  }
+
+  if (action === 'xlsx:download') {
+    downloadSpreadsheet();
+    return;
+  }
+
+  if (action === 'print') {
+    window.print();
+    return;
+  }
+});
+
+
+app.addEventListener('input', (event) => {
+  const el = event.target;
+
+  if (el.id === 'cpf') {
+    const rawBefore = el.value;
+    const caretBefore = el.selectionStart ?? rawBefore.length;
+
+    // Quantidade de dígitos existentes antes do cursor.
+    const digitsBeforeCaret = rawBefore.slice(0, caretBefore).replace(/\D/g, '').length;
+
+    const formatted = formatCPF(rawBefore);
+    el.value = formatted;
+
+    // Reposiciona o cursor pelo número de dígitos, sem "pular" para o final.
+    let pos = 0;
+    let seen = 0;
+    while (pos < formatted.length && seen < digitsBeforeCaret) {
+      if (/\d/.test(formatted[pos])) seen++;
+      pos++;
+    }
+    el.setSelectionRange(pos, pos);
+  }
+});
+
+
+app.addEventListener('blur', (event) => {
+  const el = event.target;
+  if (el.id === 'cpf' && el.value) {
+    const valid = validateCPF(el.value);
+    el.setCustomValidity(valid ? '' : 'Digite um CPF válido.');
+    el.classList.toggle('border-red-300', !valid);
+    el.classList.toggle('bg-red-50', !valid);
+    el.classList.toggle('border-slate-200', valid);
+    el.classList.toggle('bg-slate-50', valid);
+  }
+}, true);
+
+app.addEventListener('change', (event) => {
+  const el = event.target;
+
+  if (el.id === 'nascimento' || el.id === 'dataAdmissao' || el.id === 'periodAquisitivoFim') {
+    if (!el.value) return;
+
+    if (!validISODate(el.value)) {
+      el.setCustomValidity('Informe uma data válida.');
+      return;
+    }
+
+    const today = todayStart();
+    const date = fromISO(el.value);
+
+    if (el.id === 'nascimento' && date > today) {
+      el.setCustomValidity('A data de nascimento não pode ser futura.');
+      showToast('A data de nascimento não pode ser futura.');
+      return;
+    }
+
+    if (el.id === 'dataAdmissao' && date > today) {
+      el.setCustomValidity('A data de admissão não pode ser futura.');
+      showToast('A data de admissão não pode ser futura.');
+      return;
+    }
+
+    if (el.id === 'dataAdmissao') {
+      const nascimento = document.getElementById('nascimento')?.value;
+      if (validISODate(nascimento) && date < fromISO(nascimento)) {
+        el.setCustomValidity('A admissão não pode ser anterior ao nascimento.');
+        showToast('A data de admissão não pode ser anterior ao nascimento.');
+        return;
+      }
+    }
+
+    if (el.id === 'periodAquisitivoFim') {
+      const admissao = state.answers.dataAdmissao;
+      if (validISODate(admissao) && date < fromISO(admissao)) {
+        el.setCustomValidity('O término do período aquisitivo não pode ser anterior à admissão.');
+        showToast('O período aquisitivo não pode terminar antes da admissão.');
+        return;
+      }
+      if (date > today) {
+        el.setCustomValidity('O período aquisitivo informado ainda não terminou.');
+        showToast('O período aquisitivo informado ainda não terminou.');
+        return;
+      }
+    }
+
+    el.setCustomValidity('');
+  }
+
+  if (el.id === 'nome' || el.id === 'cargo' || el.id === 'funcao' || el.id === 'matricula' || el.id === 'lotacao') {
+    el.value = el.value.replace(/\s{2,}/g, ' ');
+  }
+});
+
+function fallbackCopy(text) {
+  const area = document.createElement('textarea');
+  area.value = text;
+  document.body.appendChild(area);
+  area.select();
+  document.execCommand('copy');
+  area.remove();
+  showToast('Solicitação copiada.');
+}
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+render();
+
+/*
+GIT
+
+git init
+git add .
+git commit -m "feat: transforma SolicitacaoDeFerias em assistente de solicitacao"
+git branch -M main
+git remote add origin https://github.com/GuiPaicheco/SolicitacaoDeFerias.git
+git push -u origin main
+
+Para sincronizar com um repositório remoto já existente:
+git pull origin main --allow-unrelated-histories
+git push -u origin main
+
+IMPORTANTE:
+- Mantenha logo.png na mesma pasta deste index.html.
+- Substitua a base calendarioBetim pela sua base oficial de feriados/pontos facultativos até 2030.
+*/
+</script>
+</body>
+</html>
