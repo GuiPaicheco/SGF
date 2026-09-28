@@ -9,7 +9,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
   status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
 const digits = (value: unknown) => String(value ?? '').replace(/\D/g, '');
-const allowedTypes = new Set(['regulamentar', 'premio', 'banco_horas', 'dayoff_aniversario']);
+const allowedTypes = new Set(['regulamentar', 'premio', 'banco_horas']);
 const isoDate = /^\d{4}-\d{2}-\d{2}$/;
 
 Deno.serve(async (request) => {
@@ -60,7 +60,7 @@ Deno.serve(async (request) => {
       start_date: first.start_date, end_date: last.end_date, return_date: last.return_date,
       acquisition_end: payload.acquisitionEnd || null,
       requested_hours: type === 'banco_horas' ? Number(payload.availableHours) : (Number(payload.addBankHours) || null),
-      birthday_year: type === 'dayoff_aniversario' ? Number(payload.birthdayYear) : null,
+      birthday_year: null,
       notes: String(payload.notes ?? '').slice(0, 2000) || null,
       submitted_at: new Date().toISOString(),
     };

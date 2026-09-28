@@ -31,9 +31,15 @@
   const dateFrom = value => { const [y,m,d] = value.split('-').map(Number); return new Date(y,m-1,d,12); };
   const addDays = (date, amount) => { const d = new Date(date); d.setDate(d.getDate()+amount); return d; };
   const formatDate = value => value ? new Intl.DateTimeFormat('pt-BR').format(typeof value === 'string' ? dateFrom(value) : value) : '—';
-  const labelType = type => ({regulamentar:'Férias regulamentares',premio:'Férias-prêmio',banco_horas:'Folga — banco de horas',dayoff_aniversario:'Day-off de aniversário'})[type] || type;
+  const formatDayMonth = value => value ? new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit'}).format(dateFrom(value)) : '—';
+  const labelType = type => ({regulamentar:'Férias regulamentares',premio:'Férias-prêmio',banco_horas:'Folga — banco de horas'})[type] || type;
   const labelStatus = status => ({rascunho:'Rascunho',enviada:'Enviada',em_analise:'Em análise',aprovada:'Aprovada',rejeitada:'Rejeitada',programada:'Programada',reprogramada:'Reprogramada',cancelada:'Cancelada',concluida:'Concluída'})[status] || status;
-  const isBusiness = date => ![0,6].includes(date.getDay()) && !HOLIDAYS.has(iso(date));
+  const isBirthdayDayOff = date => {
+    if (!state.request.birthDate) return false;
+    const birth = dateFrom(state.request.birthDate);
+    return date.getMonth() === birth.getMonth() && date.getDate() === birth.getDate();
+  };
+  const isBusiness = date => ![0,6].includes(date.getDay()) && !HOLIDAYS.has(iso(date)) && !isBirthdayDayOff(date);
   const nextBusiness = date => { let d = new Date(date); while (!isBusiness(d)) d=addDays(d,1); return d; };
   const addBusinessInclusive = (start, count) => { let d=new Date(start), used=0; while(used<count){if(isBusiness(d)) used++; if(used<count)d=addDays(d,1);} return d; };
   const subtractBusinessForStart = (returnDate, count) => { let d=addDays(returnDate,-1), used=0; while(used<count){if(isBusiness(d)) used++; if(used<count)d=addDays(d,-1);} return d; };
@@ -67,7 +73,6 @@
       <button class="choice" data-type="regulamentar"><strong>Férias regulamentares</strong><span>25 dias úteis no novo regime, 16 dias úteis quando aplicável ou 30 dias corridos no regime anterior.</span></button>
       <button class="choice" data-type="premio"><strong>Férias-prêmio</strong><span>Solicitação de 30, 60 ou 90 dias, sujeita à confirmação do direito.</span></button>
       <button class="choice" data-type="banco_horas"><strong>Folga — banco de horas</strong><span>Converta o saldo declarado em dias conforme sua jornada diária.</span></button>
-      <button class="choice" data-type="dayoff_aniversario"><strong>Day-off de aniversário</strong><span>Simule o dia de folga referente ao aniversário.</span></button>
     </div><div class="actions"><button class="button button-secondary" data-go="home">Voltar</button></div>`,12);
   }
   function renderIdentity() {
@@ -84,13 +89,11 @@
     const regularFields=regular?`${field('Término do período aquisitivo','acquisitionEnd','date')}<div class="field"><label for="unjustifiedAbsences">Mais de 9 faltas injustificadas?</label><select class="control" id="unjustifiedAbsences"><option value="no" ${r.unjustifiedAbsences==='no'?'selected':''}>Não</option><option value="yes" ${r.unjustifiedAbsences==='yes'?'selected':''}>Sim</option></select></div><div class="field"><label for="split">Fracionamento</label><select class="control" id="split"><option value="none">Sem fracionamento</option><option value="15-10" ${r.split==='15-10'?'selected':''}>15 + 10 dias úteis</option><option value="10-15" ${r.split==='10-15'?'selected':''}>10 + 15 dias úteis</option></select><small>Disponível apenas quando a regra e o vínculo permitirem.</small></div>${field('Horas do banco para acrescentar','addBankHours','number',false,'Saldo declaratório, sujeito à validação do RH.','min="0" step="0.5"')}`:'';
     const bankFields=bank?`${field('Saldo disponível em horas','availableHours','number',true,'O RH validará o saldo informado.','min="0.5" step="0.5"')}${field('Jornada diária em horas','dailyHours','number',true,'Ex.: 8 horas por dia.','min="1" max="24" step="0.5"')}`:'';
     const prize=r.type==='premio'?`<div class="field"><label for="prizeDays">Quantidade de dias</label><select class="control" id="prizeDays"><option value="30">30 dias</option><option value="60">60 dias</option><option value="90">90 dias</option></select></div>`:'';
-    const birthday=r.type==='dayoff_aniversario'?`<div class="notice">O sistema usará a data de nascimento informada e posicionará o day-off no primeiro dia útil a partir do aniversário do ano selecionado.</div>${field('Ano do day-off','birthdayYear','number',true,'Informe o ano da solicitação.','min="2026" max="2200"')}`:'';
-    app.innerHTML=shell('Regras da solicitação',labelType(r.type),`<form id="rules-form" class="form-grid">${regularFields}${bankFields}${prize}${birthday}<div class="field field-full"><div class="actions"><button type="button" class="button button-secondary" data-go="identity">Voltar</button><button class="button button-primary" type="submit">Definir datas</button></div></div></form>`,42);
+    app.innerHTML=shell('Regras da solicitação',labelType(r.type),`<form id="rules-form" class="form-grid">${regularFields}${bankFields}${prize}<div class="field field-full"><div class="actions"><button type="button" class="button button-secondary" data-go="identity">Voltar</button><button class="button button-primary" type="submit">Definir datas</button></div></div></form>`,42);
   }
   function ruleSummary() {
     const r=state.request;
     if(r.type==='banco_horas'){const hours=Number(r.availableHours),daily=Number(r.dailyHours);return {days:Math.floor(hours/daily),unit:'uteis',text:`${Math.floor(hours/daily)} dia(s) útil(eis), usando ${Math.floor(hours/daily)*daily}h`};}
-    if(r.type==='dayoff_aniversario')return {days:1,unit:'uteis',text:'1 dia útil'};
     if(r.type==='premio'){const days=Number(r.prizeDays||30);return {days,unit:'corridos',text:`${days} dias corridos`};}
     const isNew=(r.admissionDate&&r.admissionDate>=RULE_START)||(r.acquisitionEnd&&r.acquisitionEnd>=RULE_START);
     if(!isNew)return {days:30,unit:'corridos',text:'30 dias corridos — regime anterior'};
@@ -100,13 +103,12 @@
   }
   function renderDates() {
     const r=state.request, rule=ruleSummary();
-    if(r.type==='dayoff_aniversario') return calculateAndConfirmBirthday();
     const splitAllowed=r.type==='regulamentar'&&r.employmentType==='efetivo'&&r.unjustifiedAbsences==='no'&&rule.unit==='uteis'&&r.split!=='none'&&!rule.extra;
     app.innerHTML=shell('Escolha como deseja simular',`Regra calculada: ${rule.text}.`,`<form id="dates-form" class="form-grid">
       <div class="field"><label for="mode">Calcular a partir de</label><select id="mode" class="control"><option value="start" ${r.mode==='start'?'selected':''}>Data de início</option><option value="return" ${r.mode==='return'?'selected':''}>Data de retorno</option></select></div>
       ${field('Data escolhida','chosenDate','date',true,'Respeite a antecedência administrativa mínima.')}
       ${splitAllowed?field('Início do segundo período','secondStartDate','date',true,'O segundo período deve iniciar após o primeiro.'):''}
-      <div class="field field-full"><div class="notice notice-warning">Feriados e pontos facultativos cadastrados são desconsiderados nos cálculos em dias úteis. O calendário oficial deve ser revisado anualmente pelo RH.</div><div class="actions"><button type="button" class="button button-secondary" data-go="rules">Voltar</button><button class="button button-primary" type="submit">Simular período</button></div></div>
+      <div class="field field-full"><div class="notice"><strong>Day-off de aniversário:</strong> ${formatDayMonth(r.birthDate)} de cada ano. Essa data é marcada no calendário e não consome férias nem banco de horas quando estiver dentro do período calculado em dias úteis.</div><div class="notice notice-warning">Feriados e pontos facultativos cadastrados também são desconsiderados nos cálculos em dias úteis. O calendário oficial deve ser revisado anualmente pelo RH.</div><div class="actions"><button type="button" class="button button-secondary" data-go="rules">Voltar</button><button class="button button-primary" type="submit">Simular período</button></div></div>
     </form>`,58);
   }
   function makePeriod(start,days,unit,sequence=1) {
@@ -123,12 +125,24 @@
     if(splitAllowed){const secondStart=dateFrom(r.secondStartDate); if(secondStart<=dateFrom(periods[0].end_date)) throw new Error('O segundo período deve começar após o término do primeiro.'); periods.push(makePeriod(secondStart,Number(r.split.split('-')[1]),unit,2));}
     return periods;
   }
-  function calculateAndConfirmBirthday(){const r=state.request,year=Number(r.birthdayYear||new Date().getFullYear()),birth=dateFrom(r.birthDate);let d=new Date(year,birth.getMonth(),birth.getDate(),12);d=nextBusiness(d);r.periods=[makePeriod(d,1,'uteis')];r.birthdayYear=String(year);go('confirm');}
+  function dayOffsInside(periods) {
+    if (!state.request.birthDate) return [];
+    const birth=dateFrom(state.request.birthDate), found=[];
+    for (const period of periods) {
+      const start=dateFrom(period.start_date), end=dateFrom(period.end_date);
+      for (let year=start.getFullYear(); year<=end.getFullYear(); year++) {
+        const day=new Date(year,birth.getMonth(),birth.getDate(),12);
+        if(day>=start&&day<=end&&!found.includes(iso(day))) found.push(iso(day));
+      }
+    }
+    return found;
+  }
   function renderConfirm() {
     const r=state.request,rule=ruleSummary();
     app.innerHTML=shell('Revise antes de enviar','Confira principalmente os dados funcionais e as datas.',`<div class="summary">
       ${[['Servidor',r.name],['Matrícula',r.registration],['Modalidade',labelType(r.type)],['Regra',rule.text],['Lotação',r.unit]].map(([a,b])=>`<div class="summary-row"><span>${a}</span><strong>${esc(b)}</strong></div>`).join('')}
       ${r.periods.map((p,i)=>`<div class="summary-row"><span>${r.periods.length>1?`${i+1}º período`:'Período'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)} — retorno ${formatDate(p.return_date)}</strong></div>`).join('')}
+      ${dayOffsInside(r.periods).map(day=>`<div class="summary-row"><span>Day-off de aniversário</span><strong>${formatDate(day)} — não consome saldo</strong></div>`).join('')}
     </div><div class="field"><label for="notes">Observações</label><textarea class="control" id="notes" rows="3">${esc(r.notes)}</textarea></div><div class="notice">Ao enviar, você declara que os dados informados são verdadeiros e reconhece que o pedido depende da análise da chefia e do RH.</div><div class="actions"><button class="button button-secondary" data-go="dates">Voltar</button><button class="button button-primary" data-action="submit-request">Enviar solicitação</button></div>`,76);
   }
   async function submitRequest(){
@@ -140,7 +154,7 @@
     }catch(error){showToast(error.message);btn.disabled=false;btn.textContent='Enviar solicitação';}
   }
   function renderReceipt(){
-    const r=state.request;setProgress(100);app.innerHTML=`<section class="card"><div class="receipt"><div class="receipt-head"><img src="logo.png" alt="Prefeitura de Betim"><div><strong>COMPROVANTE DE SOLICITAÇÃO</strong><br><small>Protocolo ${esc(r.protocol||'simulação não enviada')}</small></div></div><h2>${labelType(r.type)}</h2><p>Registramos a solicitação de <strong>${esc(r.name)}</strong>, matrícula <strong>${esc(r.registration)}</strong>, lotado(a) em <strong>${esc(r.unit)}</strong>.</p><div class="summary">${r.periods.map((p,i)=>`<div class="summary-row"><span>${r.periods.length>1?`${i+1}º período`:'Período solicitado'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)}<br>Retorno: ${formatDate(p.return_date)}</strong></div>`).join('')}</div><p><strong>Situação:</strong> Enviada para análise administrativa.</p><p class="lead">Este documento comprova o protocolo do pedido e não autoriza o afastamento. A decisão será registrada pela chefia imediata e pelo RH.</p><div class="signature-grid"><div class="signature">Servidor(a) solicitante</div><div class="signature">Recebido por / carimbo</div></div><small>Emitido em ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'long',timeStyle:'short'}).format(new Date())}</small></div><div class="actions no-print"><button class="button button-primary" onclick="window.print()">Imprimir / salvar em PDF</button><button class="button button-secondary" data-action="restart">Nova solicitação</button></div></section>`;
+    const r=state.request;setProgress(100);app.innerHTML=`<section class="card"><div class="receipt"><div class="receipt-head"><img src="logo.png" alt="Prefeitura de Betim"><div><strong>COMPROVANTE DE SOLICITAÇÃO</strong><br><small>Protocolo ${esc(r.protocol||'simulação não enviada')}</small></div></div><h2>${labelType(r.type)}</h2><p>Registramos a solicitação de <strong>${esc(r.name)}</strong>, matrícula <strong>${esc(r.registration)}</strong>, lotado(a) em <strong>${esc(r.unit)}</strong>.</p><div class="summary">${r.periods.map((p,i)=>`<div class="summary-row"><span>${r.periods.length>1?`${i+1}º período`:'Período solicitado'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)}<br>Retorno: ${formatDate(p.return_date)}</strong></div>`).join('')}${dayOffsInside(r.periods).map(day=>`<div class="summary-row"><span>Day-off de aniversário</span><strong>${formatDate(day)} — não consome saldo</strong></div>`).join('')}</div><p><strong>Situação:</strong> Enviada para análise administrativa.</p><p class="lead">Este documento comprova o protocolo do pedido e não autoriza o afastamento. A decisão será registrada pela chefia imediata e pelo RH.</p><div class="signature-grid"><div class="signature">Servidor(a) solicitante</div><div class="signature">Recebido por / carimbo</div></div><small>Emitido em ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'long',timeStyle:'short'}).format(new Date())}</small></div><div class="actions no-print"><button class="button button-primary" onclick="window.print()">Imprimir / salvar em PDF</button><button class="button button-secondary" data-action="restart">Nova solicitação</button></div></section>`;
   }
   function renderLogin(){
     setProgress(0);app.innerHTML=shell('Área de gerenciamento','Acesso exclusivo de chefias, RH e administradores. Use a conta institucional cadastrada no Supabase Auth.',`<form id="login-form" class="form-grid"><div class="field field-full"><label for="email">E-mail institucional</label><input class="control" id="email" type="email" required autocomplete="username"></div><div class="field field-full"><label for="password">Senha</label><input class="control" id="password" type="password" required autocomplete="current-password"></div><div class="field field-full"><div class="actions"><button type="button" class="button button-secondary" data-go="home">Voltar</button><button class="button button-primary">Entrar</button></div></div></form><div class="notice notice-warning">A senha provisória não fica no código. A conta deve ser criada pelo administrador e a senha trocada no primeiro acesso.</div>`);
@@ -174,7 +188,7 @@
       const ids=['name','cpf','birthDate','registration','admissionDate','employmentType','position','functionName','unit'];ids.forEach(id=>state.request[id]=document.querySelector(`#${id}`).value.trim());state.request.cpf=formatCPF(state.request.cpf);
       if(!validCPF(state.request.cpf))return showToast('Informe um CPF válido.');if(state.request.admissionDate<state.request.birthDate)return showToast('A admissão não pode ser anterior ao nascimento.');go('rules');
     } else if(event.target.id==='rules-form'){
-      ['acquisitionEnd','unjustifiedAbsences','split','availableHours','dailyHours','addBankHours','prizeDays','birthdayYear'].forEach(id=>{const el=document.querySelector(`#${id}`);if(el)state.request[id]=el.value;});
+      ['acquisitionEnd','unjustifiedAbsences','split','availableHours','dailyHours','addBankHours','prizeDays'].forEach(id=>{const el=document.querySelector(`#${id}`);if(el)state.request[id]=el.value;});
       if(state.request.type==='banco_horas'&&ruleSummary().days<1)return showToast('O saldo não corresponde a um dia completo da jornada informada.');if(state.request.split!=='none'&&state.request.employmentType!=='efetivo')state.request.split='none';go('dates');
     } else if(event.target.id==='dates-form'){
       state.request.mode=document.querySelector('#mode').value;const chosen=document.querySelector('#chosenDate').value;state.request.secondStartDate=document.querySelector('#secondStartDate')?.value||'';try{state.request.periods=calculatePeriods(chosen);state.request.startDate=state.request.periods[0].start_date;state.request.returnDate=state.request.periods.at(-1).return_date;go('confirm');}catch(error){showToast(error.message);}

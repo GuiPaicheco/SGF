@@ -16,7 +16,8 @@ Repositório oficial: https://github.com/GuiPaicheco/SGF.git
 - [x] Implementar etapas de aprovação da chefia imediata e do RH.
 - [x] Implementar simulação pela data de início ou pela data desejada de retorno.
 - [x] Considerar data de admissão e término do período aquisitivo na escolha do regime.
-- [x] Implementar férias regulamentares, férias-prêmio, banco de horas e day-off.
+- [x] Implementar férias regulamentares, férias-prêmio e banco de horas.
+- [x] Tratar o day-off de aniversário como direito automático no calendário, sem solicitação e sem consumo de saldo.
 - [x] Permitir saldo declaratório de banco de horas e acréscimo às férias.
 - [x] Criar comprovante formal de uma página com protocolo, assinatura e carimbo.
 - [x] Implementar campos verdes quando válidos e vermelhos quando inválidos.
@@ -31,7 +32,7 @@ Repositório oficial: https://github.com/GuiPaicheco/SGF.git
 - [ ] Criar as contas institucionais de RH/chefias e atribuir seus escopos.
 - [ ] Revisar o calendário oficial de feriados e pontos facultativos de cada ano.
 - [ ] Confirmar com RH/STI o marco legal exato da data de admissão para o regime de 25 dias úteis.
-- [ ] Confirmar se day-off em fim de semana/feriado passa para o próximo dia útil.
+- [ ] Confirmar se o day-off em fim de semana/feriado é transferido; até a definição, o sistema marca a data exata do aniversário sem gerar outro pedido.
 - [ ] Confirmar se banco de horas pode prolongar férias ou deve gerar período separado.
 - [ ] Definir política oficial de arredondamento para saldo inferior a uma jornada completa.
 - [ ] Configurar domínio, HTTPS, cabeçalhos de segurança e política de backup no ambiente de publicação.
