@@ -1,6 +1,6 @@
 # SGF — Acompanhamento de implementação
 
-Última atualização: 28/09/2026  
+Última atualização: 28/09/2026
 Repositório oficial: https://github.com/GuiPaicheco/SGF.git
 
 ## Concluído
