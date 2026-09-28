@@ -40,6 +40,14 @@ Depois do login, o RLS permite consultar somente o próprio cadastro e as solici
 5. O RH programa, reprograma, rejeita, cancela ou conclui.
 6. Toda mudança de status é registrada em `request_status_history`.
 
+### Inclusões funcionais
+
+Administradores e RH acessam **Inclusões funcionais** pelo painel de gerenciamento. A fila apresenta os dados declarados pelo servidor e o protocolo que originou a inclusão.
+
+Na aprovação, o responsável seleciona uma das lotações CNES oficiais, confirma cargo e vínculo e pode registrar um parecer. O procedimento ativa o servidor, vincula cargo e lotação e conclui a pendência em uma única transação. Na rejeição, a justificativa é obrigatória. A matrícula, o CPF e a data de nascimento não são alterados por esse fluxo.
+
+As 48 lotações da carga inicial estão versionadas em `docs/cnes-lotacoes.md`. Antes da produção, o RH deve conferir grafia, hierarquia e situação ativa diretamente com a fonte institucional.
+
 ## 4. Banco de horas
 
 `declared_minutes` é o saldo informado pelo servidor; `validated_minutes` é o saldo oficial confirmado pelo RH. A aprovação não deve se apoiar apenas no saldo declarado.

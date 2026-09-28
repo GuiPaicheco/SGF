@@ -13,18 +13,15 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 - [ ] Adicionar formalmente o perfil `diretor` ao banco e definir suas políticas de acesso. O banco possui atualmente `gerencia`, mas não `diretor`.
 - [ ] Definir se `gerencia` continuará como perfil próprio ou será substituído por `diretor`.
 - [ ] Permitir ao administrador vincular responsáveis, diretores e RH às respectivas lotações.
-- [ ] Converter cargo e lotação declarados no primeiro acesso em referências oficiais após a conferência administrativa.
 - [ ] Decidir e implementar a política de acesso por CNES. Não criar contas compartilhadas com senha global sem uma decisão formal sobre rastreabilidade.
 - [ ] Ativar a proteção contra senhas vazadas no Supabase Auth antes da produção.
 - [ ] Remover o acesso provisório legado e a função `provisional-login` depois que o novo login administrativo estiver homologado.
 
 ## 2. Cadastros e estrutura organizacional
 
-- [ ] Importar no banco as unidades e os códigos CNES da [lista de lotações](cnes-lotacoes.md).
 - [ ] Criar a gestão de lotações, permitindo alterar nome, hierarquia, código CNES e responsáveis.
 - [ ] Criar a gestão de servidores, cargos, funções e vínculos por lotação.
 - [ ] Permitir ativar, bloquear e transferir servidores entre lotações mantendo histórico.
-- [ ] Criar uma visão administrativa das solicitações de inclusão funcional pendentes.
 
 ## 3. Solicitações e calendário
 
