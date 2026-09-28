@@ -6,8 +6,6 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## 1. Acesso, usuários e perfis — prioridade atual
 
-- [ ] Implementar o login administrativo por identificador e senha, incluindo o acesso inicial `admin` definido para homologação, sem expor credenciais no frontend ou no repositório.
-- [ ] Criar o provisionamento seguro da primeira conta administradora e obrigar a troca da senha inicial no primeiro acesso.
 - [ ] Unificar a experiência de login: matrícula ou identificador, senha, “Esqueci a senha” e “Solicitar acesso”. Hoje servidor e gestão usam formulários e identificadores diferentes.
 - [ ] Implementar recuperação segura de senha para servidores e gestores.
 - [ ] Criar uma fila administrativa para aprovar ou rejeitar solicitações de acesso.
@@ -68,11 +66,11 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## Ordem sugerida
 
-1. Login e provisionamento do administrador.
-2. Perfis, aprovação de acesso e escopos por lotação.
-3. Importação CNES e gestão de cadastros.
-4. Calendário visual e validação dos cálculos.
-5. Fluxo completo de aprovação e visão de escala.
-6. Comprovante, comunicação, testes e homologação.
+1. Perfis, aprovação de acesso e escopos por lotação.
+2. Importação CNES e gestão de cadastros.
+3. Calendário visual e validação dos cálculos.
+4. Fluxo completo de aprovação e visão de escala.
+5. Comprovante, comunicação, testes e homologação.
+7. Por fim, verifique a integridade do código, DB e se está 100% seguro.
 
 > Manter a identidade visual profissional, a responsividade e o versionamento contínuo no GitHub.

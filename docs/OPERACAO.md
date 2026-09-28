@@ -8,7 +8,11 @@ O CPF em `servidores.cpf` deve conter somente 11 dígitos. Matrícula, CPF e dat
 
 ## 2. Acesso administrativo
 
-Crie o usuário em Supabase Auth com e-mail institucional e uma senha temporária individual. Depois crie o registro correspondente em `profiles` usando o mesmo UUID.
+A conta inicial de homologação entra pela **Área de gerenciamento** usando o identificador `admin`. O e-mail interno do Supabase Auth não é informado ao navegador; a Edge Function `management-auth` resolve o identificador, aplica limitação de tentativas e devolve a sessão somente quando a senha está correta.
+
+No primeiro acesso, `profiles.must_change_password` bloqueia o painel até a definição de uma senha pessoal com pelo menos dez caracteres. A senha inicial não deve ser registrada no código, na documentação nem em mensagens permanentes.
+
+Para novos usuários de gestão, crie o usuário em Supabase Auth com uma senha temporária individual. Depois crie o registro correspondente em `profiles`, usando o mesmo UUID, e defina um `login_identifier` exclusivo e `must_change_password = true`.
 
 - `administrador`: acesso global e configuração.
 - `rh`: acesso global às filas administrativas.
@@ -17,7 +21,7 @@ Crie o usuário em Supabase Auth com e-mail institucional e uma senha temporári
 
 Não use uma senha compartilhada como `1234` após o piloto. Exija troca da senha temporária e desligue imediatamente contas de pessoas que perderem a atribuição.
 
-Durante a configuração inicial, a tela simplificada aceita temporariamente o código `1234`. O código é validado pela Edge Function `provisional-login`, possui limitação de tentativas e não está no JavaScript do navegador. Remova esse acesso assim que as contas institucionais individuais forem cadastradas.
+O fluxo legado `provisional-login` não é mais usado pelo frontend. Ele deve ser removido do projeto remoto depois da homologação do acesso administrativo atual.
 
 ### Acesso do servidor
 
