@@ -24,6 +24,12 @@ Repositório oficial: https://github.com/GuiPaicheco/SGF.git
 - [x] Criar função segura para envio sem login, com validação funcional e rate limit.
 - [x] Fixar a versão do cliente Supabase usada pelo navegador e pela Edge Function.
 - [x] Criar migrations versionadas e executar advisors de segurança.
+- [x] Permitir retorno às seções e à tela inicial sem perder os dados preenchidos.
+- [x] Tornar a logo e o botão “Tela inicial” atalhos persistentes de navegação.
+- [x] Centralizar e organizar a página inicial e alinhar os campos dos formulários.
+- [x] Manter o rodapé no fim da tela, inclusive em páginas com pouco conteúdo.
+- [x] Corrigir a codificação UTF-8 das mensagens retornadas pelas Edge Functions.
+- [x] Ativar o acesso administrativo provisório com senha `1234`, validada no backend.
 
 ## Preparação administrativa antes do piloto
 

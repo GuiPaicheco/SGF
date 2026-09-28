@@ -5,7 +5,10 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+const asciiJson = (body: unknown) => JSON.stringify(body).replace(/[\u007f-\uffff]/g, char =>
+  `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`
+);
+const json = (body: unknown, status = 200) => new Response(asciiJson(body), {
   status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
 const digits = (value: unknown) => String(value ?? '').replace(/\D/g, '');
@@ -14,12 +17,12 @@ const isoDate = /^\d{4}-\d{2}-\d{2}$/;
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
-  if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
+  if (request.method !== 'POST') return json({ error: 'M\u00e9todo n\u00e3o permitido.' }, 405);
 
   try {
     const url = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    if (!url || !serviceKey) return json({ error: 'Serviço temporariamente indisponível.' }, 503);
+    if (!url || !serviceKey) return json({ error: 'Servi\u00e7o temporariamente indispon\u00edvel.' }, 503);
     const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const payload = await request.json();
     const cpf = digits(payload.cpf);
@@ -29,12 +32,12 @@ Deno.serve(async (request) => {
     const periods = Array.isArray(payload.periods) ? payload.periods : [];
 
     if (cpf.length !== 11 || !registration || !isoDate.test(birthDate) || !allowedTypes.has(type)) {
-      return json({ error: 'Dados de identificação ou modalidade inválidos.' }, 400);
+      return json({ error: 'Dados de identifica\u00e7\u00e3o ou modalidade inv\u00e1lidos.' }, 400);
     }
     if (!periods.length || periods.length > 2 || periods.some((p: Record<string, unknown>) =>
       !isoDate.test(String(p.start_date)) || !isoDate.test(String(p.end_date)) ||
       !isoDate.test(String(p.return_date)) || Number(p.days) < 1 || Number(p.days) > 90)) {
-      return json({ error: 'Período solicitado inválido.' }, 400);
+      return json({ error: 'Per\u00edodo solicitado inv\u00e1lido.' }, 400);
     }
 
     const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -50,7 +53,7 @@ Deno.serve(async (request) => {
       .select('id,full_name,active,birth_date,matricula,cpf').eq('matricula', registration).eq('cpf', cpf)
       .eq('birth_date', birthDate).eq('active', true).maybeSingle();
     if (lookupError) throw lookupError;
-    if (!servidor) return json({ error: 'Não foi possível confirmar os dados funcionais. Procure o RH da sua lotação.' }, 404);
+    if (!servidor) return json({ error: 'N\u00e3o foi poss\u00edvel confirmar os dados funcionais. Procure o RH da sua lota\u00e7\u00e3o.' }, 404);
 
     const now = new Date();
     const protocol = `SGF-${now.getFullYear()}-${now.getTime().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
@@ -86,6 +89,6 @@ Deno.serve(async (request) => {
     return json({ id: created.id, protocol: created.protocol }, 201);
   } catch (error) {
     console.error('submit-request', error);
-    return json({ error: 'Não foi possível registrar a solicitação. Tente novamente ou procure o RH.' }, 500);
+    return json({ error: 'N\u00e3o foi poss\u00edvel registrar a solicita\u00e7\u00e3o. Tente novamente ou procure o RH.' }, 500);
   }
 });

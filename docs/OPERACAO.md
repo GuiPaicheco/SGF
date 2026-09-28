@@ -15,7 +15,9 @@ Crie o usuário em Supabase Auth com e-mail institucional e uma senha temporári
 - `gerencia`: acesso apenas às lotações vinculadas em `profile_scopes`.
 - `servidor`: acesso aos próprios registros, quando uma conta for vinculada.
 
-Não use uma senha compartilhada como `1234`. Exija troca da senha temporária e desligue imediatamente contas de pessoas que perderem a atribuição.
+Não use uma senha compartilhada como `1234` após o piloto. Exija troca da senha temporária e desligue imediatamente contas de pessoas que perderem a atribuição.
+
+Durante a configuração inicial, a tela simplificada aceita temporariamente o código `1234`. O código é validado pela Edge Function `provisional-login`, possui limitação de tentativas e não está no JavaScript do navegador. Remova esse acesso assim que as contas institucionais individuais forem cadastradas.
 
 ## 3. Fluxo
 

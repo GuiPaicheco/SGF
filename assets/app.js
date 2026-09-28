@@ -16,11 +16,11 @@
   const toast = document.querySelector('#toast');
   const sessionAction = document.querySelector('#session-action');
   const state = {
-    route: 'home', session: null, profile: null, requests: [], selected: null,
+    route: 'home', resumeRoute: null, session: null, profile: null, requests: [], selected: null,
     request: {
       type: '', name: '', cpf: '', birthDate: '', registration: '', admissionDate: '', employmentType: '',
       position: '', functionName: '', unit: '', acquisitionEnd: '', unjustifiedAbsences: 'no',
-      mode: 'start', startDate: '', returnDate: '', secondStartDate: '', split: 'none',
+      mode: 'start', chosenDate: '', startDate: '', returnDate: '', secondStartDate: '', split: 'none',
       availableHours: '', dailyHours: '8', addBankHours: '', notes: '', periods: []
     }
   };
@@ -45,7 +45,10 @@
   const subtractBusinessForStart = (returnDate, count) => { let d=addDays(returnDate,-1), used=0; while(used<count){if(isBusiness(d)) used++; if(used<count)d=addDays(d,-1);} return d; };
   const showToast = message => { toast.textContent=message; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3200); };
   const setProgress = value => progress.style.setProperty('--progress', `${value}%`);
-  const go = route => { state.route=route; window.scrollTo({top:0,behavior:'smooth'}); render(); };
+  const go = route => {
+    if(route==='home' && ['types','identity','rules','dates','confirm'].includes(state.route)) state.resumeRoute=state.route;
+    state.route=route;window.scrollTo({top:0,behavior:'smooth'});render();
+  };
 
   function validCPF(value) {
     const cpf=digits(value); if(cpf.length!==11 || /^(\d)\1+$/.test(cpf)) return false;
@@ -65,8 +68,8 @@
   }
 
   function renderHome() {
-    setProgress(0); sessionAction.classList.add('hidden');
-    app.innerHTML=`<section class="card hero"><div><p class="eyebrow">Sistema auxiliar de RH</p><h1>Solicitações claras, seguras e rastreáveis.</h1><p class="lead">Simule férias e folgas, envie seu pedido e gere o comprovante. Chefias e RH acompanham cada etapa em ambiente restrito.</p><div class="notice"><strong>Atenção:</strong> a simulação e o comprovante não representam autorização. O afastamento só ocorre após decisão administrativa.</div></div><div class="choice-grid"><button class="choice" data-go="types"><strong>Fazer solicitação</strong><span>Acesso sem senha, com verificação dos dados funcionais.</span></button><button class="choice" data-go="login"><strong>Área de gerenciamento</strong><span>Acesso autenticado para chefias, RH e administradores.</span></button></div></section>`;
+    setProgress(0);
+    app.innerHTML=`<section class="card hero"><div><p class="eyebrow">Sistema auxiliar de RH</p><h1>Solicitações claras, seguras e rastreáveis.</h1><p class="lead">Simule férias e folgas, envie seu pedido e gere o comprovante. Chefias e RH acompanham cada etapa em ambiente restrito.</p><div class="notice"><strong>Atenção:</strong> a simulação e o comprovante não representam autorização. O afastamento só ocorre após decisão administrativa.</div></div><div class="choice-grid">${state.resumeRoute?`<button class="choice" data-resume><strong>Continuar solicitação</strong><span>Retome do ponto em que parou, sem perder os dados preenchidos.</span></button>`:''}<button class="choice" data-go="types"><strong>Fazer solicitação</strong><span>Acesso sem senha, com verificação dos dados funcionais.</span></button><button class="choice" data-go="login"><strong>Área de gerenciamento</strong><span>Acesso autenticado para chefias, RH e administradores.</span></button></div></section>`;
   }
   function renderTypes() {
     app.innerHTML=shell('O que você deseja solicitar?','Escolha a modalidade. As regras e os cálculos serão ajustados automaticamente.',`<div class="choice-grid">
@@ -157,9 +160,21 @@
     const r=state.request;setProgress(100);app.innerHTML=`<section class="card"><div class="receipt"><div class="receipt-head"><img src="logo.png" alt="Prefeitura de Betim"><div><strong>COMPROVANTE DE SOLICITAÇÃO</strong><br><small>Protocolo ${esc(r.protocol||'simulação não enviada')}</small></div></div><h2>${labelType(r.type)}</h2><p>Registramos a solicitação de <strong>${esc(r.name)}</strong>, matrícula <strong>${esc(r.registration)}</strong>, lotado(a) em <strong>${esc(r.unit)}</strong>.</p><div class="summary">${r.periods.map((p,i)=>`<div class="summary-row"><span>${r.periods.length>1?`${i+1}º período`:'Período solicitado'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)}<br>Retorno: ${formatDate(p.return_date)}</strong></div>`).join('')}${dayOffsInside(r.periods).map(day=>`<div class="summary-row"><span>Day-off de aniversário</span><strong>${formatDate(day)} — não consome saldo</strong></div>`).join('')}</div><p><strong>Situação:</strong> Enviada para análise administrativa.</p><p class="lead">Este documento comprova o protocolo do pedido e não autoriza o afastamento. A decisão será registrada pela chefia imediata e pelo RH.</p><div class="signature-grid"><div class="signature">Servidor(a) solicitante</div><div class="signature">Recebido por / carimbo</div></div><small>Emitido em ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'long',timeStyle:'short'}).format(new Date())}</small></div><div class="actions no-print"><button class="button button-primary" onclick="window.print()">Imprimir / salvar em PDF</button><button class="button button-secondary" data-action="restart">Nova solicitação</button></div></section>`;
   }
   function renderLogin(){
-    setProgress(0);app.innerHTML=shell('Área de gerenciamento','Acesso exclusivo de chefias, RH e administradores. Use a conta institucional cadastrada no Supabase Auth.',`<form id="login-form" class="form-grid"><div class="field field-full"><label for="email">E-mail institucional</label><input class="control" id="email" type="email" required autocomplete="username"></div><div class="field field-full"><label for="password">Senha</label><input class="control" id="password" type="password" required autocomplete="current-password"></div><div class="field field-full"><div class="actions"><button type="button" class="button button-secondary" data-go="home">Voltar</button><button class="button button-primary">Entrar</button></div></div></form><div class="notice notice-warning">A senha provisória não fica no código. A conta deve ser criada pelo administrador e a senha trocada no primeiro acesso.</div>`);
+    setProgress(0);app.innerHTML=shell('Área de gerenciamento','Acesso provisório para configuração inicial do SGF.',`<form id="login-form" class="form-grid"><div class="field field-full"><label for="password">Senha provisória</label><input class="control" id="password" type="password" required autocomplete="current-password" autofocus></div><div class="field field-full"><div class="actions"><button type="button" class="button button-secondary" data-go="home">Voltar</button><button class="button button-primary">Entrar</button></div></div></form><div class="notice notice-warning">Use a senha provisória fornecida para o piloto. Ela é validada pelo Supabase Auth e não está gravada no código do navegador.</div>`);
   }
-  async function login(event){event.preventDefault();const email=document.querySelector('#email').value.trim(),password=document.querySelector('#password').value;const {error}=await client.auth.signInWithPassword({email,password});if(error)return showToast('Credenciais inválidas ou acesso indisponível.');await loadSession();go('dashboard');}
+  async function login(event){
+    event.preventDefault();
+    const button=event.submitter, password=document.querySelector('#password').value;
+    if(button){button.disabled=true;button.textContent='Entrando…';}
+    try{
+      const response=await fetch(`${SUPABASE_URL}/functions/v1/provisional-login`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({password})});
+      const body=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(body.error||'Senha provisória inválida.');
+      const {error}=await client.auth.setSession({access_token:body.access_token,refresh_token:body.refresh_token});
+      if(error) throw error;
+      await loadSession();go('dashboard');
+    }catch(error){showToast(error.message);if(button){button.disabled=false;button.textContent='Entrar';}}
+  }
   async function loadSession(){if(!client)return;const {data}=await client.auth.getSession();state.session=data.session;if(!state.session)return;const {data:profile}=await client.from('profiles').select('id,full_name,role').eq('id',state.session.user.id).single();state.profile=profile;sessionAction.classList.remove('hidden');}
   async function loadRequests(){const {data,error}=await client.from('vacation_requests').select('id,protocol,type,status,start_date,end_date,return_date,created_at,notes,servidor:servidores(id,full_name,matricula,lotacao:lotacoes(name)),periods:request_periods(*)').order('created_at',{ascending:false});if(error)throw error;state.requests=data||[];}
   async function renderDashboard(){
@@ -176,6 +191,7 @@
   function render(){sessionAction.classList.toggle('hidden',!state.session);({home:renderHome,types:renderTypes,identity:renderIdentity,rules:renderRules,dates:renderDates,confirm:renderConfirm,receipt:renderReceipt,login:renderLogin,dashboard:renderDashboard,detail:renderDetail}[state.route]||renderHome)();app.focus({preventScroll:true});}
 
   document.addEventListener('click',async event=>{
+    if(event.target.closest('[data-resume]')){go(state.resumeRoute||'types');return;}
     const goButton=event.target.closest('[data-go]');if(goButton){go(goButton.dataset.go);return;}
     const typeButton=event.target.closest('[data-type]');if(typeButton){state.request.type=typeButton.dataset.type;go('identity');return;}
     const requestButton=event.target.closest('[data-request]');if(requestButton){state.selected=state.requests.find(r=>r.id===requestButton.dataset.request);go('detail');return;}
@@ -191,10 +207,15 @@
       ['acquisitionEnd','unjustifiedAbsences','split','availableHours','dailyHours','addBankHours','prizeDays'].forEach(id=>{const el=document.querySelector(`#${id}`);if(el)state.request[id]=el.value;});
       if(state.request.type==='banco_horas'&&ruleSummary().days<1)return showToast('O saldo não corresponde a um dia completo da jornada informada.');if(state.request.split!=='none'&&state.request.employmentType!=='efetivo')state.request.split='none';go('dates');
     } else if(event.target.id==='dates-form'){
-      state.request.mode=document.querySelector('#mode').value;const chosen=document.querySelector('#chosenDate').value;state.request.secondStartDate=document.querySelector('#secondStartDate')?.value||'';try{state.request.periods=calculatePeriods(chosen);state.request.startDate=state.request.periods[0].start_date;state.request.returnDate=state.request.periods.at(-1).return_date;go('confirm');}catch(error){showToast(error.message);}
+      state.request.mode=document.querySelector('#mode').value;const chosen=document.querySelector('#chosenDate').value;state.request.chosenDate=chosen;state.request.secondStartDate=document.querySelector('#secondStartDate')?.value||'';try{state.request.periods=calculatePeriods(chosen);state.request.startDate=state.request.periods[0].start_date;state.request.returnDate=state.request.periods.at(-1).return_date;go('confirm');}catch(error){showToast(error.message);}
     }
   });
-  document.addEventListener('input',event=>{if(event.target.id==='cpf')event.target.value=formatCPF(event.target.value);if(event.target.matches('.control')){event.target.classList.toggle('valid',event.target.checkValidity()&&!!event.target.value);event.target.classList.toggle('invalid',!event.target.checkValidity());}});
+  document.addEventListener('input',event=>{
+    const el=event.target;
+    if(el.id==='cpf')el.value=formatCPF(el.value);
+    if(el.id && !['password','email','decision-notes'].includes(el.id)) state.request[el.id]=el.value;
+    if(el.matches('.control')){el.classList.toggle('valid',el.checkValidity()&&!!el.value);el.classList.toggle('invalid',!el.checkValidity());}
+  });
   sessionAction.addEventListener('click',async()=>{await client?.auth.signOut();state.session=null;state.profile=null;go('home');});
   loadSession().finally(()=>render());
 })();

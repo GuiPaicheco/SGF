@@ -14,7 +14,7 @@ O frontend não precisa de build. Sirva a pasta por HTTP (por exemplo, com a ext
 - `supabase/migrations`: histórico versionado do banco.
 - `supabase/functions/submit-request`: envio anônimo validado no servidor.
 - `docs/OPERACAO.md`: preparação do ambiente e operação do piloto.
-- `pendencias.md`: backlog vivo e decisões ainda dependentes do RH/STI.
+- `docs/pendencias.md`: backlog vivo e decisões ainda dependentes do RH/STI.
 
 ## Segurança
 

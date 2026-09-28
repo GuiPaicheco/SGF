@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#123c2f">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data:; connect-src 'self' https://ijhvbzomakbbxverqfqh.supabase.co wss://ijhvbzomakbbxverqfqh.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
-  <title>SGF — Prefeitura de Betim</title>
+  <title>SGF - Prefeitura de Betim</title>
   <link rel="icon" href="logo.png"><link rel="stylesheet" href="assets/app.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
   <script defer src="assets/app.js"></script>
@@ -14,8 +14,9 @@
 <body>
   <a class="skip-link" href="#app">Ir para o conteúdo</a>
   <header class="site-header"><div class="header-inner">
-    <img src="logo.png" alt="Prefeitura Municipal de Betim" class="brand-logo">
+    <button class="brand-home" type="button" data-go="home" aria-label="Ir para a tela inicial"><img src="logo.png" alt="Prefeitura Municipal de Betim" class="brand-logo"></button>
     <div class="brand-copy"><strong>SGF</strong><span>Sistema de Gestão de Férias e Folgas</span></div>
+    <button id="home-action" class="button button-ghost" type="button" data-go="home">Tela inicial</button>
     <button id="session-action" class="button button-ghost hidden" type="button">Sair</button>
   </div></header>
   <div id="progress" class="progress" aria-live="polite"></div>
