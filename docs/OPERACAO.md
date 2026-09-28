@@ -19,6 +19,14 @@ Não use uma senha compartilhada como `1234` após o piloto. Exija troca da senh
 
 Durante a configuração inicial, a tela simplificada aceita temporariamente o código `1234`. O código é validado pela Edge Function `provisional-login`, possui limitação de tentativas e não está no JavaScript do navegador. Remova esse acesso assim que as contas institucionais individuais forem cadastradas.
 
+### Acesso do servidor
+
+O servidor usa a opção **Área do servidor**. Em **Solicitar acesso**, confirma nome, CPF, data de nascimento e matrícula, informa cargo e lotação e cria uma senha individual de no mínimo oito caracteres. A Edge Function `employee-auth` cria a credencial no Supabase Auth e vincula o UUID ao campo `servidores.profile_id`.
+
+Cargo e lotação informados no primeiro acesso ficam em `servidores.declared_position` e `servidores.declared_unit` até que o RH associe os registros oficiais de `cargos` e `lotacoes`. Todo novo acesso recebe inicialmente o perfil `servidor`.
+
+Depois do login, o RLS permite consultar somente o próprio cadastro e as solicitações vinculadas. O funcionário pode iniciar uma solicitação com seus dados preenchidos e acompanhar protocolo, períodos e situação, sem ações de aprovação ou programação.
+
 ## 3. Fluxo
 
 1. O servidor informa os dados funcionais, simula e envia.
