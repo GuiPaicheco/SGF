@@ -179,7 +179,9 @@
   async function submitRequest(){
     const btn=document.querySelector('[data-action="submit-request"]');btn.disabled=true;btn.textContent='Enviando…';state.request.notes=document.querySelector('#notes')?.value.trim()||'';
     try{
-      const response=await fetch(`${SUPABASE_URL}/functions/v1/submit-request`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify(state.request)});
+      const payload={...state.request,cpf:digits(state.request.cpf)};
+      if(!(Number(payload.addBankHours)>0))payload.addBankHours=null;
+      const response=await fetch(`${SUPABASE_URL}/functions/v1/submit-request`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify(payload)});
       const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'Não foi possível enviar a solicitação.');
       state.request.protocol=body.protocol;state.request.requestId=body.id;state.request.inclusionPending=Boolean(body.inclusion_pending);go('receipt');
     }catch(error){showToast(error.message);btn.disabled=false;btn.textContent='Enviar solicitação';}

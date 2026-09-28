@@ -56,6 +56,7 @@ Deno.serve(async (request) => {
 
     payload.cpf = cpf;
     payload.registration = registration;
+    payload.addBankHours = Number(payload.addBankHours) > 0 ? Number(payload.addBankHours) : null;
     payload.periods = periods.map((p: Record<string, unknown>, index: number) => ({ ...p, sequence: index + 1 }));
     const { data: created, error: createError } = await db.rpc('register_vacation_submission', { payload });
     if (createError) {

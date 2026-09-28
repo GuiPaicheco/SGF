@@ -34,6 +34,15 @@ Repositório oficial: https://github.com/GuiPaicheco/SGF.git
 - [x] Reutilizar o cadastro provisório por CPF, matrícula e nascimento, independentemente de horário ou dispositivo.
 - [x] Registrar solicitação, períodos, aprovações e inclusão funcional em uma única transação.
 - [x] Reintroduzir o calendário visual no resumo, com cores para início, período, término, retorno, feriado e day-off.
+- [x] Corrigir o envio de férias regulamentares quando o acréscimo de banco de horas é zero ou não informado.
+
+## Validação da solicitação
+
+- [x] Reproduzir o erro real do navegador nos logs da Edge Function.
+- [x] Normalizar CPF e banco de horas opcional no frontend antes do envio.
+- [x] Normalizar banco de horas zero ou vazio novamente no backend, protegendo clientes em cache.
+- [x] Homologar o payload do frontend com `addBankHours: "0"`: protocolo criado, inclusão pendente, um período e duas aprovações.
+- [x] Versionar os arquivos estáticos no HTML para evitar a reutilização do JavaScript anterior pelo navegador.
 
 ## Preparação administrativa antes do piloto
 
