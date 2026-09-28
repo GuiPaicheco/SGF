@@ -22,10 +22,11 @@ Durante a configuração inicial, a tela simplificada aceita temporariamente o c
 ## 3. Fluxo
 
 1. O servidor informa os dados funcionais, simula e envia.
-2. A Edge Function valida o cadastro e cria protocolo, períodos e duas etapas de aprovação.
-3. A chefia analisa apenas servidores do seu escopo.
-4. O RH programa, reprograma, rejeita, cancela ou conclui.
-5. Toda mudança de status é registrada em `request_status_history`.
+2. A Edge Function procura o servidor por CPF e matrícula. Se ele ainda não existir, cria um cadastro inativo provisório e uma pendência em `employee_inclusion_requests` para conferência do RH.
+3. O protocolo, os períodos, as duas etapas de aprovação e a eventual inclusão funcional são gravados em uma única transação. Divergências com CPF ou matrícula já existentes são bloqueadas para evitar associação indevida.
+4. A chefia analisa apenas servidores do seu escopo; enquanto a inclusão não tiver lotação oficial vinculada, a conferência cabe ao RH ou administrador.
+5. O RH programa, reprograma, rejeita, cancela ou conclui.
+6. Toda mudança de status é registrada em `request_status_history`.
 
 ## 4. Banco de horas
 

@@ -140,24 +140,52 @@
     }
     return found;
   }
+  function renderCalendar(periods) {
+    if (!periods.length) return '';
+    const first=dateFrom(periods[0].start_date), last=dateFrom(periods[periods.length-1].return_date), months=[];
+    for(let cursor=new Date(first.getFullYear(),first.getMonth(),1,12);cursor<=last;cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1,12)) months.push(new Date(cursor));
+    const dayOffs=new Set(dayOffsInside(periods)),periodDates=new Set(),starts=new Set(),ends=new Set(),returns=new Set();
+    periods.forEach(period=>{
+      starts.add(period.start_date);ends.add(period.end_date);returns.add(period.return_date);
+      for(let day=dateFrom(period.start_date),end=dateFrom(period.end_date);day<=end;day=addDays(day,1)) periodDates.add(iso(day));
+    });
+    const week=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+    const calendars=months.map(month=>{
+      const offset=(month.getDay()+6)%7,total=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+      const cells=Array.from({length:offset},()=>'<span class="calendar-day is-empty" aria-hidden="true"></span>');
+      for(let number=1;number<=total;number++){
+        const date=new Date(month.getFullYear(),month.getMonth(),number,12),key=iso(date),classes=['calendar-day'],labels=[];
+        if(periodDates.has(key)){classes.push('is-period');labels.push('período de afastamento');}
+        if(starts.has(key)){classes.push('is-start');labels.push('início');}
+        if(ends.has(key)){classes.push('is-end');labels.push('término');}
+        if(returns.has(key)){classes.push('is-return');labels.push('retorno');}
+        if(HOLIDAYS.has(key)){classes.push('is-holiday');labels.push('feriado ou ponto facultativo');}
+        if(dayOffs.has(key)){classes.push('is-dayoff');labels.push('day-off de aniversário');}
+        if([0,6].includes(date.getDay())) classes.push('is-weekend');
+        cells.push(`<span class="${classes.join(' ')}" title="${esc(labels.join(', '))}" aria-label="${number} de ${new Intl.DateTimeFormat('pt-BR',{month:'long'}).format(month)}${labels.length?`, ${labels.join(', ')}`:''}"><b>${number}</b></span>`);
+      }
+      return `<section class="calendar-month"><h4>${new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(month)}</h4><div class="calendar-week">${week.map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-days">${cells.join('')}</div></section>`;
+    }).join('');
+    return `<section class="calendar-preview" aria-labelledby="calendar-title"><div class="calendar-heading"><div><p class="eyebrow">Visualização do período</p><h3 id="calendar-title">Calendário da solicitação</h3></div><div class="calendar-legend"><span class="legend-start">Início</span><span class="legend-period">Período</span><span class="legend-end">Término</span><span class="legend-return">Retorno</span><span class="legend-holiday">Feriado</span><span class="legend-dayoff">Day-off</span></div></div><div class="calendar-months">${calendars}</div></section>`;
+  }
   function renderConfirm() {
     const r=state.request,rule=ruleSummary();
     app.innerHTML=shell('Revise antes de enviar','Confira principalmente os dados funcionais e as datas.',`<div class="summary">
       ${[['Servidor',r.name],['Matrícula',r.registration],['Modalidade',labelType(r.type)],['Regra',rule.text],['Lotação',r.unit]].map(([a,b])=>`<div class="summary-row"><span>${a}</span><strong>${esc(b)}</strong></div>`).join('')}
       ${r.periods.map((p,i)=>`<div class="summary-row"><span>${r.periods.length>1?`${i+1}º período`:'Período'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)} — retorno ${formatDate(p.return_date)}</strong></div>`).join('')}
       ${dayOffsInside(r.periods).map(day=>`<div class="summary-row"><span>Day-off de aniversário</span><strong>${formatDate(day)} — não consome saldo</strong></div>`).join('')}
-    </div><div class="field"><label for="notes">Observações</label><textarea class="control" id="notes" rows="3">${esc(r.notes)}</textarea></div><div class="notice">Ao enviar, você declara que os dados informados são verdadeiros e reconhece que o pedido depende da análise da chefia e do RH.</div><div class="actions"><button class="button button-secondary" data-go="dates">Voltar</button><button class="button button-primary" data-action="submit-request">Enviar solicitação</button></div>`,76);
+    </div>${renderCalendar(r.periods)}<div class="field"><label for="notes">Observações</label><textarea class="control" id="notes" rows="3">${esc(r.notes)}</textarea></div><div class="notice">Ao enviar, você declara que os dados informados são verdadeiros. Se seu cadastro ainda não existir, esta solicitação abrirá automaticamente uma pendência de inclusão funcional para o RH, sem impedir o protocolo.</div><div class="actions"><button class="button button-secondary" data-go="dates">Voltar</button><button class="button button-primary" data-action="submit-request">Enviar solicitação</button></div>`,76);
   }
   async function submitRequest(){
     const btn=document.querySelector('[data-action="submit-request"]');btn.disabled=true;btn.textContent='Enviando…';state.request.notes=document.querySelector('#notes')?.value.trim()||'';
     try{
       const response=await fetch(`${SUPABASE_URL}/functions/v1/submit-request`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify(state.request)});
       const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'Não foi possível enviar a solicitação.');
-      state.request.protocol=body.protocol;state.request.requestId=body.id;go('receipt');
+      state.request.protocol=body.protocol;state.request.requestId=body.id;state.request.inclusionPending=Boolean(body.inclusion_pending);go('receipt');
     }catch(error){showToast(error.message);btn.disabled=false;btn.textContent='Enviar solicitação';}
   }
   function renderReceipt(){
-    const r=state.request;setProgress(100);app.innerHTML=`<section class="card"><div class="receipt"><div class="receipt-head"><img src="logo.png" alt="Prefeitura de Betim"><div><strong>COMPROVANTE DE SOLICITAÇÃO</strong><br><small>Protocolo ${esc(r.protocol||'simulação não enviada')}</small></div></div><h2>${labelType(r.type)}</h2><p>Registramos a solicitação de <strong>${esc(r.name)}</strong>, matrícula <strong>${esc(r.registration)}</strong>, lotado(a) em <strong>${esc(r.unit)}</strong>.</p><div class="summary">${r.periods.map((p,i)=>`<div class="summary-row"><span>${r.periods.length>1?`${i+1}º período`:'Período solicitado'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)}<br>Retorno: ${formatDate(p.return_date)}</strong></div>`).join('')}${dayOffsInside(r.periods).map(day=>`<div class="summary-row"><span>Day-off de aniversário</span><strong>${formatDate(day)} — não consome saldo</strong></div>`).join('')}</div><p><strong>Situação:</strong> Enviada para análise administrativa.</p><p class="lead">Este documento comprova o protocolo do pedido e não autoriza o afastamento. A decisão será registrada pela chefia imediata e pelo RH.</p><div class="signature-grid"><div class="signature">Servidor(a) solicitante</div><div class="signature">Recebido por / carimbo</div></div><small>Emitido em ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'long',timeStyle:'short'}).format(new Date())}</small></div><div class="actions no-print"><button class="button button-primary" onclick="window.print()">Imprimir / salvar em PDF</button><button class="button button-secondary" data-action="restart">Nova solicitação</button></div></section>`;
+    const r=state.request;setProgress(100);app.innerHTML=`<section class="card"><div class="receipt"><div class="receipt-head"><img src="logo.png" alt="Prefeitura de Betim"><div><strong>COMPROVANTE DE SOLICITAÇÃO</strong><br><small>Protocolo ${esc(r.protocol||'simulação não enviada')}</small></div></div><h2>${labelType(r.type)}</h2><p>Registramos a solicitação de <strong>${esc(r.name)}</strong>, matrícula <strong>${esc(r.registration)}</strong>, lotado(a) em <strong>${esc(r.unit)}</strong>.</p><div class="summary">${r.periods.map((p,i)=>`<div class="summary-row"><span>${r.periods.length>1?`${i+1}º período`:'Período solicitado'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)}<br>Retorno: ${formatDate(p.return_date)}</strong></div>`).join('')}${dayOffsInside(r.periods).map(day=>`<div class="summary-row"><span>Day-off de aniversário</span><strong>${formatDate(day)} — não consome saldo</strong></div>`).join('')}</div><p><strong>Situação:</strong> Enviada para análise administrativa.</p>${r.inclusionPending?'<p class="notice"><strong>Inclusão funcional pendente:</strong> o RH recebeu seus dados para conferência junto com esta solicitação. O protocolo de férias já está registrado.</p>':''}<p class="lead">Este documento comprova o protocolo do pedido e não autoriza o afastamento. A decisão será registrada pela chefia imediata e pelo RH.</p><div class="signature-grid"><div class="signature">Servidor(a) solicitante</div><div class="signature">Recebido por / carimbo</div></div><small>Emitido em ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'long',timeStyle:'short'}).format(new Date())}</small></div><div class="actions no-print"><button class="button button-primary" onclick="window.print()">Imprimir / salvar em PDF</button><button class="button button-secondary" data-action="restart">Nova solicitação</button></div></section>`;
   }
   function renderLogin(){
     setProgress(0);app.innerHTML=shell('Área de gerenciamento','Acesso provisório para configuração inicial do SGF.',`<form id="login-form" class="form-grid"><div class="field field-full"><label for="password">Senha provisória</label><input class="control" id="password" type="password" required autocomplete="current-password" autofocus></div><div class="field field-full"><div class="actions"><button type="button" class="button button-secondary" data-go="home">Voltar</button><button class="button button-primary">Entrar</button></div></div></form><div class="notice notice-warning">Use a senha provisória fornecida para o piloto. Ela é validada pelo Supabase Auth e não está gravada no código do navegador.</div>`);

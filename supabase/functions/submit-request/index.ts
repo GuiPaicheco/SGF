@@ -30,8 +30,13 @@ Deno.serve(async (request) => {
     const birthDate = String(payload.birthDate ?? '');
     const type = String(payload.type ?? '');
     const periods = Array.isArray(payload.periods) ? payload.periods : [];
+    const name = String(payload.name ?? '').trim();
+    const admissionDate = String(payload.admissionDate ?? '');
+    const employmentType = String(payload.employmentType ?? '').trim();
+    const unit = String(payload.unit ?? '').trim();
 
-    if (cpf.length !== 11 || !registration || !isoDate.test(birthDate) || !allowedTypes.has(type)) {
+    if (cpf.length !== 11 || !registration || !name || !unit || !employmentType ||
+        !isoDate.test(birthDate) || !isoDate.test(admissionDate) || !allowedTypes.has(type)) {
       return json({ error: 'Dados de identifica\u00e7\u00e3o ou modalidade inv\u00e1lidos.' }, 400);
     }
     if (!periods.length || periods.length > 2 || periods.some((p: Record<string, unknown>) =>
@@ -49,44 +54,18 @@ Deno.serve(async (request) => {
     if ((count ?? 0) >= 10) return json({ error: 'Muitas tentativas. Aguarde 15 minutos e tente novamente.' }, 429);
     const { data: attempt } = await db.from('submission_attempts').insert({ ip_hash: ipHash, accepted: false }).select('id').single();
 
-    const { data: servidor, error: lookupError } = await db.from('servidores')
-      .select('id,full_name,active,birth_date,matricula,cpf').eq('matricula', registration).eq('cpf', cpf)
-      .eq('birth_date', birthDate).eq('active', true).maybeSingle();
-    if (lookupError) throw lookupError;
-    if (!servidor) return json({ error: 'N\u00e3o foi poss\u00edvel confirmar os dados funcionais. Procure o RH da sua lota\u00e7\u00e3o.' }, 404);
-
-    const now = new Date();
-    const protocol = `SGF-${now.getFullYear()}-${now.getTime().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
-    const first = periods[0], last = periods[periods.length - 1];
-    const requestRow = {
-      servidor_id: servidor.id, type, status: 'enviada', protocol,
-      start_date: first.start_date, end_date: last.end_date, return_date: last.return_date,
-      acquisition_end: payload.acquisitionEnd || null,
-      requested_hours: type === 'banco_horas' ? Number(payload.availableHours) : (Number(payload.addBankHours) || null),
-      birthday_year: null,
-      notes: String(payload.notes ?? '').slice(0, 2000) || null,
-      submitted_at: new Date().toISOString(),
-    };
-    const { data: created, error: createError } = await db.from('vacation_requests').insert(requestRow).select('id,protocol').single();
-    if (createError) throw createError;
-
-    const periodRows = periods.map((p: Record<string, unknown>, index: number) => ({
-      request_id: created.id, sequence: index + 1, start_date: p.start_date, end_date: p.end_date,
-      return_date: p.return_date, days: Number(p.days),
-      hours: type === 'banco_horas' ? Number(payload.dailyHours) * Number(p.days) : null,
-    }));
-    const { error: periodError } = await db.from('request_periods').insert(periodRows);
-    if (periodError) { await db.from('vacation_requests').delete().eq('id', created.id); throw periodError; }
-    await db.from('request_approvals').insert([
-      { request_id: created.id, stage: 'chefia_imediata' }, { request_id: created.id, stage: 'rh' },
-    ]);
-
-    const declaredHours = Number(payload.availableHours || payload.addBankHours || 0);
-    if (declaredHours > 0) await db.from('time_bank_accounts').upsert({
-      servidor_id: servidor.id, declared_minutes: Math.round(declaredHours * 60), updated_at: new Date().toISOString(),
-    }, { onConflict: 'servidor_id' });
+    payload.cpf = cpf;
+    payload.registration = registration;
+    payload.periods = periods.map((p: Record<string, unknown>, index: number) => ({ ...p, sequence: index + 1 }));
+    const { data: created, error: createError } = await db.rpc('register_vacation_submission', { payload });
+    if (createError) {
+      if (createError.message?.includes('IDENTITY_CONFLICT')) {
+        return json({ error: 'J\u00e1 existe um cadastro com este CPF ou matr\u00edcula e dados divergentes. Procure o RH para regulariza\u00e7\u00e3o.' }, 409);
+      }
+      throw createError;
+    }
     if (attempt?.id) await db.from('submission_attempts').update({ accepted: true }).eq('id', attempt.id);
-    return json({ id: created.id, protocol: created.protocol }, 201);
+    return json(created, 201);
   } catch (error) {
     console.error('submit-request', error);
     return json({ error: 'N\u00e3o foi poss\u00edvel registrar a solicita\u00e7\u00e3o. Tente novamente ou procure o RH.' }, 500);

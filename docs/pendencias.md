@@ -30,6 +30,10 @@ Repositório oficial: https://github.com/GuiPaicheco/SGF.git
 - [x] Manter o rodapé no fim da tela, inclusive em páginas com pouco conteúdo.
 - [x] Corrigir a codificação UTF-8 das mensagens retornadas pelas Edge Functions.
 - [x] Ativar o acesso administrativo provisório com senha `1234`, validada no backend.
+- [x] Permitir que a própria solicitação abra a inclusão funcional quando o servidor ainda não estiver cadastrado.
+- [x] Reutilizar o cadastro provisório por CPF, matrícula e nascimento, independentemente de horário ou dispositivo.
+- [x] Registrar solicitação, períodos, aprovações e inclusão funcional em uma única transação.
+- [x] Reintroduzir o calendário visual no resumo, com cores para início, período, término, retorno, feriado e day-off.
 
 ## Preparação administrativa antes do piloto
 
@@ -47,6 +51,7 @@ Repositório oficial: https://github.com/GuiPaicheco/SGF.git
 ## Próxima evolução recomendada
 
 - [ ] Tela administrativa de cadastros e importação CSV.
+- [ ] Criar a fila visual de conferência e conclusão das inclusões funcionais para o RH.
 - [ ] Notificações institucionais por e-mail após cada mudança de status.
 - [ ] Relatórios gerenciais e exportação com minimização de dados pessoais.
 - [ ] Testes automatizados das regras de calendário assim que Node.js estiver disponível no ambiente.
