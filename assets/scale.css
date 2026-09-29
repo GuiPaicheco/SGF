@@ -1,0 +1,207 @@
+.scale-card {
+  max-width: none;
+}
+
+.scale-filters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
+  gap: 0.85rem;
+  align-items: end;
+  margin: 1.25rem 0;
+}
+
+.scale-filters .field {
+  grid-template-rows: auto minmax(46px, auto);
+}
+
+.scale-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.scale-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.scale-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.scale-legend span::before {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  background: #e7ece9;
+  content: "";
+}
+
+.scale-legend .legend-approved::before { background: #4f9c78; }
+.scale-legend .legend-pending::before { background: #e5b84f; }
+.scale-legend .legend-conflict::before { background: #c83535; }
+.scale-legend span:has(b)::before { display: none; }
+
+.scale-scroll {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  max-height: min(68vh, 760px);
+  background: #fff;
+}
+
+.scale-grid {
+  table-layout: fixed;
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.scale-grid th,
+.scale-grid td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 0;
+}
+
+.scale-grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  width: 34px;
+  min-width: 34px;
+  height: 50px;
+  text-align: center;
+  background: #eef4f0;
+}
+
+.scale-grid thead th span,
+.scale-grid thead th small {
+  display: block;
+}
+
+.scale-grid thead th small {
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.scale-grid .scale-person {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  width: 190px;
+  min-width: 190px;
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  background: #fff;
+}
+
+.scale-grid thead .scale-person {
+  z-index: 6;
+  background: #eef4f0;
+}
+
+.scale-grid .scale-role {
+  position: sticky;
+  left: 190px;
+  z-index: 2;
+  width: 220px;
+  min-width: 220px;
+  padding: 0.65rem 0.75rem;
+  background: #fbfdfc;
+}
+
+.scale-grid thead .scale-role {
+  z-index: 5;
+  background: #eef4f0;
+}
+
+.scale-person strong,
+.scale-person small,
+.scale-role strong,
+.scale-role small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scale-person small,
+.scale-role small {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.scale-day {
+  width: 34px;
+  min-width: 34px;
+  height: 48px;
+  text-align: center;
+  background: #fff;
+  cursor: default;
+}
+
+.scale-day span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.scale-day.is-weekend,
+.scale-grid thead .is-weekend { background: #f3f4f3; }
+.scale-day.is-leave { color: #fff; background: #4f9c78; cursor: pointer; }
+.scale-day.status-enviada,
+.scale-day.status-em_analise,
+.scale-day.status-devolvida { color: #493500; background: #f2cf78; }
+.scale-day.status-concluida { background: #65746c; }
+.scale-day.is-return { color: #124f78; background: #dcedf8; cursor: pointer; }
+.scale-day.is-birthday { box-shadow: inset 0 -5px 0 #8250a6; }
+.scale-day.is-holiday { outline: 2px solid #d64545; outline-offset: -2px; }
+.scale-day.has-conflict { color: #fff; background: #c83535; animation: scale-pulse 1.8s ease-in-out infinite; }
+.scale-day:hover { filter: brightness(0.94); }
+
+.scale-empty {
+  padding: 2rem !important;
+  text-align: center;
+  color: var(--muted);
+}
+
+.scale-help { margin-bottom: 0; }
+
+@keyframes scale-pulse {
+  50% { box-shadow: inset 0 0 0 3px rgba(255,255,255,.55); }
+}
+
+@media (max-width: 1000px) {
+  .scale-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .scale-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .scale-filters,
+  .scale-stats { grid-template-columns: 1fr; }
+  .scale-grid .scale-person { width: 150px; min-width: 150px; }
+  .scale-grid .scale-role { left: 150px; width: 175px; min-width: 175px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scale-day.has-conflict { animation: none; }
+}

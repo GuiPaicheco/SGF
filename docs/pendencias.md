@@ -2,7 +2,7 @@
 
 Backlog ativo do sistema. Itens entregues e validados são removidos; o histórico permanece no Git.
 
-Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions, documentação e banco remoto.
+Última revisão completa: 29/09/2026, após a entrega do calendário visual e dinâmico de escala por funcionário, lotação, cargo e função.
 
 **Total:** 15 pendências.
 

@@ -74,7 +74,9 @@ O RH registra créditos e débitos validados na análise da solicitação. Cada 
 
 A linha do tempo apresenta todas as mudanças de situação, responsável, data e justificativa. Diretor, RH e administrador podem devolver um pedido para correção conforme seu estágio; o servidor pode reenviar ou cancelar uma solicitação devolvida. O RH e o administrador podem programar, reprogramar datas, cancelar e concluir.
 
-O calendário de escala compara afastamentos aprovados por lotação, cargo e função. Conflitos são alertas de apoio à decisão e não substituem a análise da chefia.
+O calendário de escala apresenta todos os funcionários ativos do escopo em uma grade mensal, com uma linha por funcionário e uma coluna por dia, inclusive quando não há afastamento. Os filtros de lotação, cargo, função e situação atualizam a visão sem alterar os pedidos. As marcações identificam início, fim, retorno, feriado, day-off de aniversário e dias de afastamento; células vermelhas indicam sobreposição por lotação, cargo ou função. Ao selecionar uma célula colorida, o gestor abre a solicitação correspondente.
+
+Os botões **Mês anterior** e **Próximo mês** mantêm os filtros aplicados. O painel também informa quantidade de funcionários, solicitações do período, dias com conflito e o pico de afastamentos simultâneos. Conflitos são alertas de apoio à decisão e não substituem a análise da chefia.
 
 As mudanças de situação geram notificações internas para o servidor, responsáveis pela lotação e administradores. O usuário consulta e marca essas mensagens como lidas no próprio SGF.
 
