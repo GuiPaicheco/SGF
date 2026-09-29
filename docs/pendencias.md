@@ -2,7 +2,7 @@
 
 Este arquivo contém somente trabalho ainda não concluído. Itens entregues e validados são removidos, não mantidos como histórico.
 
-Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions e banco remoto.
+Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions e banco remoto após a implementação da aprovação explícita pela chefia e pelo RH.
 
 Repositório: https://github.com/GuiPaicheco/SGF.git
 

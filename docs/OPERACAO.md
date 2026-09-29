@@ -40,9 +40,9 @@ Depois do login, o RLS permite consultar somente o próprio cadastro e as solici
 1. O servidor informa os dados funcionais, simula e envia.
 2. A Edge Function procura o servidor por CPF e matrícula. Se ele ainda não existir, cria um cadastro inativo provisório e uma pendência em `employee_inclusion_requests` para conferência do RH.
 3. O protocolo, os períodos, as duas etapas de aprovação e a eventual inclusão funcional são gravados em uma única transação. Divergências com CPF ou matrícula já existentes são bloqueadas para evitar associação indevida.
-4. A chefia analisa apenas servidores do seu escopo; enquanto a inclusão não tiver lotação oficial vinculada, a conferência cabe ao RH ou administrador.
-5. O RH programa, reprograma, rejeita, cancela ou conclui.
-6. Toda mudança de status é registrada em `request_status_history`.
+4. A chefia analisa apenas servidores do seu escopo e registra decisão, parecer, responsável e data em `request_approvals`. A aprovação encaminha a solicitação ao RH; a rejeição encerra o fluxo. Enquanto a inclusão não tiver lotação oficial vinculada, a conferência cabe ao RH ou administrador.
+5. O RH somente registra sua decisão depois da aprovação da chefia. A aprovação final libera a programação das férias; a rejeição exige justificativa e encerra o fluxo.
+6. Toda mudança de situação é registrada em `request_status_history`.
 
 ### Inclusões funcionais
 
