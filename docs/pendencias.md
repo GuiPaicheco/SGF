@@ -9,10 +9,8 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 - [ ] Unificar a experiência de login: matrícula ou identificador, senha, “Esqueci a senha” e “Solicitar acesso”. Hoje servidor e gestão usam formulários e identificadores diferentes.
 - [ ] Implementar recuperação segura de senha para servidores e gestores.
 - [ ] Criar uma fila administrativa para aprovar ou rejeitar solicitações de acesso.
-- [ ] Permitir que o administrador atribua e altere os perfis `administrador`, `diretor`, `rh` e `servidor`.
-- [ ] Adicionar formalmente o perfil `diretor` ao banco e definir suas políticas de acesso. O banco possui atualmente `gerencia`, mas não `diretor`.
-- [ ] Definir se `gerencia` continuará como perfil próprio ou será substituído por `diretor`.
-- [ ] Permitir ao administrador vincular responsáveis, diretores e RH às respectivas lotações.
+- [ ] Homologar se `gerencia` continuará como perfil próprio ou será substituído por `diretor`.
+- [ ] Definir e implementar o escopo territorial do RH; atualmente RH e administrador possuem visão global, enquanto diretor e gerência são vinculados às lotações.
 - [ ] Decidir e implementar a política de acesso por CNES. Não criar contas compartilhadas com senha global sem uma decisão formal sobre rastreabilidade.
 - [ ] Ativar a proteção contra senhas vazadas no Supabase Auth antes da produção.
 - [ ] Remover o acesso provisório legado e a função `provisional-login` depois que o novo login administrativo estiver homologado.
@@ -63,11 +61,11 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## Ordem sugerida
 
-1. Perfis, aprovação de acesso e escopos por lotação.
-2. Importação CNES e gestão de cadastros.
+1. Aprovação de acesso e definição do escopo do RH.
+2. Gestão de cadastros e estrutura organizacional.
 3. Calendário visual e validação dos cálculos.
 4. Fluxo completo de aprovação e visão de escala.
 5. Comprovante, comunicação, testes e homologação.
-7. Por fim, verifique a integridade do código, DB e se está 100% seguro.
+6. Por fim, verificar a integridade do código e do banco e realizar a auditoria de segurança.
 
 > Manter a identidade visual profissional, a responsividade e o versionamento contínuo no GitHub.

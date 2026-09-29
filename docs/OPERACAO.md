@@ -16,8 +16,13 @@ Para novos usuários de gestão, crie o usuário em Supabase Auth com uma senha 
 
 - `administrador`: acesso global e configuração.
 - `rh`: acesso global às filas administrativas.
-- `gerencia`: acesso apenas às lotações vinculadas em `profile_scopes`.
+- `diretor`: acesso aos servidores e solicitações das lotações vinculadas em `profile_scopes`.
+- `gerencia`: acesso equivalente ao diretor durante a fase de compatibilidade.
 - `servidor`: acesso aos próprios registros, quando uma conta for vinculada.
+
+O administrador usa **Perfis e acessos** para definir o papel, o identificador de entrada e os escopos territoriais. Diretor e gerência exigem pelo menos uma lotação; RH e administrador permanecem globais até a definição do escopo territorial do RH. A conta administradora atual não pode alterar o próprio papel nessa tela.
+
+Quando um servidor é promovido para uma função de gestão, o próximo acesso administrativo exige a troca da senha. A alteração de papel e escopos é atômica e registrada em `audit_events`.
 
 Não use uma senha compartilhada como `1234` após o piloto. Exija troca da senha temporária e desligue imediatamente contas de pessoas que perderem a atribuição.
 
