@@ -25,7 +25,7 @@ Quando um servidor é promovido para uma função de gestão, o próximo acesso 
 
 Não use uma senha compartilhada como `1234` após o piloto. Exija troca da senha temporária e desligue imediatamente contas de pessoas que perderem a atribuição.
 
-O fluxo legado `provisional-login` não é mais usado pelo frontend. Ele deve ser removido do projeto remoto depois da homologação do acesso administrativo atual.
+O acesso provisório compartilhado foi encerrado. O endpoint legado responde permanentemente com HTTP 410 e seus segredos foram removidos. A conta administrativa existente permanece disponível somente pelo login individual, com troca obrigatória da senha temporária. Todo acesso à gestão deve ser individual e rastreável.
 
 ### Acesso do servidor
 

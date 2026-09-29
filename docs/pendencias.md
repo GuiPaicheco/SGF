@@ -9,9 +9,10 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 - [ ] Unificar a experiência de login: matrícula ou identificador, senha, “Esqueci a senha” e “Solicitar acesso”. Hoje servidor e gestão usam formulários e identificadores diferentes.
 - [ ] Implementar recuperação segura de senha para servidores e gestores.
 - [ ] Criar uma fila administrativa para aprovar ou rejeitar solicitações de acesso.
+- [ ] Não emitir uma conta autenticada para cadastro funcional provisório antes da aprovação administrativa.
+- [ ] Exigir sessão vinculada para pedidos atribuídos a um servidor já cadastrado; manter o fluxo sem login somente para inclusão funcional pendente, sem alterar saldo de banco de horas.
 - [ ] Decidir e implementar a política de acesso por CNES. Não criar contas compartilhadas com senha global sem uma decisão formal sobre rastreabilidade.
 - [ ] Ativar a proteção contra senhas vazadas no Supabase Auth antes da produção.
-- [ ] Remover o acesso provisório legado e a função `provisional-login` depois que o novo login administrativo estiver homologado.
 
 ## 2. Cadastros e estrutura organizacional
 
