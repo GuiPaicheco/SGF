@@ -56,7 +56,11 @@ As 48 lotações da carga inicial estão versionadas em `docs/cnes-lotacoes.md`.
 
 `declared_minutes` é o saldo informado pelo servidor; `validated_minutes` é o saldo oficial confirmado pelo RH. A aprovação não deve se apoiar apenas no saldo declarado.
 
-## 5. Revisões periódicas
+## 5. Calendário institucional
+
+Feriados e pontos facultativos ativos são carregados da tabela `calendar_events` antes de qualquer simulação. O calendário é público somente para leitura, pois também atende solicitações sem login. Alterações anuais devem ser registradas no banco pelo responsável autorizado, mantendo nome, tipo, data, fonte e situação do evento. Se o calendário não puder ser carregado, o frontend bloqueia a simulação para evitar cálculo incorreto.
+
+## 6. Revisões periódicas
 
 - Atualizar `calendar_events` e o calendário do frontend antes de cada exercício.
 - Revisar usuários, papéis e escopos mensalmente.

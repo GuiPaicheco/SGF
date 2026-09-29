@@ -5,19 +5,15 @@
   const SUPABASE_URL = 'https://ijhvbzomakbbxverqfqh.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_9upWl4mCzsfuaPE1_gOFkw_9Im-Y4sJ';
   const RULE_START = '2025-12-02';
-  const HOLIDAYS = new Set([
-    '2026-09-07',
-    '2026-10-12','2026-10-30',
-    '2026-11-02','2026-11-15', '2026-11-20',
-    '2026-12-24','2026-12-25','2026-12-31'
-  ]);
+  const HOLIDAYS = new Set();
+  const CALENDAR_EVENTS = new Map();
   const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY);
   const app = document.querySelector('#app');
   const progress = document.querySelector('#progress');
   const toast = document.querySelector('#toast');
   const sessionAction = document.querySelector('#session-action');
   const state = {
-    route: 'home', session: null, profile: null, requests: [], inclusions: [], locations: [], profiles: [], profileLocations: [], selected: null,
+    route: 'home', session: null, profile: null, requests: [], inclusions: [], locations: [], profiles: [], profileLocations: [], selected: null, calendarLoaded: false,
     dashboard: { query: '', status: '', type: '', sort: 'newest', page: 1, pageSize: 10 },
     request: {
       type: '', name: '', cpf: '', birthDate: '', registration: '', admissionDate: '', employmentType: '',
@@ -48,6 +44,15 @@
   const showToast = message => { toast.textContent=message; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3200); };
   const setProgress = value => progress.style.setProperty('--progress', `${value}%`);
   const go = route => { state.route=route; window.scrollTo({top:0,behavior:'smooth'}); render(); };
+
+  async function loadCalendarEvents() {
+    if(!client)return;
+    const {data,error}=await client.from('calendar_events').select('event_date,type,name').eq('active',true).order('event_date');
+    if(error){console.error('calendar-events',error);return;}
+    HOLIDAYS.clear();CALENDAR_EVENTS.clear();
+    (data||[]).forEach(event=>{HOLIDAYS.add(event.event_date);CALENDAR_EVENTS.set(event.event_date,event);});
+    state.calendarLoaded=true;
+  }
 
   function validCPF(value) {
     const cpf=digits(value); if(cpf.length!==11 || /^(\d)\1+$/.test(cpf)) return false;
@@ -116,7 +121,7 @@
       <div class="field"><label for="mode">Calcular a partir de</label><select id="mode" class="control"><option value="start" ${r.mode==='start'?'selected':''}>Data de início</option><option value="return" ${r.mode==='return'?'selected':''}>Data de retorno</option></select></div>
       ${field('Data escolhida','chosenDate','date',true,'Respeite a antecedência administrativa mínima.')}
       ${splitAllowed?field('Início do segundo período','secondStartDate','date',true,'O segundo período deve iniciar após o primeiro.'):''}
-      <div class="field field-full"><div class="notice"><strong>Day-off de aniversário:</strong> ${formatDayMonth(r.birthDate)} de cada ano. Essa data é marcada no calendário e não consome férias nem banco de horas quando estiver dentro do período calculado em dias úteis.</div><div class="notice notice-warning">Feriados e pontos facultativos cadastrados também são desconsiderados nos cálculos em dias úteis. O calendário oficial deve ser revisado anualmente pelo RH.</div><div class="actions"><button type="button" class="button button-secondary" data-go="rules">Voltar</button><button class="button button-primary" type="submit">Simular período</button></div></div>
+      <div class="field field-full"><div class="notice"><strong>Day-off de aniversário:</strong> ${formatDayMonth(r.birthDate)} de cada ano. Essa data é marcada no calendário e não consome férias nem banco de horas quando estiver dentro do período calculado em dias úteis.</div><div class="notice ${state.calendarLoaded?'notice-warning':'notice-danger'}">${state.calendarLoaded?'Feriados e pontos facultativos ativos foram carregados do calendário oficial do sistema e são desconsiderados nos cálculos em dias úteis.':'O calendário oficial não pôde ser carregado. Atualize a página antes de simular o período.'}</div><div class="actions"><button type="button" class="button button-secondary" data-go="rules">Voltar</button><button class="button button-primary" type="submit" ${state.calendarLoaded?'':'disabled'}>Simular período</button></div></div>
     </form>`,58);
   }
   function makePeriod(start,days,unit,sequence=1) {
@@ -124,6 +129,7 @@
     return {sequence,start_date:iso(start),end_date:iso(end),return_date:iso(nextBusiness(addDays(end,1))),days};
   }
   function calculatePeriods(chosen) {
+    if(!state.calendarLoaded)throw new Error('O calendário oficial está indisponível. Atualize a página e tente novamente.');
     const r=state.request,rule=ruleSummary(),unit=rule.unit;
     const splitAllowed=r.type==='regulamentar'&&r.employmentType==='efetivo'&&r.unjustifiedAbsences==='no'&&r.split!=='none'&&!rule.extra;
     let start;
@@ -157,7 +163,7 @@
         const date=new Date(year,month,day,12),value=iso(date),classes=['calendar-day'],labels=[];
         const inside=periods.some(period=>value>=period.start_date&&value<=period.end_date);
         if(inside){classes.push('calendar-away');labels.push('afastamento');}
-        if(HOLIDAYS.has(value)){classes.push('calendar-holiday');labels.push('feriado ou ponto facultativo');}
+        if(HOLIDAYS.has(value)){classes.push('calendar-holiday');labels.push(CALENDAR_EVENTS.get(value)?.name||'feriado ou ponto facultativo');}
         if(birthday&&date.getMonth()===birthday.getMonth()&&date.getDate()===birthday.getDate()){classes.push('calendar-birthday');labels.push('day-off de aniversário');}
         if(starts.has(value)){classes.push('calendar-start');labels.push('início do afastamento');}
         if(ends.has(value)){classes.push('calendar-end');labels.push('último dia do período');}
@@ -319,5 +325,5 @@
   });
   document.addEventListener('input',event=>{if(event.target.id==='cpf'||event.target.id==='employee-cpf')event.target.value=formatCPF(event.target.value);if(event.target.matches('.control')){event.target.classList.toggle('valid',event.target.checkValidity()&&!!event.target.value);event.target.classList.toggle('invalid',!event.target.checkValidity());}});
   sessionAction.addEventListener('click',async()=>{await client?.auth.signOut();state.session=null;state.profile=null;state.requests=[];state.selected=null;go('home');});
-  loadSession().finally(()=>render());
+  Promise.allSettled([loadSession(),loadCalendarEvents()]).finally(()=>render());
 })();

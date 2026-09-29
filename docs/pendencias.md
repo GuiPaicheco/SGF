@@ -1,17 +1,17 @@
 # Pendências do SGF
 
-Este arquivo contém somente trabalho ainda não concluído. Itens entregues devem ser removidos após validação, não mantidos como checklist histórico.
+Este arquivo contém somente trabalho ainda não concluído. Itens entregues e validados são removidos, não mantidos como histórico.
+
+Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions e banco remoto.
 
 Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## 1. Acesso, usuários e perfis — prioridade atual
 
-- [ ] Unificar a experiência de login: matrícula ou identificador, senha, “Esqueci a senha” e “Solicitar acesso”. Hoje servidor e gestão usam formulários e identificadores diferentes.
+- [ ] Unificar a experiência de login: matrícula ou identificador, senha, “Esqueci a senha” e “Solicitar acesso”. Hoje servidor e gestão ainda usam formulários distintos.
 - [ ] Implementar recuperação segura de senha para servidores e gestores.
-- [ ] Criar uma fila administrativa para aprovar ou rejeitar solicitações de acesso.
-- [ ] Não emitir uma conta autenticada para cadastro funcional provisório antes da aprovação administrativa.
-- [ ] Exigir sessão vinculada para pedidos atribuídos a um servidor já cadastrado; manter o fluxo sem login somente para inclusão funcional pendente, sem alterar saldo de banco de horas.
-- [ ] Decidir e implementar a política de acesso por CNES. Não criar contas compartilhadas com senha global sem uma decisão formal sobre rastreabilidade.
+- [ ] Criar uma fila administrativa para aprovar ou rejeitar solicitações de acesso e somente emitir a conta autenticada após aprovação.
+- [ ] Exigir sessão vinculada para pedidos atribuídos a servidor já cadastrado; manter o fluxo sem login somente para inclusão funcional pendente, sem alterar saldo de banco de horas.
 - [ ] Ativar a proteção contra senhas vazadas no Supabase Auth antes da produção.
 
 ## 2. Cadastros e estrutura organizacional
@@ -20,35 +20,30 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 - [ ] Criar a gestão de servidores, cargos, funções e vínculos por lotação.
 - [ ] Permitir ativar, bloquear e transferir servidores entre lotações mantendo histórico.
 
-## 3. Solicitações e calendário
+## 3. Solicitações, calendário e saldos
 
-- [ ] Carregar feriados e pontos facultativos do banco, em vez de manter apenas datas fixas no frontend.
-- [ ] Validar os cálculos de férias por data de admissão, término do período aquisitivo, vínculo e faltas com casos oficiais do RH.
-- [ ] Validar a simulação por data de início e por data de retorno, incluindo fracionamento, feriados e day-off.
-- [ ] Completar o banco de horas com saldo declarado, saldo validado pelo RH, jornada, lançamentos e consumo após aprovação.
-- [ ] Permitir que banco de horas complemente férias, com validação administrativa do saldo.
+- [ ] Homologar os cálculos com casos oficiais do RH: admissão, período aquisitivo, vínculo, faltas, início, retorno, fracionamento, feriados e day-off.
+- [ ] Completar o banco de horas de ponta a ponta: jornada, saldo declarado, saldo validado pelo RH, lançamentos, complemento de férias e consumo após aprovação.
 - [ ] Exibir conflitos de escala por lotação, cargo e função antes da aprovação.
 
 ## 4. Aprovação e gestão
 
-- [ ] Implementar explicitamente as etapas de decisão da chefia imediata e do RH usando `request_approvals`.
-- [ ] Exibir pareceres, responsáveis, datas e histórico completo de cada mudança.
-- [ ] Implementar programação, reprogramação, devolução para correção, cancelamento e conclusão com regras por perfil.
+- [ ] Registrar as decisões da chefia imediata e do RH em `request_approvals`, em vez de alterar somente a situação geral.
+- [ ] Exibir os pareceres, responsáveis, datas e o histórico já armazenado em `request_status_history`.
+- [ ] Completar programação, reprogramação, devolução para correção, cancelamento e conclusão na interface, com regras por perfil.
 - [ ] Criar visão de calendário/escala por unidade, cargo e função para identificar períodos com falta de pessoal.
-- [ ] Criar indicadores administrativos por situação, modalidade, lotação e período.
+- [ ] Ampliar os indicadores atuais com modalidade, lotação e período, além da situação.
 - [ ] Notificar servidor, chefia e RH sobre envio, decisão e alteração da solicitação.
 
 ## 5. Comprovante e comunicação
 
-- [ ] Revisar e testar a impressão do comprovante nos navegadores usados pela Prefeitura.
-- [ ] Garantir que o comprovante seja impresso em uma única página, com cabeçalho, protocolo, dados, períodos, situação, carimbo e assinaturas.
-- [ ] Gerar texto copiável em formato de e-mail, com assunto e mensagem.
-- [ ] Orientar o servidor a enviar o texto à chefia/RH e imprimir, assinar e entregar o comprovante quando exigido.
+- [ ] Homologar a impressão nos navegadores da Prefeitura e garantir uma única página com cabeçalho, protocolo, dados, períodos, situação, carimbo e assinaturas.
+- [ ] Gerar texto copiável de e-mail, com assunto, mensagem e orientação de envio à chefia/RH e entrega do comprovante quando exigida.
 - [ ] Permitir imprimir ou copiar novamente a partir de “Meus pedidos”.
 
 ## 6. UI, acessibilidade e qualidade
 
-- [ ] Revisar os estados visuais verde/vermelho dos campos sem depender apenas de cor para indicar validade.
+- [ ] Revisar os estados de validação dos campos para não depender apenas de verde/vermelho.
 - [ ] Testar responsividade e alinhamento em celular, tablet e desktop.
 - [ ] Fazer testes ponta a ponta dos quatro perfis e dos fluxos sem login.
 - [ ] Adicionar testes automatizados para cálculos de datas, permissões, login e transições de situação.
@@ -63,12 +58,12 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## Ordem sugerida
 
-1. Aprovação de acesso e recuperação segura de senha.
+1. Aprovação de acesso, recuperação de senha e proteção dos fluxos sem login.
 2. Gestão de cadastros e estrutura organizacional.
-3. Calendário visual e validação dos cálculos.
-4. Fluxo completo de aprovação e visão de escala.
+3. Homologação dos cálculos e conclusão do banco de horas.
+4. Fluxo completo de aprovação, histórico e visão de escala.
 5. Comprovante, comunicação, testes e homologação.
 6. Publicação no Netlify e homologação do domínio de produção.
-7. Por fim, verificar a integridade do código e do banco e realizar a auditoria de segurança.
+7. Auditoria final de integridade e segurança do código e do banco.
 
 > Manter a identidade visual profissional, a responsividade e o versionamento contínuo no GitHub.
