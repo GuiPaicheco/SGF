@@ -34,6 +34,8 @@ Deno.serve(async (request) => {
     const admissionDate = String(payload.admissionDate ?? '');
     const employmentType = String(payload.employmentType ?? '').trim();
     const unit = String(payload.unit ?? '').trim();
+    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+    const { data: identity } = token ? await db.auth.getUser(token) : { data: { user: null } };
 
     if (cpf.length !== 11 || !registration || !name || !unit || !employmentType ||
         !isoDate.test(birthDate) || !isoDate.test(admissionDate) || !allowedTypes.has(type)) {
@@ -43,6 +45,22 @@ Deno.serve(async (request) => {
       !isoDate.test(String(p.start_date)) || !isoDate.test(String(p.end_date)) ||
       !isoDate.test(String(p.return_date)) || Number(p.days) < 1 || Number(p.days) > 90)) {
       return json({ error: 'Per\u00edodo solicitado inv\u00e1lido.' }, 400);
+    }
+
+    const [{ data: byRegistration }, { data: byCpf }] = await Promise.all([
+      db.from('servidores').select('id,profile_id').eq('matricula', registration).maybeSingle(),
+      db.from('servidores').select('id,profile_id').eq('cpf', cpf).maybeSingle(),
+    ]);
+    const existingEmployee = byRegistration || byCpf;
+    if (existingEmployee) {
+      if (!identity.user) return json({ error: 'Este servidor já possui cadastro. Entre na sua conta para solicitar.' }, 401);
+      if (!existingEmployee.profile_id || existingEmployee.profile_id !== identity.user.id) {
+        return json({ error: 'A sessão não está vinculada a este cadastro funcional.' }, 403);
+      }
+    } else if (identity.user) {
+      return json({ error: 'A conta autenticada não corresponde aos dados funcionais informados.' }, 403);
+    } else if (type === 'banco_horas') {
+      return json({ error: 'Folga por banco de horas exige acesso autenticado e saldo validado pelo RH.' }, 401);
     }
 
     const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -56,7 +74,8 @@ Deno.serve(async (request) => {
 
     payload.cpf = cpf;
     payload.registration = registration;
-    payload.addBankHours = Number(payload.addBankHours) > 0 ? Number(payload.addBankHours) : null;
+    payload.addBankHours = identity.user && Number(payload.addBankHours) > 0 ? Number(payload.addBankHours) : null;
+    if (!identity.user) payload.availableHours = null;
     payload.periods = periods.map((p: Record<string, unknown>, index: number) => ({ ...p, sequence: index + 1 }));
     const { data: created, error: createError } = await db.rpc('register_vacation_submission', { payload });
     if (createError) {
@@ -64,6 +83,11 @@ Deno.serve(async (request) => {
         return json({ error: 'J\u00e1 existe um cadastro com este CPF ou matr\u00edcula e dados divergentes. Procure o RH para regulariza\u00e7\u00e3o.' }, 409);
       }
       throw createError;
+    }
+    if (identity.user && created?.id) {
+      const { error: ownerError } = await db.from('vacation_requests')
+        .update({ created_by: identity.user.id }).eq('id', created.id);
+      if (ownerError) throw ownerError;
     }
     if (attempt?.id) await db.from('submission_attempts').update({ accepted: true }).eq('id', attempt.id);
     return json(created, 201);

@@ -2,16 +2,12 @@
 
 Este arquivo contém somente trabalho ainda não concluído. Itens entregues e validados são removidos, não mantidos como histórico.
 
-Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions e banco remoto após a implementação da aprovação explícita pela chefia e pelo RH.
+Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions e banco remoto após a conclusão do fluxo unificado de acesso.
 
 Repositório: https://github.com/GuiPaicheco/SGF.git
 
-## 1. Acesso, usuários e perfis — prioridade atual
+## 1. Acesso, usuários e perfis — configuração de produção
 
-- [ ] Unificar a experiência de login: matrícula ou identificador, senha, “Esqueci a senha” e “Solicitar acesso”. Hoje servidor e gestão ainda usam formulários distintos.
-- [ ] Implementar recuperação segura de senha para servidores e gestores.
-- [ ] Criar uma fila administrativa para aprovar ou rejeitar solicitações de acesso e somente emitir a conta autenticada após aprovação.
-- [ ] Exigir sessão vinculada para pedidos atribuídos a servidor já cadastrado; manter o fluxo sem login somente para inclusão funcional pendente, sem alterar saldo de banco de horas.
 - [ ] Ativar a proteção contra senhas vazadas no Supabase Auth antes da produção.
 
 ## 2. Cadastros e estrutura organizacional
@@ -57,7 +53,7 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## Ordem sugerida
 
-1. Aprovação de acesso, recuperação de senha e proteção dos fluxos sem login.
+1. Ativar a proteção contra senhas vazadas no Supabase Auth.
 2. Gestão de cadastros e estrutura organizacional.
 3. Homologação dos cálculos e conclusão do banco de horas.
 4. Fluxo completo de aprovação, histórico e visão de escala.

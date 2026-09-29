@@ -50,7 +50,7 @@ Deno.serve(async request => {
     });
     if (error) {
       if (error.message.includes('SELF_ROLE_CHANGE_BLOCKED')) return json({ error: 'O administrador não pode alterar o próprio perfil por esta tela.' }, 409);
-      if (error.message.includes('IDENTIFIER_REQUIRED')) return json({ error: 'Informe um identificador para o acesso à gestão.' }, 400);
+      if (error.message.includes('IDENTIFIER_REQUIRED')) return json({ error: 'Informe a matrícula ou o identificador de acesso.' }, 400);
       if (error.message.includes('SCOPE_REQUIRED')) return json({ error: 'Selecione ao menos uma lotação para diretor ou RH.' }, 400);
       if (error.message.includes('LEGACY_ROLE_DISABLED')) return json({ error: 'O perfil Gerência foi substituído por Diretor.' }, 400);
       if (error.message.includes('duplicate key')) return json({ error: 'Este identificador já está em uso.' }, 409);

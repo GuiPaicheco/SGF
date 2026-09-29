@@ -6,20 +6,20 @@ Cadastre a hierarquia em `lotacoes`, usando `parent_id` e `unit_type` para repre
 
 O CPF em `servidores.cpf` deve conter somente 11 dígitos. Matrícula, CPF e data de nascimento são usados pela função de verificação; a resposta nunca revela qual campo divergiu.
 
-## 2. Acesso administrativo
+## 2. Acesso ao SGF
 
-A conta inicial de homologação entra pela **Área de gerenciamento** usando o identificador `admin`. O e-mail interno do Supabase Auth não é informado ao navegador; a Edge Function `management-auth` resolve o identificador, aplica limitação de tentativas e devolve a sessão somente quando a senha está correta.
+Servidores, diretores, RH e administradores usam a mesma tela **Entrar no SGF**, com matrícula ou identificador e senha. A Edge Function `access-auth` resolve o identificador sem expor o e-mail da conta, limita tentativas e devolve a sessão somente quando a senha está correta.
 
 No primeiro acesso, `profiles.must_change_password` bloqueia o painel até a definição de uma senha pessoal com pelo menos dez caracteres. A senha inicial não deve ser registrada no código, na documentação nem em mensagens permanentes.
 
-Para novos usuários de gestão, crie o usuário em Supabase Auth com uma senha temporária individual. Depois crie o registro correspondente em `profiles`, usando o mesmo UUID, e defina um `login_identifier` exclusivo e `must_change_password = true`.
+Novos usuários usam **Solicitar acesso** e informam os dados funcionais e um e-mail válido. A solicitação entra em `access_requests`; nenhuma conta é criada nessa etapa. O administrador confere a fila **Solicitações de acesso**, define o perfil, o identificador e os escopos e então aprova ou rejeita. Somente a aprovação cria a conta e envia um convite por e-mail para definição da senha.
 
 - `administrador`: acesso global e configuração.
 - `rh`: acesso administrativo às lotações vinculadas em `profile_scopes`.
 - `diretor`: acesso aos servidores e solicitações das lotações vinculadas em `profile_scopes`.
 - `servidor`: acesso aos próprios registros, quando uma conta for vinculada.
 
-O administrador usa **Perfis e acessos** para definir o papel, o identificador de entrada e os escopos territoriais. Diretor e RH exigem pelo menos uma lotação; somente o administrador possui acesso global. A conta administradora atual não pode alterar o próprio papel nessa tela.
+O administrador usa **Perfis e acessos** para alterar o papel, a matrícula ou identificador de entrada e os escopos territoriais. Diretor e RH exigem pelo menos uma lotação; somente o administrador possui acesso global. A conta administradora atual não pode alterar o próprio papel nessa tela.
 
 Quando um servidor é promovido para uma função de gestão, o próximo acesso administrativo exige a troca da senha. A alteração de papel e escopos é atômica e registrada em `audit_events`.
 
@@ -27,13 +27,17 @@ Não use uma senha compartilhada como `1234` após o piloto. Exija troca da senh
 
 O acesso provisório compartilhado foi encerrado. O endpoint legado responde permanentemente com HTTP 410 e seus segredos foram removidos. A conta administrativa existente permanece disponível somente pelo login individual, com troca obrigatória da senha temporária. Todo acesso à gestão deve ser individual e rastreável.
 
-### Acesso do servidor
+### Recuperação e primeiro acesso
 
-O servidor usa a opção **Área do servidor**. Em **Solicitar acesso**, confirma nome, CPF, data de nascimento e matrícula, informa cargo e lotação e cria uma senha individual de no mínimo oito caracteres. A Edge Function `employee-auth` cria a credencial no Supabase Auth e vincula o UUID ao campo `servidores.profile_id`.
+**Esqueci a senha** recebe matrícula ou identificador e sempre retorna uma resposta neutra, evitando revelar contas existentes. Quando há uma conta com e-mail válido, o Supabase envia um link de recuperação. Convites e recuperações retornam ao SGF para definição de uma senha com pelo menos dez caracteres.
 
-Cargo e lotação informados no primeiro acesso ficam em `servidores.declared_position` e `servidores.declared_unit` até que o RH associe os registros oficiais de `cargos` e `lotacoes`. Todo novo acesso recebe inicialmente o perfil `servidor`.
+Cargo e lotação informados na solicitação ficam em `servidores.declared_position` e `servidores.declared_unit` até que o RH associe os registros oficiais de `cargos` e `lotacoes`.
 
 Depois do login, o RLS permite consultar somente o próprio cadastro e as solicitações vinculadas. O funcionário pode iniciar uma solicitação com seus dados preenchidos e acompanhar protocolo, períodos e situação, sem ações de aprovação ou programação.
+
+Pedidos ligados a servidor já cadastrado exigem uma sessão vinculada ao mesmo `servidores.profile_id`. O envio sem login só aceita um cadastro funcional ainda inexistente, abre a inclusão funcional correspondente e não registra nem altera saldo de banco de horas.
+
+Os endpoints legados `employee-auth` e `management-auth` respondem permanentemente com HTTP 410. Todo novo login, convite, recuperação e alteração de senha passa por `access-auth`.
 
 ## 3. Fluxo
 
