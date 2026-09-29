@@ -8,7 +8,7 @@ const cors = {
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
-const allowedRoles = ['servidor', 'gerencia', 'diretor', 'rh', 'administrador'];
+const allowedRoles = ['servidor', 'diretor', 'rh', 'administrador'];
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -51,7 +51,8 @@ Deno.serve(async request => {
     if (error) {
       if (error.message.includes('SELF_ROLE_CHANGE_BLOCKED')) return json({ error: 'O administrador não pode alterar o próprio perfil por esta tela.' }, 409);
       if (error.message.includes('IDENTIFIER_REQUIRED')) return json({ error: 'Informe um identificador para o acesso à gestão.' }, 400);
-      if (error.message.includes('SCOPE_REQUIRED')) return json({ error: 'Selecione ao menos uma lotação para diretor ou gerência.' }, 400);
+      if (error.message.includes('SCOPE_REQUIRED')) return json({ error: 'Selecione ao menos uma lotação para diretor ou RH.' }, 400);
+      if (error.message.includes('LEGACY_ROLE_DISABLED')) return json({ error: 'O perfil Gerência foi substituído por Diretor.' }, 400);
       if (error.message.includes('duplicate key')) return json({ error: 'Este identificador já está em uso.' }, 409);
       throw error;
     }

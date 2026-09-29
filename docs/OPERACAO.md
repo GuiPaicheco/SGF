@@ -15,12 +15,11 @@ No primeiro acesso, `profiles.must_change_password` bloqueia o painel até a def
 Para novos usuários de gestão, crie o usuário em Supabase Auth com uma senha temporária individual. Depois crie o registro correspondente em `profiles`, usando o mesmo UUID, e defina um `login_identifier` exclusivo e `must_change_password = true`.
 
 - `administrador`: acesso global e configuração.
-- `rh`: acesso global às filas administrativas.
+- `rh`: acesso administrativo às lotações vinculadas em `profile_scopes`.
 - `diretor`: acesso aos servidores e solicitações das lotações vinculadas em `profile_scopes`.
-- `gerencia`: acesso equivalente ao diretor durante a fase de compatibilidade.
 - `servidor`: acesso aos próprios registros, quando uma conta for vinculada.
 
-O administrador usa **Perfis e acessos** para definir o papel, o identificador de entrada e os escopos territoriais. Diretor e gerência exigem pelo menos uma lotação; RH e administrador permanecem globais até a definição do escopo territorial do RH. A conta administradora atual não pode alterar o próprio papel nessa tela.
+O administrador usa **Perfis e acessos** para definir o papel, o identificador de entrada e os escopos territoriais. Diretor e RH exigem pelo menos uma lotação; somente o administrador possui acesso global. A conta administradora atual não pode alterar o próprio papel nessa tela.
 
 Quando um servidor é promovido para uma função de gestão, o próximo acesso administrativo exige a troca da senha. A alteração de papel e escopos é atômica e registrada em `audit_events`.
 
@@ -47,7 +46,7 @@ Depois do login, o RLS permite consultar somente o próprio cadastro e as solici
 
 ### Inclusões funcionais
 
-Administradores e RH acessam **Inclusões funcionais** pelo painel de gerenciamento. A fila apresenta os dados declarados pelo servidor e o protocolo que originou a inclusão.
+Administradores e RH acessam **Inclusões funcionais** pelo painel de gerenciamento. A fila apresenta os dados declarados pelo servidor e o protocolo que originou a inclusão. O RH vê somente cadastros já vinculados às suas lotações; cadastros provisórios ainda sem lotação oficial são tratados pelo administrador.
 
 Na aprovação, o responsável seleciona uma das lotações CNES oficiais, confirma cargo e vínculo e pode registrar um parecer. O procedimento ativa o servidor, vincula cargo e lotação e conclui a pendência em uma única transação. Na rejeição, a justificativa é obrigatória. A matrícula, o CPF e a data de nascimento não são alterados por esse fluxo.
 
