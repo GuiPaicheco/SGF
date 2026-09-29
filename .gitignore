@@ -1,0 +1,5 @@
+.netlify/
+dist/
+.env
+.env.*
+!.env.example

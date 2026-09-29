@@ -57,6 +57,13 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 - [ ] Adicionar testes automatizados para cálculos de datas, permissões, login e transições de situação.
 - [ ] Revisar textos, acentuação, mensagens de erro e instruções antes da homologação.
 
+## 7. Publicação e produção
+
+- [ ] Conectar o repositório ao Netlify e homologar o primeiro deploy conforme `docs/HOSPEDAGEM.md`.
+- [ ] Definir o domínio de produção e cadastrá-lo em **Site URL** e **Redirect URLs** no Supabase Auth.
+- [ ] Restringir o CORS das Edge Functions ao domínio de produção e à política aprovada para Deploy Previews.
+- [ ] Executar a validação pós-deploy nos navegadores utilizados pela Prefeitura.
+
 ## Ordem sugerida
 
 1. Aprovação de acesso e recuperação segura de senha.
@@ -64,6 +71,7 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 3. Calendário visual e validação dos cálculos.
 4. Fluxo completo de aprovação e visão de escala.
 5. Comprovante, comunicação, testes e homologação.
-6. Por fim, verificar a integridade do código e do banco e realizar a auditoria de segurança.
+6. Publicação no Netlify e homologação do domínio de produção.
+7. Por fim, verificar a integridade do código e do banco e realizar a auditoria de segurança.
 
 > Manter a identidade visual profissional, a responsividade e o versionamento contínuo no GitHub.
