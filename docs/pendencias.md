@@ -1,57 +1,45 @@
 # Pendências do SGF
 
-Este arquivo contém somente trabalho ainda não concluído. Itens entregues e validados são removidos, não mantidos como histórico.
+Backlog ativo do sistema. Itens entregues e validados são removidos; o histórico permanece no Git.
 
-Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions e banco remoto após a conclusão da gestão de cadastros e estrutura organizacional.
+Última revisão completa: 29/09/2026, confrontando frontend, migrations, Edge Functions, documentação e banco remoto.
 
-Repositório: https://github.com/GuiPaicheco/SGF.git
+**Total:** 20 pendências.
 
-## 1. Acesso, usuários e perfis — configuração de produção
+## Etapa 1 — Regras e operação
 
-- [ ] Ativar a proteção contra senhas vazadas no Supabase Auth antes da produção.
+- [ ] Homologar com o RH os cálculos de admissão, período aquisitivo, vínculo, faltas, início, retorno, fracionamento, feriados e day-off.
+- [ ] Completar o banco de horas: jornada, saldo declarado, validação pelo RH, lançamentos, complemento de férias e consumo após aprovação.
+- [ ] Exibir a linha do tempo de `request_status_history`, com situação anterior, nova situação, responsável, data e observação.
+- [ ] Completar programação, reprogramação, devolução para correção, cancelamento e conclusão, respeitando as permissões de cada perfil.
+- [ ] Criar calendário de escala por lotação, cargo e função, destacando conflitos e risco de falta de pessoal antes da aprovação.
+- [ ] Ampliar os indicadores por situação, modalidade, lotação e período.
+- [ ] Notificar servidor, diretor e RH sobre envio, decisão e alteração da solicitação.
 
-## 2. Solicitações, calendário e saldos
-
-- [ ] Homologar os cálculos com casos oficiais do RH: admissão, período aquisitivo, vínculo, faltas, início, retorno, fracionamento, feriados e day-off.
-- [ ] Completar o banco de horas de ponta a ponta: jornada, saldo declarado, saldo validado pelo RH, lançamentos, complemento de férias e consumo após aprovação.
-- [ ] Exibir conflitos de escala por lotação, cargo e função antes da aprovação.
-
-## 3. Aprovação e gestão
-
-- [ ] Exibir a linha do tempo completa das mudanças armazenadas em `request_status_history`, com situação anterior, nova situação, responsável, data e observação.
-- [ ] Completar programação, reprogramação, devolução para correção, cancelamento e conclusão na interface, com regras por perfil.
-- [ ] Criar visão de calendário/escala por unidade, cargo e função para identificar períodos com falta de pessoal.
-- [ ] Ampliar os indicadores atuais com modalidade, lotação e período, além da situação.
-- [ ] Notificar servidor, chefia e RH sobre envio, decisão e alteração da solicitação.
-
-## 4. Comprovante e comunicação
+## Etapa 2 — Comprovante e comunicação
 
 - [ ] Homologar a impressão nos navegadores da Prefeitura e garantir uma única página com cabeçalho, protocolo, dados, períodos, situação, carimbo e assinaturas.
-- [ ] Gerar texto copiável de e-mail, com assunto, mensagem e orientação de envio à chefia/RH e entrega do comprovante quando exigida.
-- [ ] Permitir imprimir ou copiar novamente a partir de “Meus pedidos”.
+- [ ] Gerar assunto e texto copiáveis para comunicação por e-mail, incluindo as orientações de entrega do comprovante.
+- [ ] Permitir reimprimir e copiar os dados do comprovante em “Meus pedidos”.
 
-## 5. UI, acessibilidade e qualidade
+## Etapa 3 — UI, acessibilidade e testes
 
-- [ ] Revisar os estados de validação dos campos para não depender apenas de verde/vermelho.
-- [ ] Testar responsividade e alinhamento em celular, tablet e desktop.
-- [ ] Fazer testes ponta a ponta dos quatro perfis e dos fluxos sem login.
-- [ ] Adicionar testes automatizados para cálculos de datas, permissões, login e transições de situação.
+- [ ] Tornar os estados de validação compreensíveis sem depender apenas de verde e vermelho.
+- [ ] Validar responsividade e alinhamento em celular, tablet e desktop.
+- [ ] Executar testes ponta a ponta dos perfis servidor, diretor, RH e administrador, além dos fluxos públicos.
+- [ ] Adicionar testes automatizados para datas, permissões, autenticação e transições de situação.
 - [ ] Revisar textos, acentuação, mensagens de erro e instruções antes da homologação.
 
-## 6. Publicação e produção
+## Etapa 4 — Publicação e produção
 
+- [ ] Ativar a proteção contra senhas vazadas no Supabase Auth.
 - [ ] Conectar o repositório ao Netlify e homologar o primeiro deploy conforme `docs/HOSPEDAGEM.md`.
 - [ ] Definir o domínio de produção e cadastrá-lo em **Site URL** e **Redirect URLs** no Supabase Auth.
 - [ ] Restringir o CORS das Edge Functions ao domínio de produção e à política aprovada para Deploy Previews.
 - [ ] Executar a validação pós-deploy nos navegadores utilizados pela Prefeitura.
 
-## Ordem sugerida
+## Encerramento
 
-1. Ativar a proteção contra senhas vazadas no Supabase Auth.
-2. Homologação dos cálculos e conclusão do banco de horas.
-3. Fluxo completo de aprovação, histórico e visão de escala.
-4. Comprovante, comunicação, testes e homologação.
-5. Publicação no Netlify e homologação do domínio de produção.
-6. Auditoria final de integridade e segurança do código e do banco.
+Depois das quatro etapas, executar a auditoria final de integridade e segurança do código e do banco.
 
-> Manter a identidade visual profissional, a responsividade e o versionamento contínuo no GitHub.
+> Preservar a identidade visual, a responsividade, a documentação e o versionamento contínuo no GitHub em todas as entregas.
