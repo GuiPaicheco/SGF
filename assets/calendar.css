@@ -1,0 +1,48 @@
+.request-calendar {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid #d7e2dc;
+  border-radius: 1rem;
+  background: #fbfdfc;
+}
+
+.calendar-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.calendar-heading h3,
+.calendar-month h4 { margin: 0; text-transform: capitalize; }
+.calendar-heading p { margin: .35rem 0 0; color: #53645c; }
+.calendar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+.calendar-month { padding: 1rem; border: 1px solid #e0e8e4; border-radius: .8rem; background: #fff; }
+.calendar-month h4 { margin-bottom: .75rem; text-align: center; color: #123c2f; }
+.calendar-weekdays,
+.calendar-days { display: grid; grid-template-columns: repeat(7, minmax(1.75rem, 1fr)); gap: .25rem; }
+.calendar-weekdays { margin-bottom: .3rem; color: #66756e; font-size: .75rem; font-weight: 700; text-align: center; }
+.calendar-day { display: grid; place-items: center; min-height: 2rem; border-radius: .45rem; font-size: .82rem; border: 1px solid transparent; }
+.calendar-empty { visibility: hidden; }
+.calendar-away { background: #fce8e6; border-color: #f4b7b0; }
+.calendar-holiday { box-shadow: inset 0 -4px #3b82c4; }
+.calendar-birthday { outline: 2px solid #8b5db7; outline-offset: -2px; }
+.calendar-start { background: #b42318; border-color: #b42318; color: #fff; font-weight: 800; }
+.calendar-end { background: #f4b740; border-color: #d99b19; color: #342400; font-weight: 800; }
+.calendar-return { background: #18794e; border-color: #18794e; color: #fff; font-weight: 800; }
+.calendar-legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem .8rem; font-size: .78rem; }
+.calendar-legend span { display: inline-flex; align-items: center; gap: .3rem; }
+.calendar-legend i { width: .85rem; height: .85rem; border-radius: .2rem; border: 1px solid #c7d2cc; }
+.legend-start { background: #b42318; }
+.legend-away { background: #fce8e6; }
+.legend-end { background: #f4b740; }
+.legend-return { background: #18794e; }
+.legend-holiday { background: #3b82c4; }
+.legend-birthday { background: #fff; outline: 2px solid #8b5db7; outline-offset: -2px; }
+
+@media (max-width: 700px) {
+  .calendar-heading { flex-direction: column; }
+  .calendar-legend { justify-content: flex-start; }
+  .request-calendar { padding: .85rem; }
+}

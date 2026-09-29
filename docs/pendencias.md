@@ -22,9 +22,6 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## 3. Solicitações e calendário
 
-- [ ] Reintroduzir o calendário visual na simulação e no acompanhamento.
-- [ ] Marcar claramente o início do afastamento em vermelho, o último dia do período, o retorno em verde, feriados/pontos facultativos e o day-off de aniversário.
-- [ ] Explicar no calendário que a data inicial representa o primeiro dia em que o servidor não trabalhará.
 - [ ] Carregar feriados e pontos facultativos do banco, em vez de manter apenas datas fixas no frontend.
 - [ ] Validar os cálculos de férias por data de admissão, término do período aquisitivo, vínculo e faltas com casos oficiais do RH.
 - [ ] Validar a simulação por data de início e por data de retorno, incluindo fracionamento, feriados e day-off.
