@@ -28,8 +28,7 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## 4. Aprovação e gestão
 
-- [ ] Registrar as decisões da chefia imediata e do RH em `request_approvals`, em vez de alterar somente a situação geral.
-- [ ] Exibir os pareceres, responsáveis, datas e o histórico já armazenado em `request_status_history`.
+- [ ] Exibir a linha do tempo completa das mudanças armazenadas em `request_status_history`, com situação anterior, nova situação, responsável, data e observação.
 - [ ] Completar programação, reprogramação, devolução para correção, cancelamento e conclusão na interface, com regras por perfil.
 - [ ] Criar visão de calendário/escala por unidade, cargo e função para identificar períodos com falta de pessoal.
 - [ ] Ampliar os indicadores atuais com modalidade, lotação e período, além da situação.

@@ -1,6 +1,6 @@
 # Lotações e códigos CNES para importação
 
-Fonte de trabalho fornecida para a carga inicial. Os nomes e códigos devem ser conferidos antes da importação no ambiente de produção.
+[Link da Planilha que fiz](https://docs.google.com/spreadsheets/d/1mzvbSTsKbBd6LlE7kSt4QCud_tWwghC6yCkInNUeE2g/edit?usp=sharing)
 
 | CNES | Unidade/lotação |
 |---|---|
