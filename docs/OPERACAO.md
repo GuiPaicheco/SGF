@@ -68,6 +68,18 @@ As 48 lotações da carga inicial estão versionadas em `docs/cnes-lotacoes.md`.
 
 `declared_minutes` é o saldo informado pelo servidor; `validated_minutes` é o saldo oficial confirmado pelo RH. A aprovação não deve se apoiar apenas no saldo declarado.
 
+O RH registra créditos e débitos validados na análise da solicitação. Cada lançamento permanece em `time_bank_entries`. Na conclusão de uma folga por banco de horas, o consumo é debitado de forma atômica e a conclusão é impedida quando o saldo validado for insuficiente.
+
+## Operação das solicitações
+
+A linha do tempo apresenta todas as mudanças de situação, responsável, data e justificativa. Diretor, RH e administrador podem devolver um pedido para correção conforme seu estágio; o servidor pode reenviar ou cancelar uma solicitação devolvida. O RH e o administrador podem programar, reprogramar datas, cancelar e concluir.
+
+O calendário de escala compara afastamentos aprovados por lotação, cargo e função. Conflitos são alertas de apoio à decisão e não substituem a análise da chefia.
+
+As mudanças de situação geram notificações internas para o servidor, responsáveis pela lotação e administradores. O usuário consulta e marca essas mensagens como lidas no próprio SGF.
+
+A validação formal dos cálculos deve seguir `docs/HOMOLOGACAO_REGRAS.md`.
+
 ## 5. Calendário institucional
 
 Feriados e pontos facultativos ativos são carregados da tabela `calendar_events` antes de qualquer simulação. O calendário é público somente para leitura, pois também atende solicitações sem login. Alterações anuais devem ser registradas no banco pelo responsável autorizado, mantendo nome, tipo, data, fonte e situação do evento. Se o calendário não puder ser carregado, o frontend bloqueia a simulação para evitar cálculo incorreto.
