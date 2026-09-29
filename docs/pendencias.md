@@ -34,7 +34,6 @@ Repositório: https://github.com/GuiPaicheco/SGF.git
 
 ## 4. Aprovação e gestão
 
-- [ ] Transformar o painel atual em uma fila operacional com filtros, busca, ordenação e paginação.
 - [ ] Implementar explicitamente as etapas de decisão da chefia imediata e do RH usando `request_approvals`.
 - [ ] Exibir pareceres, responsáveis, datas e histórico completo de cada mudança.
 - [ ] Implementar programação, reprogramação, devolução para correção, cancelamento e conclusão com regras por perfil.
