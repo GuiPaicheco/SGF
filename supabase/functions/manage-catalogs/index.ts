@@ -1,0 +1,91 @@
+import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
+
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+  status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+});
+const digits = (value: unknown) => String(value ?? '').replace(/\D/g, '');
+
+Deno.serve(async request => {
+  if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
+  try {
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+    if (!token) return json({ error: 'Sessão inválida.' }, 401);
+    const { data: identity, error: identityError } = await admin.auth.getUser(token);
+    if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
+    const { data: actor } = await admin.from('profiles').select('role,must_change_password').eq('id', identity.user.id).single();
+    if (!actor || !['administrador', 'rh'].includes(actor.role) || actor.must_change_password) return json({ error: 'Acesso exclusivo do administrador e RH.' }, 403);
+    const payload = await request.json();
+    const action = String(payload.action ?? 'list');
+    const { data: scopes } = await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id);
+    const scopeIds = (scopes || []).map(item => item.lotacao_id);
+
+    if (action === 'list') {
+      let employeeQuery = admin.from('servidores').select('id,full_name,matricula,cpf,birth_date,admission_date,employment_type,weekly_hours,active,profile_id,lotacao:lotacoes(id,code,name),cargo:cargos(id,name),funcao:funcoes(id,name)').order('full_name');
+      let locationQuery = admin.from('lotacoes').select('id,code,name,unit_type,parent_id,active').order('name');
+      if (actor.role === 'rh') {
+        employeeQuery = employeeQuery.in('lotacao_id', scopeIds.length ? scopeIds : ['00000000-0000-0000-0000-000000000000']);
+        locationQuery = locationQuery.in('id', scopeIds.length ? scopeIds : ['00000000-0000-0000-0000-000000000000']);
+      }
+      const [employeesResult, locationsResult, positionsResult, functionsResult, profilesResult, scopesResult] = await Promise.all([
+        employeeQuery, locationQuery,
+        admin.from('cargos').select('id,name').order('name'),
+        admin.from('funcoes').select('id,name').order('name'),
+        actor.role === 'administrador' ? admin.from('profiles').select('id,full_name,role').in('role', ['diretor', 'rh']).order('full_name') : Promise.resolve({ data: [] }),
+        actor.role === 'administrador' ? admin.from('profile_scopes').select('profile_id,lotacao_id') : Promise.resolve({ data: [] }),
+      ]);
+      const error = employeesResult.error || locationsResult.error || positionsResult.error || functionsResult.error;
+      if (error) throw error;
+      return json({ employees: employeesResult.data, locations: locationsResult.data, positions: positionsResult.data, functions: functionsResult.data, managers: profilesResult.data, managerScopes: scopesResult.data, actorRole: actor.role });
+    }
+
+    if (action === 'history') {
+      const employeeId = String(payload.id ?? '');
+      if (!employeeId) return json({ error: 'Servidor inválido.' }, 400);
+      if (actor.role === 'rh' && !scopeIds.length) return json({ error: 'Servidor fora do seu escopo.' }, 403);
+      const { data: employee } = await admin.from('servidores').select('lotacao_id').eq('id', employeeId).single();
+      if (!employee || (actor.role === 'rh' && !scopeIds.includes(employee.lotacao_id))) return json({ error: 'Servidor fora do seu escopo.' }, 403);
+      const { data, error } = await admin.from('employee_assignment_history').select('id,previous_employment_type,new_employment_type,previous_active,new_active,reason,changed_at,changed_by:profiles(full_name),previous_lotacao:lotacoes!employee_assignment_history_previous_lotacao_id_fkey(name),new_lotacao:lotacoes!employee_assignment_history_new_lotacao_id_fkey(name),previous_cargo:cargos!employee_assignment_history_previous_cargo_id_fkey(name),new_cargo:cargos!employee_assignment_history_new_cargo_id_fkey(name),previous_funcao:funcoes!employee_assignment_history_previous_funcao_id_fkey(name),new_funcao:funcoes!employee_assignment_history_new_funcao_id_fkey(name)').eq('servidor_id', employeeId).order('changed_at', { ascending: false });
+      if (error) throw error;
+      return json({ history: data || [] });
+    }
+
+    if (action === 'save-location') {
+      const { data, error } = await admin.rpc('manage_location_registry', { actor_id: identity.user.id, target_id: payload.id || null, target_name: String(payload.name ?? ''), target_code: String(payload.code ?? ''), target_unit_type: String(payload.unit_type ?? 'unidade'), target_parent_id: payload.parent_id || null, target_active: payload.active !== false, responsible_ids: Array.isArray(payload.responsible_ids) ? payload.responsible_ids : [] });
+      if (error) throw error; return json({ id: data });
+    }
+    if (action === 'save-reference') {
+      const { data, error } = await admin.rpc('manage_reference_registry', { actor_id: identity.user.id, registry_kind: String(payload.kind ?? ''), target_id: payload.id || null, target_name: String(payload.name ?? '') });
+      if (error) throw error; return json({ id: data });
+    }
+    if (action === 'save-employee') {
+      const { data, error } = await admin.rpc('manage_employee_registry', {
+        actor_id: identity.user.id, target_id: payload.id || null,
+        target_full_name: String(payload.full_name ?? ''), target_registration: String(payload.registration ?? ''),
+        target_cpf: digits(payload.cpf), target_birth_date: payload.birth_date || null,
+        target_admission_date: payload.admission_date || null, target_employment_type: String(payload.employment_type ?? ''),
+        target_lotacao_id: payload.lotacao_id || null, target_cargo_id: payload.cargo_id || null,
+        target_funcao_id: payload.funcao_id || null, target_weekly_hours: payload.weekly_hours ? Number(payload.weekly_hours) : null,
+        target_active: payload.active !== false, target_reason: String(payload.reason ?? ''),
+      });
+      if (error) throw error; return json({ id: data });
+    }
+    return json({ error: 'Ação inválida.' }, 400);
+  } catch (error) {
+    console.error('manage-catalogs', error);
+    const message = error instanceof Error ? error.message : '';
+    if (message.includes('duplicate key')) return json({ error: 'Já existe um cadastro com estes dados.' }, 409);
+    if (message.includes('SCOPE')) return json({ error: 'A lotação informada está fora do seu escopo.' }, 403);
+    if (message.includes('REASON_REQUIRED')) return json({ error: 'Informe o motivo da alteração.' }, 400);
+    if (message.includes('ADMIN_REQUIRED')) return json({ error: 'Somente o administrador pode alterar lotações.' }, 403);
+    return json({ error: 'Não foi possível salvar o cadastro.' }, 500);
+  }
+});

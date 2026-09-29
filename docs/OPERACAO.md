@@ -48,6 +48,14 @@ Os endpoints legados `employee-auth` e `management-auth` respondem permanentemen
 5. O RH somente registra sua decisão depois da aprovação da chefia. A aprovação final libera a programação das férias; a rejeição exige justificativa e encerra o fluxo.
 6. Toda mudança de situação é registrada em `request_status_history`.
 
+### Cadastros e estrutura organizacional
+
+Administradores e RH acessam **Cadastros e estrutura** pela tela inicial autenticada. O administrador pode criar e alterar lotações, hierarquia, tipo, código CNES, situação e responsáveis. Os responsáveis selecionados são registrados em `profile_scopes`.
+
+Administradores e RH podem cadastrar e editar servidores, cargos, funções, vínculos e jornada semanal. O RH atua somente nas lotações atribuídas ao seu perfil; alterações estruturais de lotações permanecem exclusivas do administrador.
+
+Toda inclusão, transferência, mudança de cargo, função, vínculo, ativação ou bloqueio funcional gera um registro em `employee_assignment_history`, contendo valores anteriores e novos, motivo, responsável e data. Os eventos também são registrados em `audit_events`.
+
 ### Inclusões funcionais
 
 Administradores e RH acessam **Inclusões funcionais** pelo painel de gerenciamento. A fila apresenta os dados declarados pelo servidor e o protocolo que originou a inclusão. O RH vê somente cadastros já vinculados às suas lotações; cadastros provisórios ainda sem lotação oficial são tratados pelo administrador.
