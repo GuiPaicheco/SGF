@@ -58,6 +58,19 @@ Na configuração de acessos e perfis, a seleção de lotações aparece quando 
 
 Depois do login, o RLS permite consultar somente o próprio cadastro e as solicitações vinculadas. O funcionário pode iniciar uma solicitação com seus dados preenchidos e acompanhar protocolo, períodos e situação, sem ações de aprovação ou programação.
 
+### Comprovante e comunicação
+
+Ao concluir uma solicitação, o SGF gera um comprovante preparado para impressão ou PDF em uma única página A4. O documento reúne protocolo, situação, identificação funcional, lotação, períodos, retornos, day-off de aniversário eventualmente incluído e observações.
+
+O comprovante possui exatamente dois campos de assinatura:
+
+1. **Servidor(a) solicitante**, que confirma o pedido.
+2. **RH ou Chefia Imediata**, preenchido por quem autorizou as férias ou folgas naquele período, com nome, matrícula e carimbo quando aplicável.
+
+O protocolo, isoladamente, não autoriza o afastamento. Depois de coletar as duas assinaturas, uma cópia deve permanecer com o servidor e a via administrativa deve ser entregue conforme o procedimento da lotação.
+
+Em **Meus pedidos → Ver detalhes**, o servidor pode reabrir e reimprimir o comprovante a qualquer momento, além de copiar os dados ou um texto de e-mail já acompanhado de assunto e orientações de entrega. O conteúdo copiado sempre reflete a situação atual armazenada no pedido.
+
 Todo pedido exige uma sessão válida com perfil `servidor`, sem troca de senha pendente, vinculada ao mesmo `servidores.profile_id` da matrícula e do CPF informados. A aprovação de acesso pode criar um cadastro funcional provisório; nesse caso, o primeiro pedido autenticado abre a inclusão funcional correspondente.
 
 Os endpoints legados `employee-auth` e `management-auth` respondem permanentemente com HTTP 410. Todo novo login, convite, recuperação e alteração de senha passa por `access-auth`.
