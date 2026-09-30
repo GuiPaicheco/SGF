@@ -39,7 +39,7 @@ Deno.serve(async request => {
       const scopeIds = new Set((ownScopes || []).map(scope => scope.lotacao_id));
       const [{ data: inclusions, error: inclusionError }, { data: locations, error: locationError }] = await Promise.all([
         admin.from('employee_inclusion_requests')
-          .select('id,status,requested_name,requested_unit,requested_position,requested_function,requested_employment_type,notes,created_at,servidor:servidores(id,matricula,cpf,birth_date,profile_id,lotacao_id),request:vacation_requests(protocol)')
+          .select('id,status,requested_name,requested_unit,requested_position,requested_function,requested_team,requested_employment_type,notes,created_at,servidor:servidores(id,matricula,cpf,birth_date,profile_id,lotacao_id),request:vacation_requests(protocol)')
           .order('created_at', { ascending: false }),
         admin.from('lotacoes').select('id,code,name,unit_type').eq('active', true).order('name'),
       ]);
@@ -56,7 +56,7 @@ Deno.serve(async request => {
     const id = String(payload.id ?? '');
     const notes = String(payload.notes ?? '').trim();
     const { data: inclusion } = await admin.from('employee_inclusion_requests')
-      .select('id,status,servidor_id,requested_position,requested_employment_type').eq('id', id).single();
+      .select('id,status,servidor_id,requested_position,requested_team,requested_employment_type').eq('id', id).single();
     if (!inclusion || !['pendente', 'em_analise'].includes(inclusion.status)) {
       return json({ error: 'Pendência não encontrada ou já concluída.' }, 409);
     }
@@ -73,10 +73,15 @@ Deno.serve(async request => {
     const locationId = String(payload.location_id ?? '');
     const positionName = String(payload.position ?? inclusion.requested_position ?? '').trim();
     const employmentType = String(payload.employment_type ?? inclusion.requested_employment_type ?? '').trim();
+    const team = String(payload.team ?? inclusion.requested_team ?? '').trim() || 'Não se aplica';
     if (action === 'approve' && (!locationId || !positionName || !employmentType)) return json({ error: 'Informe lotação, cargo e vínculo.' }, 400);
     if (action === 'approve' && actorRole === 'rh') {
       const { data: allowedScope } = await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id).eq('lotacao_id', locationId).maybeSingle();
       if (!allowedScope) return json({ error: 'A lotação selecionada não pertence ao seu escopo.' }, 403);
+    }
+    if (action === 'approve') {
+      const { error: teamError } = await admin.from('employee_inclusion_requests').update({ requested_team: team }).eq('id', id);
+      if (teamError) throw teamError;
     }
     const { error } = await admin.rpc('review_employee_inclusion', {
       inclusion_id: id,

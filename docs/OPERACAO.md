@@ -126,6 +126,17 @@ A validação formal dos cálculos deve seguir `docs/HOMOLOGACAO_REGRAS.md`.
 
 Feriados e pontos facultativos ativos são carregados da tabela `calendar_events` antes de qualquer simulação. O calendário é público somente para leitura, pois também atende a Simulação Rápida sem login. O administrador gerencia data, nome, tipo, fonte e situação em **Cadastros → Feriados**. Se o calendário não puder ser carregado, o frontend bloqueia a simulação para evitar cálculo incorreto.
 
+## Equipes e escala mínima
+
+- Todo cadastro funcional informa a equipe; quando não houver equipe aplicável, selecione **Não se aplica**.
+- A escala mínima é apresentada no padrão **Cargo - Equipe e Função - Nome**.
+- Para uma data ainda não planejada, o sistema sugere a última escala salva na mesma lotação e no mesmo dia da semana. Servidores afastados na nova data são desmarcados automaticamente.
+- O RH pode alterar a sugestão e salvá-la, inclusive vazia. As últimas escalas ficam disponíveis no próprio painel para conferência do ciclo.
+
+## Alterações no calendário
+
+Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastamento em andamento, o sistema atualiza o calendário visual e cria notificações para o servidor, RH responsável e administradores. A notificação solicita a revisão do período e do retorno; ela não altera silenciosamente uma solicitação já protocolada.
+
 ## 6. Revisões periódicas
 
 - Atualizar `calendar_events` e o calendário do frontend antes de cada exercício.

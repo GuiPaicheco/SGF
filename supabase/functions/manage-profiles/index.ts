@@ -77,7 +77,7 @@ Deno.serve(async request => {
         const primaryRole = roles.includes('administrador') ? 'administrador' : roles.includes('rh') ? 'rh' : 'servidor';
         const { error: profileError } = await admin.from('profiles').insert({ id: accountId, full_name: name, cpf, role: primaryRole, roles, login_identifier: registration.toLowerCase(), primary_lotacao_id: locationId, must_change_password: true });
         if (profileError) throw profileError;
-        const { error: employeeError } = await admin.from('servidores').insert({ profile_id: accountId, full_name: name, matricula: registration, cpf, birth_date: birthDate, lotacao_id: locationId, employment_type: String(payload.employment_type || 'pendente'), active: true, declared_position: String(payload.position || '') });
+        const { error: employeeError } = await admin.from('servidores').insert({ profile_id: accountId, full_name: name, matricula: registration, cpf, birth_date: birthDate, lotacao_id: locationId, employment_type: String(payload.employment_type || 'pendente'), team_name: String(payload.team || 'Não se aplica').trim() || 'Não se aplica', active: true, declared_position: String(payload.position || '') });
         if (employeeError) throw employeeError;
         if (roles.includes('rh')) {
           const { error: scopeError } = await admin.from('profile_scopes').insert({ profile_id: accountId, lotacao_id: locationId });

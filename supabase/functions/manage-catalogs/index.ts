@@ -46,7 +46,7 @@ Deno.serve(async request => {
     }
 
     if (action === 'list') {
-      let employeeQuery = admin.from('servidores').select('id,full_name,matricula,cpf,birth_date,admission_date,employment_type,weekly_hours,active,profile_id,lotacao:lotacoes!servidores_lotacao_id_fkey(id,code,name),cargo:cargos(id,name),funcao:funcoes(id,name)').order('full_name');
+      let employeeQuery = admin.from('servidores').select('id,full_name,matricula,cpf,birth_date,admission_date,employment_type,weekly_hours,team_name,active,profile_id,lotacao:lotacoes!servidores_lotacao_id_fkey(id,code,name),cargo:cargos(id,name),funcao:funcoes(id,name)').order('full_name');
       let locationQuery = admin.from('lotacoes').select('id,code,name,unit_type,parent_id,active').order('name');
       if (actorRole === 'rh') {
         employeeQuery = employeeQuery.in('lotacao_id', scopeIds.length ? scopeIds : ['00000000-0000-0000-0000-000000000000']);
@@ -70,7 +70,7 @@ Deno.serve(async request => {
       if (actorRole === 'rh' && !scopeIds.length) return json({ error: 'Servidor fora do seu escopo.' }, 403);
       const { data: employee } = await admin.from('servidores').select('lotacao_id').eq('id', employeeId).single();
       if (!employee || (actorRole === 'rh' && !scopeIds.includes(employee.lotacao_id))) return json({ error: 'Servidor fora do seu escopo.' }, 403);
-      const { data, error } = await admin.from('employee_assignment_history').select('id,previous_employment_type,new_employment_type,previous_active,new_active,reason,changed_at,changed_by:profiles(full_name),previous_lotacao:lotacoes!employee_assignment_history_previous_lotacao_id_fkey(name),new_lotacao:lotacoes!employee_assignment_history_new_lotacao_id_fkey(name),previous_cargo:cargos!employee_assignment_history_previous_cargo_id_fkey(name),new_cargo:cargos!employee_assignment_history_new_cargo_id_fkey(name),previous_funcao:funcoes!employee_assignment_history_previous_funcao_id_fkey(name),new_funcao:funcoes!employee_assignment_history_new_funcao_id_fkey(name)').eq('servidor_id', employeeId).order('changed_at', { ascending: false });
+      const { data, error } = await admin.from('employee_assignment_history').select('id,previous_employment_type,new_employment_type,previous_team,new_team,previous_active,new_active,reason,changed_at,changed_by:profiles(full_name),previous_lotacao:lotacoes!employee_assignment_history_previous_lotacao_id_fkey(name),new_lotacao:lotacoes!employee_assignment_history_new_lotacao_id_fkey(name),previous_cargo:cargos!employee_assignment_history_previous_cargo_id_fkey(name),new_cargo:cargos!employee_assignment_history_new_cargo_id_fkey(name),previous_funcao:funcoes!employee_assignment_history_previous_funcao_id_fkey(name),new_funcao:funcoes!employee_assignment_history_new_funcao_id_fkey(name)').eq('servidor_id', employeeId).order('changed_at', { ascending: false });
       if (error) throw error;
       return json({ history: data || [] });
     }
@@ -92,6 +92,7 @@ Deno.serve(async request => {
         target_lotacao_id: payload.lotacao_id || null, target_cargo_id: payload.cargo_id || null,
         target_funcao_id: payload.funcao_id || null, target_weekly_hours: payload.weekly_hours ? Number(payload.weekly_hours) : null,
         target_active: payload.active !== false, target_reason: String(payload.reason ?? ''),
+        target_team: String(payload.team ?? 'Não se aplica'),
       });
       if (error) throw error; return json({ id: data });
     }

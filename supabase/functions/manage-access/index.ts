@@ -38,7 +38,7 @@ Deno.serve(async request => {
 
     if (action === 'list') {
       const [{ data: requests, error: requestError }, { data: locations, error: locationError }] = await Promise.all([
-        admin.from('access_requests').select('id,full_name,registration,cpf,email,requested_position,requested_unit,status,notes,created_at').order('created_at', { ascending: false }),
+        admin.from('access_requests').select('id,full_name,registration,cpf,email,requested_position,requested_unit,requested_team,status,notes,created_at').order('created_at', { ascending: false }),
         admin.from('lotacoes').select('id,code,name,unit_type').eq('active', true).order('name'),
       ]);
       if (requestError || locationError) throw requestError || locationError;

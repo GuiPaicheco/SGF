@@ -59,24 +59,31 @@ Deno.serve(async request => {
       if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return json({ error: 'Mes invalido.' }, 400);
       const [year, monthNumber] = month.split('-').map(Number);
       const nextMonth = new Date(Date.UTC(year, monthNumber, 1)).toISOString().slice(0, 10);
+      const historyStart = new Date(Date.UTC(year, monthNumber - 4, 1)).toISOString().slice(0, 10);
       let locationQuery = admin.from('lotacoes').select('id,code,name').eq('active', true).order('name');
       if (actorRole === 'rh') {
         const { data: scopes } = await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', profile.id);
         locationQuery = locationQuery.in('id', scopes?.length ? scopes.map(item => item.lotacao_id) : ['00000000-0000-0000-0000-000000000000']);
       }
-      const [locations, assignments] = await Promise.all([
+      const [locations, assignments, plannedDays] = await Promise.all([
         locationQuery,
-        admin.from('minimum_scale_assignments').select('lotacao_id,scale_date,servidor_id').gte('scale_date', `${month}-01`).lt('scale_date', nextMonth),
+        admin.from('minimum_scale_assignments').select('lotacao_id,scale_date,servidor_id').gte('scale_date', historyStart).lt('scale_date', nextMonth),
+        admin.from('minimum_scale_days').select('lotacao_id,scale_date,source_date,updated_at').gte('scale_date', historyStart).lt('scale_date', nextMonth).order('scale_date', { ascending: false }),
       ]);
-      if (locations.error || assignments.error) throw locations.error || assignments.error;
+      if (locations.error || assignments.error || plannedDays.error) throw locations.error || assignments.error || plannedDays.error;
       const allowed = new Set((locations.data || []).map(item => item.id));
-      return json({ locations: locations.data || [], assignments: (assignments.data || []).filter(item => allowed.has(item.lotacao_id)) });
+      return json({
+        locations: locations.data || [],
+        assignments: (assignments.data || []).filter(item => allowed.has(item.lotacao_id)),
+        planned_days: (plannedDays.data || []).filter(item => allowed.has(item.lotacao_id)),
+      });
     }
     if (action === 'scale-save') {
       if (!['rh', 'administrador'].includes(actorRole)) return json({ error: 'Acesso indisponivel.' }, 403);
       const { error } = await scoped.rpc('set_minimum_scale', {
         actor_id: profile.id, target_lotacao_id: payload.lotacao_id,
         target_date: payload.date, target_servidor_ids: Array.isArray(payload.servidor_ids) ? payload.servidor_ids : [],
+        target_source_date: payload.source_date || null,
       });
       if (error) throw error;
       return json({ ok: true });

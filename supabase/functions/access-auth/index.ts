@@ -83,13 +83,14 @@ Deno.serve(async request => {
       const email = String(payload.email ?? '').trim().toLowerCase();
       const position = String(payload.position ?? '').trim();
       const unit = String(payload.unit ?? '').trim();
-      if (!fullName || !registration || !position || !unit || !validCpf(cpf) ||
+      const team = String(payload.team ?? '').trim() || 'Não se aplica';
+      if (!fullName || !registration || !position || !unit || team.length > 120 || !validCpf(cpf) ||
           !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || !/^[^\s@]+@betim\.mg\.gov\.br$/.test(email)) {
         return json({ error: 'Confira os dados da solicitação de acesso.' }, 400);
       }
       const { error } = await admin.from('access_requests').insert({
         full_name: fullName, registration, cpf, birth_date: birthDate, email,
-        requested_identifier: registration.toLowerCase(), requested_position: position, requested_unit: unit,
+        requested_identifier: registration.toLowerCase(), requested_position: position, requested_unit: unit, requested_team: team,
       });
       if (error) {
         if (error.code === '23505') return json({ error: 'Já existe uma solicitação de acesso pendente para estes dados.' }, 409);
