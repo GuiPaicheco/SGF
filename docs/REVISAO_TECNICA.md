@@ -6,7 +6,7 @@ Data: 29/09/2026. Escopo: frontend, estilos, configuração de publicação, Edg
 
 **Atualização de 30/09/2026:** foram aplicadas as migrations de fluxo administrativo, aprovação de lotação pelo RH, aprovação e vínculo CNES em uma transação e correção dos nomes de feriados da carga inicial. As funções correspondentes foram publicadas no projeto Supabase conectado. Na interface local, o login administrativo, a fila de solicitações, a escala mensal e nominal, os cadastros e o calendário administrativo foram conferidos; 14 testes automatizados passaram. Permanecem pendentes a homologação com contas de Servidor/RH, a política de senha mínima do Supabase Auth e o deploy do frontend no Netlify.
 
-**Atualização de 30/09/2026 — produção:** o repositório foi conectado ao Netlify e a branch `main` está publicada em `https://sgfbetim.netlify.app`. Foi adicionada uma baseline do banco e um job isolado que recria o Supabase local a partir de todas as migrations. Os advisors remotos foram executados, os dois índices de chaves estrangeiras faltantes foram aplicados, e as senhas temporárias fixas foram substituídas por credenciais aleatórias fortes. A proteção contra senhas vazadas ainda precisa ser habilitada no painel do Supabase; o recurso depende do plano Pro ou superior.
+**Atualização de 30/09/2026 — produção:** o repositório foi conectado ao Netlify e a branch `main` está publicada em `https://sgfbetim.netlify.app`. Foi adicionada uma baseline do banco, e a reconstrução de um Supabase vazio a partir de todas as migrations passou na integração contínua (execução `36749569051`). Os advisors remotos foram executados, os dois índices de chaves estrangeiras faltantes foram aplicados, e as senhas temporárias fixas foram substituídas por credenciais aleatórias fortes. A proteção contra senhas vazadas ainda precisa ser habilitada no painel do Supabase; o recurso depende do plano Pro ou superior.
 
 ## Correções feitas nesta revisão
 
@@ -23,7 +23,6 @@ Data: 29/09/2026. Escopo: frontend, estilos, configuração de publicação, Edg
 | Prioridade | Questão | Encaminhamento |
 |---|---|---|
 | Alta | O cálculo de direito e dos períodos ocorre no navegador; a API ainda não recalcula integralmente as regras | Homologar as regras com o RH e implementar cálculo e validação autoritativos no servidor |
-| Alta | A primeira migration depende de tabelas e tipos que não estão criados neste repositório | Versionar uma baseline compatível e provar a instalação em um projeto Supabase vazio |
 | Alta | Não houve teste integrado com sessão, RLS, Edge Functions e fluxo completo por papel | Criar ambiente de homologação e executar roteiro ponta a ponta com dados fictícios |
 | Alta | Pedidos de banco de horas já concluídos antes desta correção podem ter debitado o saldo declarado inteiro | Conferir extratos e corrigir eventuais diferenças mediante procedimento auditável do RH |
 | Alta | As Edge Functions aceitam CORS de qualquer origem | Definir domínios de produção e preview; restringir origens após a decisão de hospedagem |
