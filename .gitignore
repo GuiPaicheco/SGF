@@ -1,5 +1,6 @@
 .netlify/
 dist/
+supabase/.temp/
 .env
 .env.*
 !.env.example

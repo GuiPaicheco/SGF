@@ -1,8 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
+import { requestedBankHours, validSubmissionPeriods } from './validate.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const asciiJson = (body: unknown) => JSON.stringify(body).replace(/[\u007f-\uffff]/g, char =>
@@ -24,6 +25,15 @@ Deno.serve(async (request) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     if (!url || !serviceKey) return json({ error: 'Servi\u00e7o temporariamente indispon\u00edvel.' }, 503);
     const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+    if (!token) return json({ error: 'Entre no SGF para registrar uma solicitação.' }, 401);
+    const { data: identity, error: identityError } = await db.auth.getUser(token);
+    if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada. Entre novamente.' }, 401);
+    const { data: profile, error: profileError } = await db.from('profiles')
+      .select('roles,must_change_password').eq('id', identity.user.id).single();
+    if (profileError || !profile?.roles?.includes('servidor') || request.headers.get('x-sgf-role') !== 'servidor' || profile.must_change_password) {
+      return json({ error: 'A conta ainda não está liberada para solicitações.' }, 403);
+    }
     const payload = await request.json();
     const cpf = digits(payload.cpf);
     const registration = String(payload.registration ?? '').trim();
@@ -34,16 +44,11 @@ Deno.serve(async (request) => {
     const admissionDate = String(payload.admissionDate ?? '');
     const employmentType = String(payload.employmentType ?? '').trim();
     const unit = String(payload.unit ?? '').trim();
-    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-    const { data: identity } = token ? await db.auth.getUser(token) : { data: { user: null } };
-
     if (cpf.length !== 11 || !registration || !name || !unit || !employmentType ||
         !isoDate.test(birthDate) || !isoDate.test(admissionDate) || !allowedTypes.has(type)) {
       return json({ error: 'Dados de identifica\u00e7\u00e3o ou modalidade inv\u00e1lidos.' }, 400);
     }
-    if (!periods.length || periods.length > 2 || periods.some((p: Record<string, unknown>) =>
-      !isoDate.test(String(p.start_date)) || !isoDate.test(String(p.end_date)) ||
-      !isoDate.test(String(p.return_date)) || Number(p.days) < 1 || Number(p.days) > 90)) {
+    if (!validSubmissionPeriods(periods, type, payload.dailyHours, payload.availableHours)) {
       return json({ error: 'Per\u00edodo solicitado inv\u00e1lido.' }, 400);
     }
 
@@ -51,16 +56,9 @@ Deno.serve(async (request) => {
       db.from('servidores').select('id,profile_id').eq('matricula', registration).maybeSingle(),
       db.from('servidores').select('id,profile_id').eq('cpf', cpf).maybeSingle(),
     ]);
-    const existingEmployee = byRegistration || byCpf;
-    if (existingEmployee) {
-      if (!identity.user) return json({ error: 'Este servidor já possui cadastro. Entre na sua conta para solicitar.' }, 401);
-      if (!existingEmployee.profile_id || existingEmployee.profile_id !== identity.user.id) {
-        return json({ error: 'A sessão não está vinculada a este cadastro funcional.' }, 403);
-      }
-    } else if (identity.user) {
-      return json({ error: 'A conta autenticada não corresponde aos dados funcionais informados.' }, 403);
-    } else if (type === 'banco_horas') {
-      return json({ error: 'Folga por banco de horas exige acesso autenticado e saldo validado pelo RH.' }, 401);
+    if (!byRegistration || !byCpf || byRegistration.id !== byCpf.id ||
+        byRegistration.profile_id !== identity.user.id) {
+      return json({ error: 'A conta não está vinculada aos dados funcionais informados.' }, 403);
     }
 
     const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -74,8 +72,8 @@ Deno.serve(async (request) => {
 
     payload.cpf = cpf;
     payload.registration = registration;
-    payload.addBankHours = identity.user && Number(payload.addBankHours) > 0 ? Number(payload.addBankHours) : null;
-    if (!identity.user) payload.availableHours = null;
+    payload.requestedHours = type === 'banco_horas' ? requestedBankHours(periods, Number(payload.dailyHours)) : null;
+    payload.addBankHours = Number(payload.addBankHours) > 0 ? Number(payload.addBankHours) : null;
     payload.periods = periods.map((p: Record<string, unknown>, index: number) => ({ ...p, sequence: index + 1 }));
     const { data: created, error: createError } = await db.rpc('register_vacation_submission', { payload });
     if (createError) {
@@ -84,7 +82,7 @@ Deno.serve(async (request) => {
       }
       throw createError;
     }
-    if (identity.user && created?.id) {
+    if (created?.id) {
       const { error: ownerError } = await db.from('vacation_requests')
         .update({ created_by: identity.user.id }).eq('id', created.id);
       if (ownerError) throw ownerError;

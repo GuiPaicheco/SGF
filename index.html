@@ -7,19 +7,21 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data:; connect-src 'self' https://ijhvbzomakbbxverqfqh.supabase.co wss://ijhvbzomakbbxverqfqh.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <title>SGF - Prefeitura de Betim</title>
-  <link rel="icon" href="logo.png"><link rel="stylesheet" href="assets/app.css?v=20260928-2"><link rel="stylesheet" href="assets/calendar.css?v=20260929-1"><link rel="stylesheet" href="assets/scale.css?v=20260929-1">
+  <link rel="icon" href="logo.png"><link rel="stylesheet" href="assets/app.css?v=20260930-1"><link rel="stylesheet" href="assets/calendar.css?v=20260929-1"><link rel="stylesheet" href="assets/scale.css?v=20260929-1">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="assets/app.js?v=20260929-10"></script>
+  <script defer src="assets/app.js?v=20260930-1"></script>
 </head>
 <body>
   <a class="skip-link" href="#app">Ir para o conteúdo</a>
   <header class="site-header"><div class="header-inner">
     <button class="brand-home" type="button" data-go="home" aria-label="Ir para a tela inicial"><img src="logo.png" alt="Prefeitura Municipal de Betim" class="brand-logo"></button>
     <div class="brand-copy"><strong>SGF</strong><span>Sistema de Gestão de Férias e Folgas</span></div>
+    <div id="header-user" class="header-user hidden" aria-live="polite"></div>
     <button id="home-action" class="button button-ghost" type="button" data-go="home">Tela inicial</button>
     <button id="session-action" class="button button-ghost hidden" type="button">Sair</button>
   </div></header>
   <div id="progress" class="progress" aria-live="polite"></div>
+  <nav id="workspace-nav" class="workspace-nav hidden" aria-label="Navegação do SGF"></nav>
   <main id="app" class="app" tabindex="-1"><section class="card loading-card" aria-busy="true"><div class="spinner"></div><p>Preparando o sistema…</p></section></main>
   <footer class="site-footer"><span>Diretoria IV de Atenção Primária a Saúde</span><span>-</span><span>Prefeitura Municipal de Betim</span></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

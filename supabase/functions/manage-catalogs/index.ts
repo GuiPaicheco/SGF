@@ -2,7 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
@@ -21,17 +21,34 @@ Deno.serve(async request => {
     if (!token) return json({ error: 'Sessão inválida.' }, 401);
     const { data: identity, error: identityError } = await admin.auth.getUser(token);
     if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
-    const { data: actor } = await admin.from('profiles').select('role,must_change_password').eq('id', identity.user.id).single();
-    if (!actor || !['administrador', 'rh'].includes(actor.role) || actor.must_change_password) return json({ error: 'Acesso exclusivo do administrador e RH.' }, 403);
+    const { data: actor } = await admin.from('profiles').select('roles,must_change_password,disabled_at').eq('id', identity.user.id).single();
+    const actorRole = request.headers.get('x-sgf-role') || '';
+    if (!actor?.roles?.includes(actorRole) || !['administrador', 'rh'].includes(actorRole) || actor.must_change_password || actor.disabled_at) return json({ error: 'Acesso exclusivo do administrador e RH.' }, 403);
+    const scoped = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers: { 'x-sgf-role': actorRole } } });
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
     const { data: scopes } = await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id);
     const scopeIds = (scopes || []).map(item => item.lotacao_id);
 
+    if (action === 'calendar-list') {
+      if (actorRole !== 'administrador') return json({ error: 'Acesso exclusivo do administrador.' }, 403);
+      const { data, error } = await admin.from('calendar_events').select('id,event_date,type,name,active').order('event_date', { ascending: false }).limit(150);
+      if (error) throw error;
+      return json({ events: data || [] });
+    }
+    if (action === 'calendar-save') {
+      if (actorRole !== 'administrador') return json({ error: 'Acesso exclusivo do administrador.' }, 403);
+      const eventDate = String(payload.event_date || ''), type = String(payload.type || ''), name = String(payload.name || '').trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || !['feriado', 'ponto_facultativo'].includes(type) || !name) return json({ error: 'Informe data, tipo e nome do evento.' }, 400);
+      const { data, error } = await admin.from('calendar_events').upsert({ event_date: eventDate, type, name, active: payload.active !== false }, { onConflict: 'event_date,type' }).select('id').single();
+      if (error) throw error;
+      return json({ id: data.id });
+    }
+
     if (action === 'list') {
-      let employeeQuery = admin.from('servidores').select('id,full_name,matricula,cpf,birth_date,admission_date,employment_type,weekly_hours,active,profile_id,lotacao:lotacoes(id,code,name),cargo:cargos(id,name),funcao:funcoes(id,name)').order('full_name');
+      let employeeQuery = admin.from('servidores').select('id,full_name,matricula,cpf,birth_date,admission_date,employment_type,weekly_hours,active,profile_id,lotacao:lotacoes!servidores_lotacao_id_fkey(id,code,name),cargo:cargos(id,name),funcao:funcoes(id,name)').order('full_name');
       let locationQuery = admin.from('lotacoes').select('id,code,name,unit_type,parent_id,active').order('name');
-      if (actor.role === 'rh') {
+      if (actorRole === 'rh') {
         employeeQuery = employeeQuery.in('lotacao_id', scopeIds.length ? scopeIds : ['00000000-0000-0000-0000-000000000000']);
         locationQuery = locationQuery.in('id', scopeIds.length ? scopeIds : ['00000000-0000-0000-0000-000000000000']);
       }
@@ -39,35 +56,35 @@ Deno.serve(async request => {
         employeeQuery, locationQuery,
         admin.from('cargos').select('id,name').order('name'),
         admin.from('funcoes').select('id,name').order('name'),
-        actor.role === 'administrador' ? admin.from('profiles').select('id,full_name,role').in('role', ['diretor', 'rh']).order('full_name') : Promise.resolve({ data: [] }),
-        actor.role === 'administrador' ? admin.from('profile_scopes').select('profile_id,lotacao_id') : Promise.resolve({ data: [] }),
+        actorRole === 'administrador' ? admin.from('profiles').select('id,full_name,roles').contains('roles', ['rh']).order('full_name') : Promise.resolve({ data: [] }),
+        actorRole === 'administrador' ? admin.from('profile_scopes').select('profile_id,lotacao_id') : Promise.resolve({ data: [] }),
       ]);
       const error = employeesResult.error || locationsResult.error || positionsResult.error || functionsResult.error;
       if (error) throw error;
-      return json({ employees: employeesResult.data, locations: locationsResult.data, positions: positionsResult.data, functions: functionsResult.data, managers: profilesResult.data, managerScopes: scopesResult.data, actorRole: actor.role });
+      return json({ employees: employeesResult.data, locations: locationsResult.data, positions: positionsResult.data, functions: functionsResult.data, managers: profilesResult.data, managerScopes: scopesResult.data, actorRole });
     }
 
     if (action === 'history') {
       const employeeId = String(payload.id ?? '');
       if (!employeeId) return json({ error: 'Servidor inválido.' }, 400);
-      if (actor.role === 'rh' && !scopeIds.length) return json({ error: 'Servidor fora do seu escopo.' }, 403);
+      if (actorRole === 'rh' && !scopeIds.length) return json({ error: 'Servidor fora do seu escopo.' }, 403);
       const { data: employee } = await admin.from('servidores').select('lotacao_id').eq('id', employeeId).single();
-      if (!employee || (actor.role === 'rh' && !scopeIds.includes(employee.lotacao_id))) return json({ error: 'Servidor fora do seu escopo.' }, 403);
+      if (!employee || (actorRole === 'rh' && !scopeIds.includes(employee.lotacao_id))) return json({ error: 'Servidor fora do seu escopo.' }, 403);
       const { data, error } = await admin.from('employee_assignment_history').select('id,previous_employment_type,new_employment_type,previous_active,new_active,reason,changed_at,changed_by:profiles(full_name),previous_lotacao:lotacoes!employee_assignment_history_previous_lotacao_id_fkey(name),new_lotacao:lotacoes!employee_assignment_history_new_lotacao_id_fkey(name),previous_cargo:cargos!employee_assignment_history_previous_cargo_id_fkey(name),new_cargo:cargos!employee_assignment_history_new_cargo_id_fkey(name),previous_funcao:funcoes!employee_assignment_history_previous_funcao_id_fkey(name),new_funcao:funcoes!employee_assignment_history_new_funcao_id_fkey(name)').eq('servidor_id', employeeId).order('changed_at', { ascending: false });
       if (error) throw error;
       return json({ history: data || [] });
     }
 
     if (action === 'save-location') {
-      const { data, error } = await admin.rpc('manage_location_registry', { actor_id: identity.user.id, target_id: payload.id || null, target_name: String(payload.name ?? ''), target_code: String(payload.code ?? ''), target_unit_type: String(payload.unit_type ?? 'unidade'), target_parent_id: payload.parent_id || null, target_active: payload.active !== false, responsible_ids: Array.isArray(payload.responsible_ids) ? payload.responsible_ids : [] });
+      const { data, error } = await scoped.rpc('manage_location_registry', { actor_id: identity.user.id, target_id: payload.id || null, target_name: String(payload.name ?? ''), target_code: String(payload.code ?? ''), target_unit_type: String(payload.unit_type ?? 'unidade'), target_parent_id: payload.parent_id || null, target_active: payload.active !== false, responsible_ids: Array.isArray(payload.responsible_ids) ? payload.responsible_ids : [] });
       if (error) throw error; return json({ id: data });
     }
     if (action === 'save-reference') {
-      const { data, error } = await admin.rpc('manage_reference_registry', { actor_id: identity.user.id, registry_kind: String(payload.kind ?? ''), target_id: payload.id || null, target_name: String(payload.name ?? '') });
+      const { data, error } = await scoped.rpc('manage_reference_registry', { actor_id: identity.user.id, registry_kind: String(payload.kind ?? ''), target_id: payload.id || null, target_name: String(payload.name ?? '') });
       if (error) throw error; return json({ id: data });
     }
     if (action === 'save-employee') {
-      const { data, error } = await admin.rpc('manage_employee_registry', {
+      const { data, error } = await scoped.rpc('manage_employee_registry', {
         actor_id: identity.user.id, target_id: payload.id || null,
         target_full_name: String(payload.full_name ?? ''), target_registration: String(payload.registration ?? ''),
         target_cpf: digits(payload.cpf), target_birth_date: payload.birth_date || null,

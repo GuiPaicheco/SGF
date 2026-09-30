@@ -2,9 +2,9 @@
 
 Backlog ativo do sistema. Itens entregues e validados são removidos; o histórico permanece no Git.
 
-Última revisão completa: 29/09/2026, após a entrega do calendário visual e dinâmico de escala por funcionário, lotação, cargo e função.
+Última revisão: 30/09/2026, após a integração de cadastros, escala nominal, notificações e arquivamento.
 
-**Total:** 15 pendências.
+**Total:** ver itens abaixo.
 
 ## Homologação externa
 
@@ -22,14 +22,19 @@ Roteiro preparado em `docs/HOMOLOGACAO_REGRAS.md`; a conclusão depende do aceit
 
 - [ ] Tornar os estados de validação compreensíveis sem depender apenas de verde e vermelho.
 - [ ] Validar responsividade e alinhamento em celular, tablet e desktop.
-- [ ] Executar testes ponta a ponta dos perfis servidor, diretor, RH e administrador, além dos fluxos públicos.
+- [ ] Executar testes ponta a ponta dos acessos Público, Servidor, RH e Administrador, incluindo um CPF com os três acessos autenticados.
 - [ ] Adicionar testes automatizados para datas, permissões, autenticação e transições de situação.
 - [ ] Revisar textos, acentuação, mensagens de erro e instruções antes da homologação.
-- [ ] Exibir na parte superior do cabeçalho o Nome, Lotação e Tipo de Acesso do usuário.
 
 ## Etapa 3 — Publicação e produção
 
+- [ ] Versionar o esquema inicial do Supabase e validar a instalação completa das migrations em um projeto vazio.
+- [ ] Após o aceite do RH, recalcular e validar no servidor o direito, o fracionamento e as datas de todos os pedidos, inclusive reprogramações.
+- [ ] Conferir pedidos de banco de horas já concluídos antes da separação entre saldo declarado e horas solicitadas; reconciliar eventuais débitos com trilha de auditoria.
+- [ ] Separar a configuração de homologação e produção (URL, chave publicável, redirects e CSP) e documentar o processo de publicação de cada ambiente.
 - [ ] Ativar a proteção contra senhas vazadas no Supabase Auth.
+- [ ] Confirmar no Supabase Auth se a política de comprimento mínimo aceita as senhas temporárias de 4/6/8 caracteres. Homologar a criação manual e a troca forçada para cada maior acesso.
+- [ ] Definir com o responsável a lotação CNES e o nome pessoal da conta administrativa legada `admin`, que ainda tem cadastro provisório. O sistema já permite escolher sua lotação em **Cadastros → Usuários e acessos → Minha lotação**.
 - [ ] Conectar o repositório ao Netlify e homologar o primeiro deploy conforme `docs/HOSPEDAGEM.md`.
 - [ ] Definir o domínio de produção e cadastrá-lo em **Site URL** e **Redirect URLs** no Supabase Auth.
 - [ ] Restringir o CORS das Edge Functions ao domínio de produção e à política aprovada para Deploy Previews.

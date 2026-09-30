@@ -19,9 +19,11 @@ O frontend contém somente a URL do projeto e a chave publicável do Supabase. N
 ## Validação após o deploy
 
 - Abrir a tela inicial e confirmar que logo, estilos e JavaScript carregam sem erros.
-- Enviar uma solicitação sem login e guardar o protocolo retornado.
+- Fazer uma simulação rápida sem login e confirmar que não há botão de envio nem coleta de dados pessoais.
+- Confirmar que `submit-request` rejeita envio sem sessão com HTTP 401.
 - Entrar como servidor, criar uma solicitação e consultar **Meus pedidos**.
-- Entrar como diretor, RH e administrador, confirmando o escopo de cada perfil.
+- Entrar pelo CPF com uma conta que possua Servidor, RH e Administrador; conferir a escolha do acesso, a troca entre áreas e o escopo de cada uma.
+- Entrar e recuperar a senha pelo login `admin` em uma conta sem CPF.
 - Confirmar no navegador que as respostas possuem CSP, `X-Content-Type-Options`, `X-Frame-Options` e `Referrer-Policy`.
 - Tentar acessar `/supabase/migrations/` e `/docs/`; esses caminhos não devem publicar arquivos internos.
 - Testar impressão e responsividade nos navegadores usados pela Prefeitura.

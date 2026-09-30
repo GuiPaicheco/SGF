@@ -2,12 +2,16 @@ import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-sgf-role',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
+const inclusionLocation = (item: { servidor?: { lotacao_id?: string | null } | { lotacao_id?: string | null }[] | null }) => {
+  const employee = Array.isArray(item.servidor) ? item.servidor[0] : item.servidor;
+  return employee?.lotacao_id || null;
+};
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -20,15 +24,16 @@ Deno.serve(async request => {
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const { data: identity, error: identityError } = await admin.auth.getUser(token);
     if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
-    const { data: profile } = await admin.from('profiles').select('role,must_change_password').eq('id', identity.user.id).single();
-    if (!profile || !['administrador', 'rh'].includes(profile.role) || profile.must_change_password) {
+    const { data: profile } = await admin.from('profiles').select('roles,must_change_password').eq('id', identity.user.id).single();
+    const actorRole = request.headers.get('x-sgf-role') || '';
+    if (!profile?.roles?.includes(actorRole) || !['administrador', 'rh'].includes(actorRole) || profile.must_change_password) {
       return json({ error: 'Acesso não autorizado.' }, 403);
     }
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
 
     if (action === 'list') {
-      const { data: ownScopes } = profile.role === 'rh'
+      const { data: ownScopes } = actorRole === 'rh'
         ? await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id)
         : { data: [] };
       const scopeIds = new Set((ownScopes || []).map(scope => scope.lotacao_id));
@@ -40,8 +45,11 @@ Deno.serve(async request => {
       ]);
       if (inclusionError || locationError) throw inclusionError || locationError;
       return json({
-        inclusions: profile.role === 'rh' ? (inclusions || []).filter(item => item.servidor?.lotacao_id && scopeIds.has(item.servidor.lotacao_id)) : inclusions,
-        locations: profile.role === 'rh' ? (locations || []).filter(location => scopeIds.has(location.id)) : locations,
+        inclusions: actorRole === 'rh' ? (inclusions || []).filter(item => {
+          const location = inclusionLocation(item);
+          return location && scopeIds.has(location);
+        }) : inclusions,
+        locations: actorRole === 'rh' ? (locations || []).filter(location => scopeIds.has(location.id)) : locations,
       });
     }
 
@@ -52,7 +60,7 @@ Deno.serve(async request => {
     if (!inclusion || !['pendente', 'em_analise'].includes(inclusion.status)) {
       return json({ error: 'Pendência não encontrada ou já concluída.' }, 409);
     }
-    if (profile.role === 'rh') {
+    if (actorRole === 'rh') {
       const { data: employee } = await admin.from('servidores').select('lotacao_id').eq('id', inclusion.servidor_id).single();
       const { data: ownScope } = employee?.lotacao_id
         ? await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id).eq('lotacao_id', employee.lotacao_id).maybeSingle()
@@ -66,7 +74,7 @@ Deno.serve(async request => {
     const positionName = String(payload.position ?? inclusion.requested_position ?? '').trim();
     const employmentType = String(payload.employment_type ?? inclusion.requested_employment_type ?? '').trim();
     if (action === 'approve' && (!locationId || !positionName || !employmentType)) return json({ error: 'Informe lotação, cargo e vínculo.' }, 400);
-    if (action === 'approve' && profile.role === 'rh') {
+    if (action === 'approve' && actorRole === 'rh') {
       const { data: allowedScope } = await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id).eq('lotacao_id', locationId).maybeSingle();
       if (!allowedScope) return json({ error: 'A lotação selecionada não pertence ao seu escopo.' }, 403);
     }

@@ -1,5 +1,5 @@
 [build]
-  command = "mkdir -p dist/assets && cp index.html logo.png dist/ && cp assets/app.css assets/calendar.css assets/app.js dist/assets/"
+  command = "mkdir -p dist/assets && cp index.html logo.png dist/ && cp assets/*.css assets/*.js dist/assets/"
   publish = "dist"
 
 [build.environment]

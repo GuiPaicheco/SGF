@@ -14,6 +14,7 @@ Roteiro para validação formal pelo RH. Registrar em cada caso a matrícula de 
 | Calendário oficial | feriado e ponto facultativo no intervalo | dias não consumidos e retorno |
 | Day-off de aniversário | aniversário dentro e fora do intervalo | marcação automática sem consumo |
 | Banco de horas | saldo suficiente e insuficiente | jornada, conversão, validação e bloqueio |
+| Simulação Rápida pública | férias e banco de horas em dias úteis e corridos, calculados tanto pela data de início quanto pela data de retorno, com fim de semana, feriado e aniversário no intervalo | sem dados pessoais e sem envio; dias corridos contam todos os dias, dias úteis desconsideram os não úteis, retorno em dia útil e day-off ignorado |
 
 ## Critérios de aceite
 
