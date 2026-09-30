@@ -18,3 +18,19 @@ jobs:
           node-version: 24
       - name: Executar testes automatizados
         run: node --test tests/*.test.mjs
+
+  migrations:
+    name: Validar banco vazio
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.118.0
+      - name: Iniciar banco local e aplicar todas as migrations
+        run: |
+          supabase db start
+          supabase db reset

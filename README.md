@@ -78,13 +78,13 @@ Esses comandos verificam a sintaxe do frontend, a simulação rápida, os quatro
 ## Implantação e configuração
 
 1. Preparar um projeto Supabase de homologação, credenciais individuais e cadastros fictícios.
-2. Conferir a compatibilidade do esquema inicial do banco. **A primeira migration deste repositório pressupõe tabelas preexistentes** (`profiles`, `servidores`, `lotacoes`, `vacation_requests` e outras); ainda falta versionar uma baseline para criar o banco do zero. Não aplique as migrations em um projeto vazio sem essa etapa.
+2. A migration `20260928140000_sgf_baseline.sql` cria as entidades iniciais em um projeto vazio. O GitHub Actions inicia um Supabase local e reaplica toda a cadeia de migrations a cada alteração; mantenha esse job aprovado antes de publicar mudanças de banco.
 3. Antes da migration `20260929234326_cpf_multi_access.sql`, conferir o CPF das contas vinculadas a servidores e corrigir divergências na base. Aplicar também `20260930002220_restore_login_alias.sql`: ela preserva o login `admin`, cria identificadores para contas sem login e passa a atribuir login às novas contas. Uma conta sem CPF pode entrar por login, mas precisa de CPF validado para reunir acessos pela mesma identidade. Aplicar as migrations em ordem e publicar **todas** as Edge Functions alteradas na mesma janela da mudança. Configurar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `SUPABASE_ANON_KEY` nas funções que as usam. Não copiar segredos para o frontend.
 4. Conferir URL e chave publicável em `assets/app.js`, políticas de RLS, domínios de autenticação, redirects e CSP. Configurar calendário e cadastros institucionais.
 5. Seguir [HOSPEDAGEM.md](docs/HOSPEDAGEM.md) para publicar e validar o Netlify. A pasta `dist/` contém somente os arquivos do site; migrations e documentos operacionais não são publicados.
 6. Executar a [homologação de regras](docs/HOMOLOGACAO_REGRAS.md), os testes por perfil e a revisão de segurança antes de qualquer uso real.
 
-O frontend usa `@supabase/supabase-js` via CDN, fixado na versão `2.117.2`; as funções usam a mesma versão via importação `npm:` no Deno. A configuração atual aponta para um projeto Supabase específico e **não oferece troca automática de ambiente**.
+O frontend usa `@supabase/supabase-js` via CDN, fixado na versão `2.117.2`; as funções usam a mesma versão via importação `npm:` no Deno. A configuração atual aponta para o projeto Supabase do piloto; a separação das credenciais publicáveis e dos domínios do ambiente definitivo continua obrigatória antes da produção institucional.
 
 ## Segurança e dados pessoais
 

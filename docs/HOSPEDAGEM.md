@@ -2,6 +2,8 @@
 
 O SGF é uma aplicação estática. O Netlify deve publicar somente a pasta `dist`, gerada pelo comando definido em `netlify.toml`. Assim, migrations, funções Supabase e documentos internos não ficam acessíveis pelo site.
 
+O repositório está conectado ao projeto Netlify `sgfbetim`. O deploy contínuo da branch `main` está ativo em `https://sgfbetim.netlify.app`; essa URL é do piloto e não substitui a definição do domínio institucional definitivo.
+
 ## Publicação recomendada
 
 1. No Netlify, selecione **Add new site > Import an existing project** e conecte o repositório `GuiPaicheco/SGF`.

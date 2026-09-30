@@ -19,7 +19,11 @@ const validCPF = (value: string) => {
   return true;
 };
 const institutionalEmail = (value: string) => /^[^\s@]+@betim\.mg\.gov\.br$/i.test(value);
-const defaultPassword = (roles: string[]) => roles.includes('administrador') ? '12345678' : roles.includes('rh') ? '123456' : '1234';
+const temporaryPassword = () => {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  return `Sg1!${[...bytes].map(value => alphabet[value % alphabet.length]).join('')}`;
+};
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -70,7 +74,8 @@ Deno.serve(async request => {
       if (!location) return json({ error: 'Selecione uma lotação ativa.' }, 400);
       const { data: duplicate } = await admin.from('profiles').select('id').eq('cpf', cpf).maybeSingle();
       if (duplicate) return json({ error: 'Este CPF já possui conta. Edite os acessos da conta existente.' }, 409);
-      const { data: created, error: authError } = await admin.auth.admin.createUser({ email, password: defaultPassword(roles), email_confirm: true, user_metadata: { full_name: name }, app_metadata: { app_roles: roles } });
+      const initialPassword = temporaryPassword();
+      const { data: created, error: authError } = await admin.auth.admin.createUser({ email, password: initialPassword, email_confirm: true, user_metadata: { full_name: name }, app_metadata: { app_roles: roles } });
       if (authError || !created.user) return json({ error: authError?.message || 'Não foi possível criar a conta. Confira a política de senhas do Supabase.' }, 400);
       const accountId = created.user.id;
       try {
@@ -84,7 +89,7 @@ Deno.serve(async request => {
           if (scopeError) throw scopeError;
         }
         await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'user_created', entity_type: 'profile', entity_id: accountId, new_value: { roles, lotacao_id: locationId } });
-        return json({ ok: true, id: accountId });
+        return json({ ok: true, id: accountId, temporary_password: initialPassword });
       } catch (error) {
         await admin.auth.admin.deleteUser(accountId);
         throw error;
@@ -97,12 +102,13 @@ Deno.serve(async request => {
       const { data: target } = await admin.from('profiles').select('id,roles,disabled_at').eq('id', targetId).maybeSingle();
       if (!target || target.disabled_at) return json({ error: 'Conta indisponível.' }, 404);
       if (action === 'reset-password') {
-        const { error } = await admin.auth.admin.updateUserById(targetId, { password: defaultPassword(target.roles || []) });
+        const initialPassword = temporaryPassword();
+        const { error } = await admin.auth.admin.updateUserById(targetId, { password: initialPassword });
         if (error) return json({ error: error.message }, 400);
         const { error: profileError } = await admin.from('profiles').update({ must_change_password: true }).eq('id', targetId);
         if (profileError) throw profileError;
         await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'password_reset', entity_type: 'profile', entity_id: targetId });
-        return json({ ok: true });
+        return json({ ok: true, temporary_password: initialPassword });
       }
       if (target.roles?.includes('administrador')) {
         const { data: others } = await admin.from('profiles').select('id').contains('roles', ['administrador']).is('disabled_at', null).neq('id', targetId);
