@@ -5,8 +5,8 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+const json = (body: unknown, status = 200, extraHeaders: Record<string, string> = {}) => new Response(JSON.stringify(body), {
+  status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...extraHeaders },
 });
 const digits = (value: unknown) => String(value ?? '').replace(/\D/g, '');
 const sha256 = async (value: string) => {
@@ -67,13 +67,34 @@ Deno.serve(async request => {
     const cpfInput = /^[\d.\-\s]+$/.test(identifier) && validCpf(cpf);
     const loginInput = /^[a-z0-9._-]{3,40}$/.test(identifier);
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    const attemptKey = `access-auth:${await sha256(`${ip}:${action}:${cpfInput ? cpf : identifier}`)}`;
-    const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-    const { count } = await admin.from('submission_attempts').select('id', { count: 'exact', head: true })
-      .eq('ip_hash', attemptKey).eq('accepted', false).gte('attempted_at', since);
-    if ((count ?? 0) >= 8) return json({ error: 'Muitas tentativas. Aguarde 15 minutos.' }, 429);
-    const { data: attempt } = await admin.from('submission_attempts')
-      .insert({ ip_hash: attemptKey, accepted: false }).select('id').single();
+    const identityKey = `access-auth:${await sha256(`${ip}:${action}:${cpfInput ? cpf : identifier}`)}`;
+    const ipKey = `access-auth-ip:${await sha256(`${ip}:${action}`)}`;
+    const beginAttempt = async (key: string, windowSeconds: number, maxFailures: number, cooldownSeconds: number) => {
+      const { data, error } = await admin.rpc('begin_access_attempt', {
+        target_key: key, target_window_seconds: windowSeconds,
+        target_max_failures: maxFailures, target_cooldown_seconds: cooldownSeconds,
+      });
+      if (error) throw error;
+      return data as { allowed: boolean; attempt_id?: number; retry_after?: number; reason?: string };
+    };
+    const attempts: number[] = [];
+    if (action === 'login') {
+      const globalLimit = await beginAttempt(ipKey, 60, 30, 1);
+      if (!globalLimit.allowed) {
+        const retryAfter = Math.max(1, Number(globalLimit.retry_after) || 1);
+        return json({ error: `Aguarde ${retryAfter} segundo(s) antes de tentar novamente.`, retry_after: retryAfter }, 429, { 'Retry-After': String(retryAfter) });
+      }
+      if (globalLimit.attempt_id) attempts.push(globalLimit.attempt_id);
+    }
+    const attempt = await beginAttempt(identityKey, 15 * 60, action === 'login' ? 5 : 8, action === 'login' ? 3 : 5);
+    if (!attempt.allowed) {
+      const retryAfter = Math.max(1, Number(attempt.retry_after) || 1);
+      return json({ error: `Muitas tentativas. Tente novamente em ${retryAfter} segundo(s).`, retry_after: retryAfter }, 429, { 'Retry-After': String(retryAfter) });
+    }
+    if (attempt.attempt_id) attempts.push(attempt.attempt_id);
+    const acceptAttempts = async () => {
+      if (attempts.length) await admin.from('submission_attempts').update({ accepted: true }).in('id', attempts);
+    };
 
     if (action === 'request-access') {
       const cpf = digits(payload.cpf);
@@ -85,7 +106,7 @@ Deno.serve(async request => {
       const unit = String(payload.unit ?? '').trim();
       const team = String(payload.team ?? '').trim() || 'Não se aplica';
       if (!fullName || !registration || !position || !unit || team.length > 120 || !validCpf(cpf) ||
-          !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || !/^[^\s@]+@betim\.mg\.gov\.br$/.test(email)) {
+        !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || !/^[^\s@]+@betim\.mg\.gov\.br$/.test(email)) {
         return json({ error: 'Confira os dados da solicitação de acesso.' }, 400);
       }
       const { error } = await admin.from('access_requests').insert({
@@ -96,7 +117,7 @@ Deno.serve(async request => {
         if (error.code === '23505') return json({ error: 'Já existe uma solicitação de acesso pendente para estes dados.' }, 409);
         throw error;
       }
-      if (attempt?.id) await admin.from('submission_attempts').update({ accepted: true }).eq('id', attempt.id);
+      await acceptAttempts();
       return json({ ok: true }, 202);
     }
 
@@ -112,7 +133,7 @@ Deno.serve(async request => {
           }
         }
       }
-      if (attempt?.id) await admin.from('submission_attempts').update({ accepted: true }).eq('id', attempt.id);
+      await acceptAttempts();
       return json({ ok: true, message: 'Se o acesso existir e possuir e-mail válido, enviaremos as instruções.' });
     }
 
@@ -147,7 +168,7 @@ Deno.serve(async request => {
     const access = await admin.from('profiles').select('roles').eq('id', profile.id).single();
     if (access.error && !missingColumn(access.error, 'roles')) throw access.error;
     const roles = Array.isArray(access.data?.roles) && access.data.roles.length ? access.data.roles : [profile.role];
-    if (attempt?.id) await admin.from('submission_attempts').update({ accepted: true }).eq('id', attempt.id);
+    await acceptAttempts();
     return json({
       access_token: signedIn.session.access_token,
       refresh_token: signedIn.session.refresh_token,

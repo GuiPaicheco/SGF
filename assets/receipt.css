@@ -1,57 +1,262 @@
-.receipt-card { display: grid; gap: 1.25rem; }
-.receipt { background: #fff; border: 1px solid #bfcac4; border-radius: 12px; color: #17211d; margin: auto; max-width: 800px; padding: 2rem; width: 100%; }
-.receipt-head { align-items: center; border-bottom: 3px solid #123c2f; display: flex; gap: 1.25rem; justify-content: flex-start; padding-bottom: 1rem; }
-.receipt-head img { height: auto; width: 120px; }
-.receipt-head div { display: grid; gap: .18rem; }
-.receipt-head span, .receipt-head small, .receipt span { color: #52625a; font-size: .76rem; }
-.receipt-head strong { color: #123c2f; font-size: 1.15rem; letter-spacing: .04em; }
-.receipt-protocol { background: #f2f6f3; display: grid; gap: 1px; grid-template-columns: 1.25fr 1fr 1fr; margin: 1rem 0; }
-.receipt-protocol div, .receipt-data div { background: #f8faf9; display: grid; gap: .2rem; padding: .7rem .8rem; }
-.receipt-protocol strong, .receipt-data strong { font-size: .9rem; overflow-wrap: anywhere; }
-.receipt h2 { font-size: 1.2rem; margin: 1rem 0 .65rem; }
-.receipt-data { display: grid; gap: 1px; grid-template-columns: 2fr 1fr; }
-.receipt-data-wide { grid-column: 1 / -1; }
-.receipt-periods { display: grid; gap: .55rem; margin: 1rem 0; }
-.receipt-period { border-left: 4px solid #267455; display: grid; gap: .2rem; padding: .55rem .8rem; }
-.receipt-period strong { font-size: .95rem; }
-.receipt-dayoff { border-left-color: #b67b10; }
-.receipt-notes { border: 1px solid #d9e1dc; border-radius: 8px; padding: .65rem .8rem; }
-.receipt-notes p { margin: .25rem 0 0; white-space: pre-wrap; }
-.receipt-warning { background: #fff7df; border-left: 4px solid #b67b10; font-size: .84rem; margin: 1rem 0; padding: .7rem .8rem; }
-.signature-grid { display: grid; gap: 2.5rem; grid-template-columns: 1fr 1fr; margin-top: 3.5rem; }
-.signature { border-top: 1px solid #17211d; display: grid; gap: .22rem; padding-top: .5rem; text-align: center; }
-.signature strong { font-size: .85rem; }
-.signature span, .signature small { font-size: .68rem; line-height: 1.35; }
-.receipt-footer { border-top: 1px solid #d9e1dc; color: #52625a; font-size: .68rem; margin-top: 1.25rem; padding-top: .6rem; text-align: center; }
-.receipt-tools { align-items: center; background: #eef4f0; border: 1px solid #d9e1dc; border-radius: 12px; display: flex; gap: 1rem; justify-content: space-between; margin: auto; max-width: 800px; padding: 1rem; width: 100%; }
-.receipt-tools h3, .receipt-tools p { margin: 0; }
-.receipt-tools p { color: #52625a; font-size: .84rem; margin-top: .25rem; }
+.receipt-card {
+  display: grid;
+  gap: 1.25rem;
+}
+.receipt {
+  background: #fff;
+  border: 1px solid #bfcac4;
+  border-radius: 12px;
+  color: #17211d;
+  margin: auto;
+  max-width: 800px;
+  padding: 2rem;
+  width: 100%;
+}
+.receipt-head {
+  align-items: center;
+  border-bottom: 3px solid #123c2f;
+  display: flex;
+  gap: 1.25rem;
+  justify-content: flex-start;
+  padding-bottom: 1rem;
+}
+.receipt-head img {
+  height: auto;
+  width: 120px;
+}
+.receipt-head div {
+  display: grid;
+  gap: 0.18rem;
+}
+.receipt-head span,
+.receipt-head small,
+.receipt span {
+  color: #52625a;
+  font-size: 0.76rem;
+}
+.receipt-head strong {
+  color: #123c2f;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+}
+.receipt-protocol {
+  background: #f2f6f3;
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  margin: 1rem 0;
+}
+.receipt-protocol div,
+.receipt-data div {
+  background: #f8faf9;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+}
+.receipt-protocol strong,
+.receipt-data strong {
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.receipt h2 {
+  font-size: 1.2rem;
+  margin: 1rem 0 0.65rem;
+}
+.receipt-data {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 2fr 1fr;
+}
+.receipt-data-wide {
+  grid-column: 1 / -1;
+}
+.receipt-periods {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1rem 0;
+}
+.receipt-period {
+  border-left: 4px solid #267455;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.55rem 0.8rem;
+}
+.receipt-period strong {
+  font-size: 0.95rem;
+}
+.receipt-dayoff {
+  border-left-color: #b67b10;
+}
+.receipt-notes {
+  border: 1px solid #d9e1dc;
+  border-radius: 8px;
+  padding: 0.65rem 0.8rem;
+}
+.receipt-notes p {
+  margin: 0.25rem 0 0;
+  white-space: pre-wrap;
+}
+.receipt-warning {
+  background: #fff7df;
+  border-left: 4px solid #b67b10;
+  font-size: 0.84rem;
+  margin: 1rem 0;
+  padding: 0.7rem 0.8rem;
+}
+.signature-grid {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 3.5rem;
+}
+.signature {
+  border-top: 1px solid #17211d;
+  display: grid;
+  gap: 0.22rem;
+  padding-top: 0.5rem;
+  text-align: center;
+}
+.signature strong {
+  font-size: 0.85rem;
+}
+.signature span,
+.signature small {
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+.receipt-footer {
+  border-top: 1px solid #d9e1dc;
+  color: #52625a;
+  font-size: 0.68rem;
+  margin-top: 1.25rem;
+  padding-top: 0.6rem;
+  text-align: center;
+}
+.receipt-tools {
+  align-items: center;
+  background: #eef4f0;
+  border: 1px solid #d9e1dc;
+  border-radius: 12px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: auto;
+  max-width: 800px;
+  padding: 1rem;
+  width: 100%;
+}
+.receipt-tools h3,
+.receipt-tools p {
+  margin: 0;
+}
+.receipt-tools p {
+  color: #52625a;
+  font-size: 0.84rem;
+  margin-top: 0.25rem;
+}
 
 @media (max-width: 680px) {
-  .receipt { padding: 1.1rem; }
-  .receipt-head { align-items: flex-start; }
-  .receipt-head img { width: 88px; }
-  .receipt-protocol, .receipt-data, .signature-grid { grid-template-columns: 1fr; }
-  .receipt-data-wide { grid-column: auto; }
-  .signature-grid { gap: 3.5rem; }
-  .receipt-tools { align-items: stretch; flex-direction: column; }
+  .receipt {
+    padding: 1.1rem;
+  }
+  .receipt-head {
+    align-items: flex-start;
+  }
+  .receipt-head img {
+    width: 88px;
+  }
+  .receipt-protocol,
+  .receipt-data,
+  .signature-grid {
+    grid-template-columns: 1fr;
+  }
+  .receipt-data-wide {
+    grid-column: auto;
+  }
+  .signature-grid {
+    gap: 3.5rem;
+  }
+  .receipt-tools {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 @media print {
-  @page { margin: 8mm; size: A4 portrait; }
-  html, body { background: #fff !important; height: auto; }
-  .site-header, .progress, .workspace-nav, .site-footer, .no-print, .toast { display: none !important; }
-  .app { margin: 0; max-width: none; padding: 0; }
-  .card.receipt-card { border: 0; box-shadow: none; display: block; margin: 0; padding: 0; }
-  .receipt { border: 0; border-radius: 0; box-sizing: border-box; max-width: none; min-height: 275mm; padding: 7mm 9mm; print-color-adjust: exact; width: 100%; -webkit-print-color-adjust: exact; }
-  .receipt-head { padding-bottom: 3mm; }
-  .receipt-head img { width: 30mm; }
-  .receipt-protocol { margin: 3mm 0; }
-  .receipt-protocol div, .receipt-data div { padding: 2.2mm 3mm; }
-  .receipt h2 { margin: 3mm 0 2mm; }
-  .receipt-periods { gap: 1.5mm; margin: 3mm 0; }
-  .receipt-period { break-inside: avoid; padding: 2mm 3mm; }
-  .receipt-warning { margin: 3mm 0; padding: 2mm 3mm; }
-  .signature-grid { break-inside: avoid; gap: 14mm; margin-top: 19mm; }
-  .receipt-footer { margin-top: 5mm; }
+  @page {
+    margin: 8mm;
+    size: A4 portrait;
+  }
+  html,
+  body {
+    background: #fff !important;
+    height: auto;
+  }
+  .site-header,
+  .progress,
+  .workspace-nav,
+  .site-footer,
+  .no-print,
+  .toast {
+    display: none !important;
+  }
+  .app {
+    margin: 0;
+    max-width: none;
+    padding: 0;
+  }
+  .card.receipt-card {
+    border: 0;
+    box-shadow: none;
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+  .receipt {
+    border: 0;
+    border-radius: 0;
+    box-sizing: border-box;
+    max-width: none;
+    min-height: 275mm;
+    padding: 7mm 9mm;
+    print-color-adjust: exact;
+    width: 100%;
+    -webkit-print-color-adjust: exact;
+  }
+  .receipt-head {
+    padding-bottom: 3mm;
+  }
+  .receipt-head img {
+    width: 30mm;
+  }
+  .receipt-protocol {
+    margin: 3mm 0;
+  }
+  .receipt-protocol div,
+  .receipt-data div {
+    padding: 2.2mm 3mm;
+  }
+  .receipt h2 {
+    margin: 3mm 0 2mm;
+  }
+  .receipt-periods {
+    gap: 1.5mm;
+    margin: 3mm 0;
+  }
+  .receipt-period {
+    break-inside: avoid;
+    padding: 2mm 3mm;
+  }
+  .receipt-warning {
+    margin: 3mm 0;
+    padding: 2mm 3mm;
+  }
+  .signature-grid {
+    break-inside: avoid;
+    gap: 14mm;
+    margin-top: 19mm;
+  }
+  .receipt-footer {
+    margin-top: 5mm;
+  }
 }
