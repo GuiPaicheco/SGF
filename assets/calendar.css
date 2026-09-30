@@ -45,4 +45,9 @@
   .calendar-heading { flex-direction: column; }
   .calendar-legend { justify-content: flex-start; }
   .request-calendar { padding: .85rem; }
+  .calendar-grid { grid-template-columns: minmax(0, 1fr); }
+  .calendar-month { min-width: 0; padding: .7rem; }
+  .calendar-weekdays,
+  .calendar-days { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .calendar-day { min-height: 1.75rem; }
 }

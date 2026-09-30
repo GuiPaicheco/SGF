@@ -59,4 +59,11 @@ test('um CPF com três acessos escolhe a área e troca o contexto das consultas'
   assert.equal(headers.at(-1), 'rh');
   assert.equal(clientsCreated, 1, 'a troca de acesso preserva a sessão do cliente');
   assert.match(app.innerHTML, /Solicitações/);
+  await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
+  await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'administrador' } } : null } });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(saved.get('sgf-access-role'), 'administrador');
+  await roleFetch('/rest/v1/vacation_requests');
+  assert.equal(headers.at(-1), 'administrador');
+  assert.match(app.innerHTML, /Painel administrativo/);
 });

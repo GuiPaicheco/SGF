@@ -25,3 +25,27 @@
 .header-user{display:grid;gap:.1rem;text-align:right;max-width:300px}.header-user strong{font-size:.9rem}.header-user small{font-size:.72rem;opacity:.83;line-height:1.25}.catalog-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1.5rem}.catalog-tabs .button[aria-current="page"]{background:var(--green-900);color:#fff}@media(max-width:760px){.header-user{order:3;width:100%;max-width:none;text-align:left}.header-inner{flex-wrap:wrap}}
 .notification-row>div{flex:1}.notification-row p{margin:.4rem 0;color:var(--muted);line-height:1.4}.notification-row .actions{margin-top:.6rem}.notification-row strong{text-align:left}
 .minimum-scale-card{margin-top:1.5rem}.minimum-list{margin:1.25rem 0;max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:.5rem}.scale-day.is-minimum{box-shadow:inset 0 0 0 2px var(--green-700)}
+
+/* Validação acessível: texto, ícone, forma e atributos ARIA complementam as cores. */
+.control.valid{border-color:var(--ok);background-color:var(--ok-bg);box-shadow:inset 4px 0 0 var(--ok)}
+.control.invalid{border-color:var(--danger);border-style:dashed;background-color:var(--danger-bg);box-shadow:inset 4px 0 0 var(--danger)}
+.validation-state{display:block;font-weight:700;line-height:1.4;min-height:0!important}
+.validation-success{color:var(--ok)!important}
+.validation-error{color:var(--danger)!important}
+.validation-error::before{content:"⚠ ";}
+.control[aria-invalid="true"]:focus{box-shadow:0 0 0 3px rgba(180,35,24,.18),inset 4px 0 0 var(--danger)}
+
+@media(max-width:760px){
+  .app{padding:1.25rem .75rem 3rem}.card{border-radius:16px}
+  .summary-row{align-items:flex-start;flex-direction:column;gap:.35rem}.summary-row strong{text-align:left}
+  .actions{align-items:stretch}.actions>.button{flex:1 1 12rem}
+  .toolbar{align-items:stretch}.toolbar>.actions{margin-top:0;width:100%}
+}
+@media(max-width:420px){
+  .header-inner{gap:.5rem;width:100%}.brand-logo{width:72px}.brand-copy{min-width:0}.brand-copy strong{font-size:1.1rem}
+  #home-action{display:none}
+  .hero,.choice-grid,.choice{max-width:100%;min-width:0;width:100%}
+  .hero h1,.choice span,.choice strong{overflow-wrap:anywhere}
+  .header-inner .button{min-height:40px;padding:.55rem .6rem}.actions>.button{width:100%}
+  .card{padding:1rem}.toast{left:.75rem;right:.75rem;max-width:none}
+}

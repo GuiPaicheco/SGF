@@ -60,7 +60,7 @@ Para um ambiente independente, configure a URL e a chave publicável do Supabase
 | `supabase/migrations/` | Alterações versionadas do banco existente |
 | `netlify.toml` | Build estático, publicação e cabeçalhos HTTP |
 | `docs/` | Operação, hospedagem, homologação, arquitetura e pendências |
-| `tests/` | Testes locais da validação estrutural de pedidos |
+| `tests/` | Testes de interface, acessos, permissões, situações e consistência dos pedidos |
 
 O mapa de componentes, entidades e permissões está em [ARQUITETURA.md](docs/ARQUITETURA.md). O roteiro operacional detalhado está em [OPERACAO.md](docs/OPERACAO.md).
 
@@ -73,7 +73,7 @@ node --check assets/app.js
 node --test tests/*.test.mjs
 ```
 
-Esses comandos verificam a sintaxe do frontend, a simulação rápida e casos de consistência estrutural dos períodos enviados. Eles **não** substituem testes de integração com Supabase, testes de perfis ou a homologação dos cálculos pelo RH.
+Esses comandos verificam a sintaxe do frontend, a simulação rápida, os quatro contextos de acesso, permissões, mudanças de situação, acessibilidade básica, responsividade estrutural e consistência dos períodos enviados. O GitHub Actions executa a mesma suíte em cada envio à `main` e em pull requests. Os resultados da revisão visual e da conferência remota estão em [VALIDACAO_UI.md](docs/VALIDACAO_UI.md). Os testes não substituem a homologação dos cálculos pelo RH nem a validação pós-publicação nos navegadores institucionais.
 
 ## Implantação e configuração
 

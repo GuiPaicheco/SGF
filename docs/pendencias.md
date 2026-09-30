@@ -4,7 +4,7 @@ Backlog ativo do sistema. Itens entregues e validados são removidos; o históri
 
 Última revisão completa: 30/09/2026, confrontando frontend, testes, documentação, migrations, Edge Functions ativas e banco remoto.
 
-**Total:** 16 pendências.
+**Total:** 11 pendências.
 
 ## Homologação externa
 
@@ -12,15 +12,7 @@ Backlog ativo do sistema. Itens entregues e validados são removidos; o históri
 
 Roteiro preparado em `docs/HOMOLOGACAO_REGRAS.md`; a conclusão depende do aceite formal do RH.
 
-## Etapa 1 — UI, acessibilidade e testes
-
-- [ ] Tornar os estados de validação compreensíveis sem depender apenas de verde e vermelho.
-- [ ] Validar responsividade e alinhamento em celular, tablet e desktop.
-- [ ] Executar testes ponta a ponta dos acessos Público, Servidor, RH e Administrador, incluindo um CPF com os três acessos autenticados.
-- [ ] Completar os testes automatizados de permissões e transições de situação; datas, validação estrutural, escolha de acesso e login administrativo já possuem cobertura básica.
-- [ ] Revisar textos, acentuação, mensagens de erro e instruções antes da homologação.
-
-## Etapa 2 — Publicação e produção
+## Etapa 1 — Publicação e produção
 
 - [ ] Versionar o esquema inicial do Supabase e validar a instalação completa das migrations em um projeto vazio.
 - [ ] Após o aceite do RH, recalcular e validar no servidor o direito, o fracionamento e as datas de todos os pedidos, inclusive reprogramações.
@@ -35,6 +27,6 @@ Roteiro preparado em `docs/HOMOLOGACAO_REGRAS.md`; a conclusão depende do aceit
 
 ## Encerramento
 
-Depois das duas etapas e da homologação externa, executar a auditoria final de integridade e segurança do código e do banco.
+Depois da etapa de publicação e da homologação externa, executar a auditoria final de integridade e segurança do código e do banco.
 
 > Preservar a identidade visual, a responsividade, a documentação e o versionamento contínuo no GitHub em todas as entregas.
