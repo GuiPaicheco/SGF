@@ -78,18 +78,15 @@ Deno.serve(async request => {
       return data as { allowed: boolean; attempt_id?: number; retry_after?: number; reason?: string };
     };
     const attempts: number[] = [];
-    if (action === 'login') {
-      const globalLimit = await beginAttempt(ipKey, 60, 30, 1);
-      if (!globalLimit.allowed) {
-        const retryAfter = Math.max(1, Number(globalLimit.retry_after) || 1);
-        return json({ error: `Aguarde ${retryAfter} segundo(s) antes de tentar novamente.`, retry_after: retryAfter }, 429, { 'Retry-After': String(retryAfter) });
-      }
-      if (globalLimit.attempt_id) attempts.push(globalLimit.attempt_id);
-    }
-    const attempt = await beginAttempt(identityKey, 15 * 60, action === 'login' ? 5 : 8, action === 'login' ? 3 : 5);
+    const attempt = action === 'login'
+      ? await beginAttempt(ipKey, 60, 0, 3)
+      : await beginAttempt(identityKey, 15 * 60, 8, 5);
     if (!attempt.allowed) {
       const retryAfter = Math.max(1, Number(attempt.retry_after) || 1);
-      return json({ error: `Muitas tentativas. Tente novamente em ${retryAfter} segundo(s).`, retry_after: retryAfter }, 429, { 'Retry-After': String(retryAfter) });
+      const error = action === 'login'
+        ? `Aguarde ${retryAfter} segundo(s) antes de tentar novamente.`
+        : `Muitas tentativas. Tente novamente em ${retryAfter} segundo(s).`;
+      return json({ error, retry_after: retryAfter }, 429, { 'Retry-After': String(retryAfter) });
     }
     if (attempt.attempt_id) attempts.push(attempt.attempt_id);
     const acceptAttempts = async () => {

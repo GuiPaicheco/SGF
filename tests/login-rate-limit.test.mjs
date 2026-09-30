@@ -18,9 +18,16 @@ test('limitação do login é atômica e protegida no banco', async () => {
     read('supabase/migrations/20260930160000_access_login_rate_limit.sql'),
   ]);
   assert.match(edge, /begin_access_attempt/);
+  assert.match(edge, /beginAttempt\(ipKey, 60, 0, 3\)/);
   assert.match(edge, /target_max_failures: maxFailures/);
   assert.match(edge, /'Retry-After'/);
   assert.match(migration, /pg_advisory_xact_lock/);
   assert.match(migration, /revoke all on function public\.begin_access_attempt/);
   assert.match(migration, /grant execute[^;]+service_role/s);
+});
+
+test('login não possui bloqueio acumulado por número de falhas', async () => {
+  const migration = await read('supabase/migrations/20260930170000_login_cooldown_without_attempt_limit.sql');
+  assert.match(migration, /target_max_failures not between 0 and 1000/);
+  assert.match(migration, /if target_max_failures > 0 then/);
 });

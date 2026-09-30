@@ -12,8 +12,8 @@ O CPF em `servidores.cpf` deve conter somente 11 dígitos. Matrícula, CPF e dat
 
 - O botão de entrada entra em contagem regressiva por pelo menos 3 segundos após uma falha.
 - O servidor aplica o mesmo intervalo de forma atômica, portanto recarregar a página ou chamar a API diretamente não contorna o bloqueio.
-- Após 5 falhas para o mesmo login/CPF em 15 minutos, novas tentativas aguardam o restante dessa janela.
-- Cada origem também fica limitada a 30 falhas de login por minuto, mesmo alternando os identificadores.
+- Não existe bloqueio acumulado por quantidade de tentativas: terminado o intervalo de 3 segundos, o usuário pode tentar novamente.
+- O intervalo é aplicado por origem mesmo quando o usuário alterna o login ou CPF informado.
 - Respostas bloqueadas usam HTTP `429`, cabeçalho `Retry-After` e informam no botão quantos segundos faltam.
 
 O público usa somente a **Simulação Rápida**. Servidor, RH e Administrador entram com **login ou CPF e senha** na mesma tela. A Edge Function `access-auth` resolve o identificador sem expor o e-mail, limita tentativas e devolve a sessão somente quando a senha está correta. Uma identidade pode possuir os três acessos; nesse caso, a pessoa escolhe a área após autenticar e pode trocá-la na navegação.
