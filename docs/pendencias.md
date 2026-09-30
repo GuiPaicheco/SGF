@@ -2,7 +2,7 @@
 
 Backlog ativo do sistema. Itens entregues e validados são removidos; o histórico permanece no Git.
 
-Última revisão completa: 30/09/2026, confrontando frontend, testes, documentação, migrations, Edge Functions ativas e banco remoto. Nesta revisão também foram validados o cadastro de equipe, o ciclo histórico da escala mínima, as notificações por alteração de feriado e o limitador atômico de login; como foram concluídos, não permanecem no backlog.
+Última revisão completa: 30/09/2026, confrontando frontend, testes, documentação, migrations, Edge Functions ativas e banco remoto. Nesta revisão também foram validados o cadastro de equipe, o ciclo histórico da escala mínima, as notificações por alteração de feriado, o limitador atômico de login e a nova visão diária e mensal do calendário de escala; como foram concluídos, não permanecem no backlog.
 
 **Total:** 11 pendências.
 

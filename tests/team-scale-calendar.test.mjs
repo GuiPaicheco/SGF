@@ -29,6 +29,18 @@ test('escala mínima mantém dias vazios, origem do ciclo e edição nominal', a
   assert.match(migration, /primary key \(lotacao_id, scale_date\)/);
 });
 
+test('calendário de escala oferece leitura mensal e detalhamento do dia', async () => {
+  const [app, scale] = await Promise.all([read('assets/app.js'), read('assets/scale.css')]);
+  assert.match(app, /class="scale-day-panel" aria-live="polite"/);
+  assert.match(app, /Afastamentos e retornos/);
+  assert.match(app, /Escala mínima e eventos/);
+  assert.match(app, /data-scale-date=/);
+  assert.match(app, /cargo\?\.name[^\n]+team_name[^\n]+funcao\?\.name/);
+  assert.match(scale, /\.scale-day\.is-start/);
+  assert.match(scale, /\.scale-person-tags/);
+  assert.match(scale, /\.scale-grid thead \.is-today/);
+});
+
 test('feriado novo notifica todos os envolvidos em afastamentos afetados', async () => {
   const migration = await read('supabase/migrations/20260930143000_team_scale_cycle_calendar_notifications.sql');
   assert.match(migration, /calendar_events_notify_affected/);
