@@ -8,7 +8,7 @@ const cors = {
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
-const allowedRoles = ['servidor', 'rh', 'administrador'];
+const allowedRoles = ['servidor', 'diretor', 'rh', 'administrador'];
 const digits = (value: unknown) => String(value ?? '').replace(/\D/g, '');
 const validCPF = (value: string) => {
   if (!/^\d{11}$/.test(value) || /^(\d)\1{10}$/.test(value)) return false;
@@ -79,12 +79,12 @@ Deno.serve(async request => {
       if (authError || !created.user) return json({ error: authError?.message || 'Não foi possível criar a conta. Confira a política de senhas do Supabase.' }, 400);
       const accountId = created.user.id;
       try {
-        const primaryRole = roles.includes('administrador') ? 'administrador' : roles.includes('rh') ? 'rh' : 'servidor';
+        const primaryRole = roles.includes('administrador') ? 'administrador' : roles.includes('rh') ? 'rh' : roles.includes('diretor') ? 'diretor' : 'servidor';
         const { error: profileError } = await admin.from('profiles').insert({ id: accountId, full_name: name, cpf, role: primaryRole, roles, login_identifier: registration.toLowerCase(), primary_lotacao_id: locationId, must_change_password: true });
         if (profileError) throw profileError;
         const { error: employeeError } = await admin.from('servidores').insert({ profile_id: accountId, full_name: name, matricula: registration, cpf, birth_date: birthDate, lotacao_id: locationId, employment_type: String(payload.employment_type || 'pendente'), team_name: String(payload.team || 'Não se aplica').trim() || 'Não se aplica', active: true, declared_position: String(payload.position || '') });
         if (employeeError) throw employeeError;
-        if (roles.includes('rh')) {
+        if (roles.some(role => ['diretor', 'rh'].includes(role))) {
           const { error: scopeError } = await admin.from('profile_scopes').insert({ profile_id: accountId, lotacao_id: locationId });
           if (scopeError) throw scopeError;
         }

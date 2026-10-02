@@ -152,3 +152,9 @@ Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastame
 - Executar Supabase Security Advisor após toda alteração de schema.
 - Testar restauração de backup antes do uso em produção.
 - Não utilizar dados reais em ambientes de demonstração.
+
+## Ambiente de demonstração
+
+O arquivo `supabase/seed-demo.sql` cria uma massa fictícia e idempotente para apresentações. Os registros usam os prefixos `DEMO` e `SGF-DEMO`, contemplam diferentes cargos, equipes, modalidades e situações, além de escala mínima, banco de horas e notificações. Execute-o somente no projeto destinado à demonstração ou homologação.
+
+Antes de apresentar, confira se os filtros estão limitados aos registros fictícios e se nenhuma informação pessoal aparece nas capturas de tela. A carga pode ser reaplicada para restaurar o cenário; ela não remove dados institucionais existentes.

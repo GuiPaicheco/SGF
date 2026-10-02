@@ -70,7 +70,7 @@ Deno.serve(async request => {
     if (action !== 'approve') return json({ error: 'Ação inválida.' }, 400);
 
     const roles: string[] = Array.isArray(payload.roles) ? [...new Set<string>(payload.roles.map((value: unknown) => String(value)))] : [];
-    if (!roles.length || roles.some(role => !['servidor', 'rh', 'administrador'].includes(role))) return json({ error: 'Selecione acessos válidos.' }, 400);
+    if (!roles.length || roles.some(role => !['servidor', 'diretor', 'rh', 'administrador'].includes(role))) return json({ error: 'Selecione acessos válidos.' }, 400);
     if (actorRole === 'rh' && (roles.length !== 1 || roles[0] !== 'servidor')) return json({ error: 'O RH pode aprovar somente acesso de Servidor.' }, 403);
     const scopes = Array.isArray(payload.scope_ids) ? [...new Set(payload.scope_ids.map(String))] : [];
     const { data: accessRequest } = await admin.from('access_requests')
@@ -103,7 +103,7 @@ Deno.serve(async request => {
       if (invited?.data.user) await admin.auth.admin.deleteUser(invited.data.user.id);
       if (finalizeError.message.includes('IDENTITY_CONFLICT')) return json({ error: 'CPF, matrícula ou nascimento divergem do cadastro funcional.' }, 409);
       if (finalizeError.message.includes('ACCOUNT_EXISTS')) return json({ error: 'Este servidor já possui uma conta vinculada.' }, 409);
-      if (finalizeError.message.includes('SCOPE_REQUIRED')) return json({ error: 'Selecione ao menos uma lotação para RH.' }, 400);
+      if (finalizeError.message.includes('SCOPE_REQUIRED')) return json({ error: 'Selecione ao menos uma lotação para Diretor ou RH.' }, 400);
       throw finalizeError;
     }
     const [{ data: account }, { data: granted }] = await Promise.all([

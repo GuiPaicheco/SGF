@@ -143,7 +143,7 @@ Deno.serve(async request => {
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
       const { data: passwordProfile } = await admin.from('profiles').select('roles,disabled_at').eq('id', identity.user.id).single();
       if (!passwordProfile || passwordProfile.disabled_at) return json({ error: 'Conta indisponível.' }, 403);
-      const min = passwordProfile.roles?.includes('administrador') ? 8 : passwordProfile.roles?.includes('rh') ? 6 : 4;
+      const min = passwordProfile.roles?.includes('administrador') ? 8 : passwordProfile.roles?.some((role: string) => ['diretor', 'rh'].includes(role)) ? 6 : 4;
       if (password.length < min) return json({ error: `Esta conta exige pelo menos ${min} caracteres.` }, 400);
       const { error: updateError } = await admin.auth.admin.updateUserById(identity.user.id, { password });
       if (updateError) throw updateError;

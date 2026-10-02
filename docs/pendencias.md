@@ -2,7 +2,7 @@
 
 Backlog ativo do sistema. Itens entregues e validados são removidos; o histórico permanece no Git.
 
-Última revisão completa: 30/09/2026, confrontando frontend, testes, documentação, migrations, Edge Functions ativas, banco remoto, integração contínua e publicação no Netlify.
+Última revisão completa: 02/10/2026, confrontando frontend, testes, documentação, migrations, Edge Functions ativas, banco remoto, integração contínua e publicação no Netlify.
 
 Nesta revisão foram concluídos e removidos do backlog:
 
@@ -10,6 +10,9 @@ Nesta revisão foram concluídos e removidos do backlog:
 - substituição das senhas provisórias fixas por credenciais aleatórias fortes, exibidas uma única vez;
 - conexão do repositório ao Netlify e primeira publicação da branch `main` em `https://sgfbetim.netlify.app`;
 - correção dos índices de chaves estrangeiras apontados pelos advisors do Supabase.
+- preparação de uma base demonstrativa reutilizável, com perfis, servidores, pedidos, aprovações, banco de horas, escala mínima e notificações fictícias;
+- revisão visual das áreas administrativas publicadas, correção da acentuação das notificações e restauração completa do acesso Diretor nos cadastros e escopos;
+- roteiro de treinamento e manual de apresentação para público técnico e usuários futuros.
 
 **Total:** 8 pendências, todas dependentes de homologação, decisão institucional ou configuração externa.
 

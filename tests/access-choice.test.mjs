@@ -5,7 +5,7 @@ import test from 'node:test';
 
 const source = readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
 
-test('um CPF com três acessos escolhe a área e troca o contexto das consultas', async () => {
+test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas', async () => {
   const listeners = {};
   const headers = [];
   let roleFetch;
@@ -24,7 +24,7 @@ test('um CPF com três acessos escolhe a área e troca o contexto das consultas'
         stopAutoRefresh() {},
       },
       from(table) {
-        if (table === 'profiles') return { select() { return this; }, eq() { return this; }, single: async () => ({ data: { id: 'user-1', full_name: 'Maria Silva', roles: ['servidor', 'rh', 'administrador'], must_change_password: false } }) };
+        if (table === 'profiles') return { select() { return this; }, eq() { return this; }, single: async () => ({ data: { id: 'user-1', full_name: 'Maria Silva', roles: ['servidor', 'diretor', 'rh', 'administrador'], must_change_password: false } }) };
         if (table === 'calendar_events') return { select() { return this; }, eq() { return this; }, order: async () => ({ data: [], error: null }) };
         if (table === 'vacation_requests') return { select() { return this; }, order: async () => ({ data: [], error: null }) };
         throw new Error(`Unexpected table ${table}`);
@@ -44,13 +44,20 @@ test('um CPF com três acessos escolhe a área e troca o contexto das consultas'
   });
   await new Promise(resolve => setImmediate(resolve));
   assert.match(app.innerHTML, /Escolha seu acesso/);
-  for (const role of ['Servidor', 'RH', 'Administrador']) assert.match(app.innerHTML, new RegExp(role));
+  for (const role of ['Servidor', 'Diretor', 'RH', 'Administrador']) assert.match(app.innerHTML, new RegExp(role));
   await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'servidor' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'servidor');
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'servidor');
   assert.match(app.innerHTML, /Meus pedidos/);
+  await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
+  await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'diretor' } } : null } });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(saved.get('sgf-access-role'), 'diretor');
+  await roleFetch('/rest/v1/vacation_requests');
+  assert.equal(headers.at(-1), 'diretor');
+  assert.match(app.innerHTML, /Solicitações/);
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
   await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'rh' } } : null } });
   await new Promise(resolve => setImmediate(resolve));

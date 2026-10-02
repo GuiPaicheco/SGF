@@ -2,7 +2,7 @@
 
 Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura Municipal de Betim. O SGF permite simular períodos, registrar pedidos, acompanhar decisões da chefia e do RH, administrar cadastros e visualizar a escala. **O comprovante registra o protocolo; ele não autoriza o afastamento.**
 
-> **Estado do projeto (30/09/2026):** piloto em desenvolvimento. Os fluxos foram implementados e verificados localmente, mas as regras de direito a férias e a política de senhas ainda exigem homologação institucional antes de uso em produção. Veja [pendências](docs/pendencias.md) e [revisão técnica](docs/REVISAO_TECNICA.md).
+> **Estado do projeto (02/10/2026):** piloto em desenvolvimento. Os fluxos foram implementados e verificados localmente, mas as regras de direito a férias e a política de senhas ainda exigem homologação institucional antes de uso em produção. Veja [pendências](docs/pendencias.md) e [revisão técnica](docs/REVISAO_TECNICA.md).
 
 ## Para apresentar ao TI
 
@@ -11,7 +11,7 @@ Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura
 | Interface | Site estático em HTML, CSS e JavaScript, sem compilação do frontend |
 | Dados e autenticação | Supabase Auth, PostgreSQL com RLS e Edge Functions |
 | Hospedagem prevista | Netlify publica somente `dist/`; o backend permanece no Supabase |
-| Acessos | Público (simulação), Servidor, RH e Administrador; uma conta pode reunir os três acessos autenticados |
+| Acessos | Público (simulação), Servidor, Diretor, RH e Administrador; uma conta pode reunir os quatro acessos autenticados |
 | Rastreabilidade | Protocolo, duas aprovações, histórico de situação, lançamentos e eventos de auditoria |
 | Administração | CNES e lotação principal, calendário institucional, escala mínima nominal, cadastro e desativação com histórico preservado |
 | Uso em produção | Condicionado à homologação do RH e às verificações descritas abaixo |
@@ -23,7 +23,7 @@ Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura
 3. Já autenticado, o servidor escolhe a modalidade, confere os dados funcionais e simula as datas. O envio registra protocolo, períodos e etapas de aprovação. Se o cadastro funcional ainda estiver pendente, abre também uma pendência de inclusão.
 4. O RH analisa a etapa da chefia imediata no seu escopo. Após essa aprovação, registra a segunda decisão na etapa RH. As duas decisões continuam separadas e auditáveis.
 5. O RH pode programar, reprogramar, cancelar ou concluir conforme a situação. A conclusão que consome banco de horas exige saldo validado.
-6. O servidor acompanha situação, pareceres, histórico e notificações em **Meus pedidos**. O RH consulta a escala mensal, define a lista nominal opcional por dia e lotação e vê alertas de sobreposição. RH e administrador podem arquivar pedidos apenas em sua própria fila.
+6. O servidor acompanha situação, pareceres, histórico e notificações em **Meus pedidos**. Diretor, RH e administrador consultam a escala mensal, definem a lista nominal opcional por dia e lotação e veem alertas de sobreposição. RH e administrador podem arquivar pedidos apenas em sua própria fila.
 
 Na interface, **Entrar no SGF** é a ação principal da página inicial. O login reúne acesso existente, recuperação de senha e solicitação de novo acesso em caminhos separados. Depois de entrar, a navegação superior concentra as áreas disponíveis para cada perfil; cada tela destaca sua próxima ação. Na análise de pedidos, a decisão aparece antes dos detalhes de histórico e calendário.
 
