@@ -22,3 +22,7 @@ additional_redirect_urls = ["http://localhost:8080"]
 jwt_expiry = 3600
 enable_signup = true
 minimum_password_length = 8
+
+# Login, cadastro e recuperação são públicos; a troca de senha valida getUser.
+[functions.access-auth]
+verify_jwt = false

@@ -19,11 +19,7 @@ const validCPF = (value: string) => {
   return true;
 };
 const institutionalEmail = (value: string) => /^[^\s@]+@betim\.mg\.gov\.br$/i.test(value);
-const temporaryPassword = () => {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
-  const bytes = crypto.getRandomValues(new Uint8Array(12));
-  return `Sg1!${[...bytes].map(value => alphabet[value % alphabet.length]).join('')}`;
-};
+const temporaryPassword = () => '123456';
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });

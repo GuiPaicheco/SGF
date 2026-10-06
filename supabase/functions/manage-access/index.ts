@@ -84,13 +84,13 @@ Deno.serve(async request => {
     if (actorRole === 'rh' && !inRhScope(accessRequest.requested_unit)) return json({ error: 'Solicitação fora do seu escopo.' }, 403);
 
     const { data: existing } = await admin.from('profiles').select('id').eq('cpf', accessRequest.cpf).maybeSingle();
-    const redirectTo = String(payload.redirectTo ?? '').startsWith('https://') ? String(payload.redirectTo) : undefined;
-    const invited = existing ? null : await admin.auth.admin.inviteUserByEmail(
-      accessRequest.email,
-      redirectTo ? { redirectTo, data: { full_name: accessRequest.full_name } } : { data: { full_name: accessRequest.full_name } },
-    );
-    if (!existing && (invited?.error || !invited?.data.user)) return json({ error: 'Não foi possível enviar o convite. Verifique se o e-mail já possui uma conta.' }, 409);
-    const accountId = existing?.id || invited!.data.user!.id;
+    const initialPassword = '123456';
+    const created = existing ? null : await admin.auth.admin.createUser({
+      email: accessRequest.email, password: initialPassword, email_confirm: true,
+      user_metadata: { full_name: accessRequest.full_name }, app_metadata: { app_roles: roles },
+    });
+    if (!existing && (created?.error || !created?.data.user)) return json({ error: created?.error?.message || 'Não foi possível criar a conta. Verifique se o e-mail já possui uma conta.' }, 409);
+    const accountId = existing?.id || created!.data.user!.id;
     const { error: finalizeError } = await scoped.rpc('approve_cpf_access_with_location', {
       actor_id: identity.user.id,
       target_request_id: requestId,
@@ -100,7 +100,7 @@ Deno.serve(async request => {
       target_lotacao_id: locationId,
     });
     if (finalizeError) {
-      if (invited?.data.user) await admin.auth.admin.deleteUser(invited.data.user.id);
+      if (created?.data.user) await admin.auth.admin.deleteUser(created.data.user.id);
       if (finalizeError.message.includes('IDENTITY_CONFLICT')) return json({ error: 'CPF, matrícula ou nascimento divergem do cadastro funcional.' }, 409);
       if (finalizeError.message.includes('ACCOUNT_EXISTS')) return json({ error: 'Este servidor já possui uma conta vinculada.' }, 409);
       if (finalizeError.message.includes('SCOPE_REQUIRED')) return json({ error: 'Selecione ao menos uma lotação para Diretor ou RH.' }, 400);
@@ -111,7 +111,11 @@ Deno.serve(async request => {
       admin.from('profiles').select('roles').eq('id', accountId).single(),
     ]);
     await admin.auth.admin.updateUserById(accountId, { app_metadata: { ...(account.user?.app_metadata || {}), app_roles: granted?.roles || roles } });
-    return json({ ok: true, existing: Boolean(existing) });
+    if (!existing) {
+      const { error: flagError } = await admin.from('profiles').update({ must_change_password: true }).eq('id', accountId);
+      if (flagError) throw flagError;
+    }
+    return json({ ok: true, existing: Boolean(existing), ...(!existing ? { temporary_password: initialPassword } : {}) });
   } catch (error) {
     console.error('manage-access', error);
     return json({ error: 'Não foi possível analisar a solicitação de acesso.' }, 500);

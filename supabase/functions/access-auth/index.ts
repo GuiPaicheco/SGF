@@ -126,7 +126,11 @@ Deno.serve(async request => {
           if (account.user?.email) {
             const redirectTo = String(payload.redirectTo ?? '').startsWith('https://')
               ? String(payload.redirectTo) : undefined;
-            await auth.auth.resetPasswordForEmail(account.user.email, redirectTo ? { redirectTo } : undefined);
+            const { error: recoveryError } = await auth.auth.resetPasswordForEmail(account.user.email, redirectTo ? { redirectTo } : undefined);
+            if (recoveryError) {
+              console.error('access-auth recovery delivery failed', recoveryError.code);
+              return json({ error: 'Não foi possível enviar as instruções. Peça ao Administrador ou à TI que redefina sua senha provisória.' }, 503);
+            }
           }
         }
       }
@@ -138,6 +142,7 @@ Deno.serve(async request => {
       const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
       const password = String(payload.password ?? '');
       if (!token) return json({ error: 'Sessão inválida.' }, 401);
+      if (password === '123456') return json({ error: 'Escolha uma senha pessoal diferente da senha provisória 123456.' }, 400);
       if (password.length < 4 || password.length > 72) return json({ error: 'A senha deve ter entre 4 e 72 caracteres.' }, 400);
       const { data: identity, error: identityError } = await admin.auth.getUser(token);
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
@@ -147,7 +152,8 @@ Deno.serve(async request => {
       if (password.length < min) return json({ error: `Esta conta exige pelo menos ${min} caracteres.` }, 400);
       const { error: updateError } = await admin.auth.admin.updateUserById(identity.user.id, { password });
       if (updateError) throw updateError;
-      await admin.from('profiles').update({ must_change_password: false }).eq('id', identity.user.id);
+      const { error: flagError } = await admin.from('profiles').update({ must_change_password: false }).eq('id', identity.user.id);
+      if (flagError) throw flagError;
       return json({ ok: true });
     }
 
