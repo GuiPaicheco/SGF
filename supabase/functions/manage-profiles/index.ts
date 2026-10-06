@@ -99,7 +99,7 @@ Deno.serve(async request => {
       if (!target || target.disabled_at) return json({ error: 'Conta indisponível.' }, 404);
       if (action === 'reset-password') {
         const initialPassword = temporaryPassword();
-        const { error } = await admin.auth.admin.updateUserById(targetId, { password: initialPassword });
+        const { error } = await admin.auth.admin.updateUserById(targetId, { password: initialPassword, email_confirm: true });
         if (error) return json({ error: error.message }, 400);
         const { error: profileError } = await admin.from('profiles').update({ must_change_password: true }).eq('id', targetId);
         if (profileError) throw profileError;
