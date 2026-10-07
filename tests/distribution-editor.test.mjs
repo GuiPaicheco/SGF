@@ -32,6 +32,7 @@ test('consulta projeta versão, candidatos vigentes e preserva unidades particip
   assert.doesNotMatch(fn,/'cpf'|'email'|'birth_date'/);
 });
 test('salvamento usa versão consultada, valida candidato e recarrega pedido respeitando o perfil',()=>{
+  assert.match(app,/unitReviews.length && \['rh','administrador'\].includes\(staff\) \? renderDistributionEditor\(\)/);
   assert.match(app,/\['rh','administrador'\].includes\(staff\) \? operationRequest\(\{action:'pending-distribution-editor'/);
   assert.match(code,/editor.request_id !== request\?\.id/);
   assert.match(code,/day\?\.candidates.some/);

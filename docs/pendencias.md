@@ -33,6 +33,7 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 9. [ ] Concluir aceite institucional, reconstrução em banco vazio e restauração de backup. Permanecem dependências dos blocos 10–12.
 10. [x] Versionar e enviar a entrega ao GitHub: commit `345349d67b6c3cd66fad2a033ef18244fecc0dd9`, em `main`, sem incluir a alteração local de `logo.png`.
 11. [x] Liberar publicação Vercel: bloqueio causado pelo e-mail Git local não associado à conta GitHub. Configurada apenas neste repositório a identidade já usada no deploy anterior; commit adicional `3e2675c`, sem reescrever histórico. Deploy `dpl_EJVkxq61Lv1v5PSYA1HVZ26B2XEU` **READY**, produção `https://sgfbetim.vercel.app/`. Bloqueios anteriores preservados no histórico.
+12. [x] Validar login administrativo, fila de solicitações e carregamento da escala mensal publicada, com legenda, feriados, filtros, conflitos manuais e escala mínima. Corrigir condição visual que ocultava o editor de redistribuição do RH, apesar da permissão no backend; cobrir essa condição no teste de regressão. Reexecutar os 216 testes locais: aprovados. Ausência de pedidos impede validar decisões/detalhes completos sem fixtures adicionais; carregamento não comprova gravação desses formulários.
 
 ### Bloco concluído: ensaio real de gestão por unidade — 07/10/2026
 
