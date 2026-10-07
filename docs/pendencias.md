@@ -17,7 +17,8 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 1. [x] Investigar o erro ao salvar: Auth registrou `/recover` com sucesso e `/verify` aceito três minutos depois; não há evidência de expiração naquele primeiro clique. O frontend tratava qualquer ausência de sessão como link expirado.
 2. [x] Inicializar o cliente após o estado da aplicação e aguardar explicitamente `setSession` no retorno de convite/recuperação antes de carregar o perfil e exibir o formulário. Remover tokens da URL, limpar contexto anterior e não reutilizar sessão de outra conta em callback inválido.
 3. [x] Bloquear formulário sem sessão válida e distinguir falha de sessão de expiração. Executar seis testes novos de callback; suíte local completa com 225 testes aprovados, sintaxe e build estático conferidos.
-4. [ ] Publicar a correção, reenviar o e-mail e validar com o usuário salvar uma senha pessoal e entrar novamente. Ainda não declarar recuperação homologada.
+4. [x] Publicar commit `7fa2353` no GitHub/main e conferir página e JavaScript no domínio Vercel com HTTP 200 e versão `20261007-recovery-2`. Novo envio registrado pelo Supabase em 07/10 às 15:56 BRT; confirmação do backend não comprova recebimento na caixa postal.
+5. [ ] Validar com o usuário abrir somente o e-mail mais recente, salvar uma senha pessoal e entrar novamente. Ainda não declarar recuperação homologada.
 
 #### Demais verificações do tópico
 
