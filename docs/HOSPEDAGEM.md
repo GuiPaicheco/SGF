@@ -1,4 +1,18 @@
-# Hospedagem do SGF no Netlify
+# Hospedagem do SGF
+
+## Piloto atual — Vercel (07/10/2026)
+
+Endereço: **https://sgfbetim.vercel.app**. Projeto `sgfbetim`, conectado ao repositório `GuiPaicheco/SGF`, branch de produção `main`. O backend permanece no Supabase atual; esta mudança de hospedagem não altera o banco.
+
+O arquivo `vercel.json` define build `node scripts/build-static.mjs`, sem instalação de dependências, e publicação exclusiva de `dist`. O build copia apenas `index.html`, `logo.png` e os arquivos CSS/JS de `assets`. Documentos, migrations, funções, backups e `.env` não são publicados. Os cabeçalhos CSP e demais proteções foram mantidos e conferidos online; caminhos internos retornam HTTP 404.
+
+Cada atualização do `main` dispara uma publicação pelo Git integrado. Verifique o estado **Ready**, o commit e o endereço de produção no painel antes de considerar uma versão publicada. Não há segredos adicionais a cadastrar no Vercel: a chave publicável do frontend não é a chave de serviço do Supabase.
+
+Para recuperação de senha por e-mail, conferir no Supabase Auth **Site URL** e **Redirect URLs**, incluindo `https://sgfbetim.vercel.app`. A publicação do frontend não configura automaticamente essa lista. O fluxo completo de recuperação permanece pendente de homologação.
+
+O Netlify anterior permanece preservado, mas com publicações pausadas por limite de créditos; não usar seu frontend legado contra o banco atualizado. Nenhum plano pago foi contratado.
+
+## Configuração alternativa/histórica — Netlify
 
 O SGF é uma aplicação estática. O Netlify deve publicar somente a pasta `dist`, gerada pelo comando definido em `netlify.toml`. Assim, migrations, funções Supabase e documentos internos não ficam acessíveis pelo site.
 
