@@ -20,6 +20,17 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 6. [ ] Completar redistribuição pós-envio, avisos e auditoria conforme os blocos funcionais abaixo; validar concorrência real.
 7. [ ] Conferir recuperação de senha no novo domínio, revisão visual e aceite institucional. Nenhuma mudança de usuário/senha ou limpeza de dados foi feita nesta conferência.
 
+### Bloco concluído: ensaio real de gestão por unidade — 07/10/2026
+
+1. [x] Executar 17 verificações no PostgreSQL usando `service_role` e contexto de RH/Administrador, com fixtures integralmente revertidas.
+2. [x] Confirmar aprovação independente por unidade, sem inclusão automática no calendário; agregado permanece em análise enquanto outra unidade estiver pendente.
+3. [x] Confirmar inclusão explícita somente após aprovação; agregado somente fica programado quando todas as unidades forem adicionadas.
+4. [x] Recusar decisão de RH fora da própria diretoria, mesmo compartilhando CNES; rejeitar versão desatualizada sem criar notificação adicional.
+5. [x] Validar recusa obrigatoriamente justificada, saldo insuficiente consistente e persistência de código/rótulo/horas informadas.
+6. [x] Confirmar autoria, CNES, versões e auditoria das cinco decisões executadas; confirmar aviso da recusa ao titular.
+7. [x] Guardar ensaio reproduzível em `tests/unit-workflow-rehearsal.sql` e gerador transacional em `scripts/prepare-workflow-rehearsal.mjs`. Não é seed nem migration.
+8. [ ] Validar o mesmo fluxo pela interface e duas sessões simultâneas. Conflito de versão sequencial não é prova de ausência de deadlocks em concorrência real.
+
 ### Publicação do piloto compartilhado — plano vigente em 07/10/2026
 
 Este bloco substitui as restrições locais e o plano de três bancos descritos historicamente abaixo. Não houve contratação de plano pago nem clonagem de bancos.
@@ -276,7 +287,7 @@ O modelo atual mantém matrícula, lotação e equipe diretamente em um único r
 - [x] Corrigir RLS de pedidos para exigir revisão do CNES/lotação selecionados, não somente vínculo da pessoa com a unidade. Servidor lê seus pedidos do vínculo selecionado; bloquear papel nulo, pessoa/CNES/lotação desativados e gestão sem CNES. Revogar escrita direta do navegador em pedidos/períodos.
 - [x] Executar 11 cenários no PostgreSQL do projeto com fixtures e papel SQL `authenticated`, não somente mocks: RH e Diretor isolados por lotação compartilhando CNES, Administrador consolidado, titular por vínculo, papel administrativo forjado, conta bloqueada, CNES inativo, CNES ausente e escopo revogado; conferir ausência de UPDATE direto pelo navegador. Transação integral revertida. Arquivo reproduzível: `tests/access-rls-rehearsal.sql`; executar somente após migrations dentro de transação revertida.
 - [x] Inspecionar página inicial/login local no navegador e realizar login administrativo no backend atual. Confirmar bloqueio do painel: relação `vacation_requests`/`employment_bonds` ausente no banco legado. Não interpretar esse teste como homologação da interface interna do novo modelo.
-- [ ] Resolver ambiente integrado antes da inspeção interna dos quatro perfis e concorrência: o banco/Edge Functions atuais continuam na versão estável, sem novo modelo. Ativar migrations com revogações sem plano de transição pode quebrar o site hospedado. Manter explícita a necessidade de ambiente independente ou transição coordenada, sem publicação implícita.
+- [x] Resolver ambiente integrado: novo modelo aplicado no Supabase compartilhado por autorização e frontend atualizado publicado no Vercel em 07/10. A inspeção dos quatro perfis e concorrência continua pendente; o antigo bloqueio do banco legado não existe mais no piloto atual.
 
 - [x] Preparar matriz explícita de telas por perfil no frontend, aplicada à navegação e à renderização: Servidor nas telas próprias, Diretor na consulta/gestão, RH nas áreas operacionais e Administrador na administração global. Tratar senha obrigatória, perfil não escolhido, visitante e rota desconhecida; não substituir permissões/RLS do servidor por bloqueio visual.
 - [ ] Homologar a matriz de telas, revisar botões internos/ações diretas e confirmar os limites das áreas operacionais de RH; a separação integral depende também das permissões do backend.

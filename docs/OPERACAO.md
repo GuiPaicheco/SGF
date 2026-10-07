@@ -1,5 +1,11 @@
 # Operação e preparação do piloto
 
+## Ensaio SQL de gestão por CNES
+
+`node scripts/prepare-workflow-rehearsal.mjs` imprime um script completo com `BEGIN` e `ROLLBACK`. Executá-lo como uma única requisição SQL no ambiente autorizado; nunca remover o rollback ou executar apenas as fixtures. Não cria contas acessíveis por senha nem envia e-mails externos, mas exercita as notificações internas transacionais.
+
+Em 07/10/2026, as 17 verificações passaram no Supabase compartilhado: aprovação distinta da entrada no calendário, agregação por unidade, isolamento de diretoria, versão desatualizada, recusa estruturada, auditoria e aviso ao titular. Consulta posterior confirmou zero usuários, pedidos e lotações das fixtures. Isso não substitui testes HTTP/navegador nem duas sessões concorrentes reais. Os 11 testes de RLS permanecem no arquivo separado `tests/access-rls-rehearsal.sql`.
+
 ## Piloto compartilhado — 07/10/2026
 
 O banco atual já recebeu o novo modelo, por autorização expressa do responsável. Foram aplicadas as sete migrations novas como `multi_unit_pilot_release` e a correção `multi_unit_pilot_read_labels`; sete Edge Functions foram publicadas. Não executar novamente esses arquivos no mesmo banco. As migrations locais continuam sendo a fonte para reconstrução em banco vazio; os timestamps remotos são atribuídos pelo conector.
