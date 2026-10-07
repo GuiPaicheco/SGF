@@ -18,7 +18,10 @@
     if (state.activeContext?.lotacao_id) headers.set('x-sgf-lotacao', state.activeContext.lotacao_id);
     return fetch(input, { ...init, headers });
   };
-  let client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY, { global: { fetch: roleAwareFetch } });
+  const callbackParams = new URLSearchParams(window.location.hash.slice(1));
+  const passwordCallback = ['invite', 'recovery'].includes(callbackParams.get('type')) || /type=(invite|recovery)/.test(window.location.search);
+  const callbackError = callbackParams.has('error') || new URLSearchParams(window.location.search).has('error');
+  let client;
   const app = document.querySelector('#app');
   const restrictedControls = {
     '[data-catalog-new="cargo"], [data-catalog-new="funcao"], [data-catalog-new="location"], [data-catalog-reference], [data-catalog-location]':'structure',
@@ -44,6 +47,7 @@
   const workspaceNav = document.querySelector('#workspace-nav');
   const headerUser = document.querySelector('#header-user');
   const state = {
+    recoveryError: '',
     route: /type=(invite|recovery)/.test(`${window.location.hash}${window.location.search}`) ? 'set-password' : 'home', session: null, profile: null, multiAccess: false, accessContexts: [], activeContext: null, requests: [], archivedRequestIds: new Set(), scaleEmployees: [], scaleRequests: [], manualConflicts: [], minimumScale: [], minimumScaleDays: [], scaleLocations: [], notifications: [], inclusions: [], accessRequests: [], locations: [], profiles: [], profileLocations: [], calendarAdmin: [], catalogSort: 'name', profileSort: 'name', catalog: { employees: [], locations: [], positions: [], functions: [], managers: [], managerScopes: [], actorRole: '' }, registrationCatalogs: { cnesUnits: [], teams: [], teamTypes: [], positions: [], internalAllocations: [] }, accessFieldSequence: 0, selected: null, receiptContext: null, calendarLoaded: false, catalogShowAll: false,
     dashboard: { query: '', status: '', type: '', sort: 'newest', archived: false, page: 1, pageSize: 10 },
     scale: { month: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`, location: '', cnes: '', mode: 'confirmed', team: '', conflictCriterion: 'position', position: '', functionId: '', status: '', focusDate: '', minimumLocation: '', minimumDate: '' },
@@ -55,6 +59,10 @@
       availableHours: '', dailyHours: '8', addBankHours: '', notes: '', periods: [], dayResponsibilities: []
     }
   };
+
+  if (passwordCallback || callbackError) state.route = 'set-password';
+  // Initialize only after state exists: Auth also uses roleAwareFetch during callbacks.
+  client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { detectSessionInUrl: !(passwordCallback || callbackError) }, global: { fetch: roleAwareFetch } });
 
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const digits = value => String(value || '').replace(/\D/g, '');
@@ -492,6 +500,9 @@
     catch (error) { showToast(error.message); button.disabled = false; button.textContent = 'Enviar instruções'; }
   }
   function renderSetPassword() {
+    if (state.recoveryError || !state.session) {
+      setProgress(0); app.innerHTML = shell('Recuperação de senha', state.recoveryError || 'A sessão de recuperação não está disponível neste navegador. Solicite um novo e-mail e abra o link mais recente.', '<button class="button button-primary" data-go="recover-password">Solicitar novo e-mail</button>'); return;
+    }
     setProgress(0); app.innerHTML = shell('Defina sua senha', 'Crie uma senha pessoal para concluir o convite ou a recuperação.', `<form id="set-password-form" class="form-grid"><div class="field"><label for="set-password">Nova senha</label><input class="control" id="set-password" type="password" required minlength="${passwordMin(state.profile?.roles)}" maxlength="72" autocomplete="new-password"></div><div class="field"><label for="set-password-confirmation">Confirme a senha</label><input class="control" id="set-password-confirmation" type="password" required minlength="${passwordMin(state.profile?.roles)}" maxlength="72" autocomplete="new-password"></div><div class="field field-full"><div class="actions"><button class="button button-primary">Salvar senha</button></div></div></form>`);
   }
   function renderChangePassword() {
@@ -504,12 +515,37 @@
   async function setPassword(event) { event.preventDefault(); const button = event.submitter, password = document.querySelector('#set-password').value, confirmation = document.querySelector('#set-password-confirmation').value; if (password !== confirmation) return showToast('As senhas informadas não coincidem.'); await saveNewPassword(button, password); }
   async function saveNewPassword(button, password) {
     button.disabled = true; button.textContent = 'Salvando…';
-    try { const { data } = await client.auth.getSession(); const session = data.session; if (!session) throw new Error('O link expirou. Solicite um novo e-mail.'); const response = await fetch(`${SUPABASE_URL}/functions/v1/access-auth`, { method: 'POST', headers: sessionHeaders(session), body: JSON.stringify({ action: 'change-password', password }) }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || 'Não foi possível alterar a senha.'); await loadSession(); history.replaceState({}, document.title, window.location.pathname); showToast('Senha definida com sucesso.'); go(state.profile?.role ? accessHome(state.profile.role) : 'choose-access'); }
+    try { const { data, error: sessionError } = await client.auth.getSession(); if (sessionError) throw new Error('Não foi possível confirmar sua sessão. Confira a conexão e tente novamente.'); const session = data.session; if (!session || state.recoveryError) throw new Error('A sessão de recuperação não está disponível neste navegador. Solicite um novo e-mail.'); const response = await fetch(`${SUPABASE_URL}/functions/v1/access-auth`, { method: 'POST', headers: sessionHeaders(session), body: JSON.stringify({ action: 'change-password', password }) }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || 'Não foi possível alterar a senha.'); await loadSession(); history.replaceState({}, document.title, window.location.pathname); showToast('Senha definida com sucesso.'); go(state.profile?.role ? accessHome(state.profile.role) : 'choose-access'); }
     catch (error) { showToast(error.message); button.disabled = false; button.textContent = 'Salvar senha'; }
+  }
+  async function initializeAuthSession() {
+    if (!client) return;
+    if (passwordCallback || callbackError) {
+      try {
+        if (callbackError) throw new Error('Este link não pôde ser validado. Solicite um novo e-mail e use somente o link mais recente.');
+        const access_token = callbackParams.get('access_token'), refresh_token = callbackParams.get('refresh_token');
+        if (!access_token || !refresh_token) throw new Error('O link de recuperação está incompleto. Solicite um novo e-mail.');
+        // Await persistence before rendering the form; never fall back to another stored account.
+        const { data, error } = await client.auth.setSession({ access_token, refresh_token }).catch(() => ({ data: null, error: true }));
+        if (error || !data?.session) throw new Error('Não foi possível iniciar a sessão de recuperação. Confira a conexão e solicite um novo e-mail se necessário.');
+        state.session = data.session;
+        sessionStorage.removeItem('sgf-access-role');
+        sessionStorage.removeItem('sgf-access-context');
+      } catch (error) {
+        state.session = null; state.profile = null; state.recoveryError = error.message;
+        return;
+      } finally {
+        callbackParams.delete('access_token'); callbackParams.delete('refresh_token');
+        history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+    await loadSession();
   }
   async function loadSession() {
     if (!client) return;
-    const { data } = await client.auth.getSession(); state.session = data.session;
+    const { data, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw new Error('Não foi possível confirmar sua sessão.');
+    state.session = data.session;
     if (!state.session) { state.profile = null; state.accessContexts = []; state.activeContext = null; sessionStorage.removeItem('sgf-access-role'); sessionStorage.removeItem('sgf-access-context'); return; }
     let { data: profile, error: profileError } = await client.from('profiles').select('id,full_name,roles,must_change_password,disabled_at,primary_lotacao:lotacoes!profiles_primary_lotacao_id_fkey(name),servidor:servidores(declared_position,cargo:cargos(name),lotacao:lotacoes!servidores_lotacao_id_fkey(name))').eq('id', state.session.user.id).single();
     if (profileError?.code === '42703' && profileError.message?.includes('roles')) {
@@ -1241,5 +1277,7 @@ function render() { state.route = SGFAccessPolicy.resolve(state.route,state.prof
   document.addEventListener('change', event => { if (event.target.id === 'quick-mode') { const date = document.querySelector('#quick-date'); if (date) date.value = ''; } if (['quick-type', 'quick-mode'].includes(event.target.id)) syncQuickFields(); if (event.target.id === 'mode') { const date = document.querySelector('#chosenDate'); if (date) date.value = event.target.value === 'return' ? state.request.returnDate : state.request.startDate; syncDatesField(); } if (event.target.matches('[data-responsibility-date]')) { const context = responsibilityContexts().find(item => item.bond_unit_id === event.target.value); state.request.dayResponsibilities = (state.request.dayResponsibilities || []).filter(item => item.date !== event.target.dataset.responsibilityDate); if (context) state.request.dayResponsibilities.push({ date: event.target.dataset.responsibilityDate, bond_unit_id: context.bond_unit_id, cnes_unit_id: context.cnes_unit_id }); } if (event.target.name === 'access-role') syncRoleScope('access-role', 'access-scope-group'); if (event.target.name === 'profile-role') syncRoleScope('profile-role', 'profile-scope-group'); });
   document.addEventListener('input', event => { if (['cpf', 'employee-cpf', 'access-cpf', 'profile-cpf', 'registry-cpf'].includes(event.target.id)) event.target.value = formatCPF(event.target.value); if (['access-identifier', 'access-password'].includes(event.target.id)) document.querySelector('#login-error')?.classList.add('hidden'); if (event.target.id === 'access-scope-search') filterScopeList('access-scope-search', 'access-scope-list'); if (event.target.id === 'profile-scope-search') filterScopeList('profile-scope-search', 'profile-scope-list'); syncControlValidation(event.target); });
   sessionAction.addEventListener('click', async () => { await client?.auth.signOut(); sessionStorage.removeItem('sgf-access-role'); sessionStorage.removeItem('sgf-access-context'); state.session = null; state.profile = null; state.activeContext = null; state.accessContexts = []; state.requests = []; state.selected = null; go('home'); });
-  Promise.allSettled([loadSession(), loadCalendarEvents()]).finally(() => render());
+  Promise.allSettled([initializeAuthSession(), loadCalendarEvents()]).then(results => {
+    if (results[0].status === 'rejected') showToast('Não foi possível carregar sua sessão. Confira a conexão e atualize a página.');
+  }).finally(() => render());
 })();

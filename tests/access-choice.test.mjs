@@ -32,6 +32,7 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
     };
   };
   runInNewContext(source, {
+    URLSearchParams,
     window: { supabase: { createClient: (_url, _key, options) => clientFor(options) }, location: { hash: '', search: '' }, scrollTo() {} },
     sessionStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
     document: {

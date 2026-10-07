@@ -12,6 +12,15 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 
 ### Tópico 01 — validação de cadastro, login e perfis — em execução
 
+#### Recuperação de senha — correção de 07/10
+
+1. [x] Investigar o erro ao salvar: Auth registrou `/recover` com sucesso e `/verify` aceito três minutos depois; não há evidência de expiração naquele primeiro clique. O frontend tratava qualquer ausência de sessão como link expirado.
+2. [x] Inicializar o cliente após o estado da aplicação e aguardar explicitamente `setSession` no retorno de convite/recuperação antes de carregar o perfil e exibir o formulário. Remover tokens da URL, limpar contexto anterior e não reutilizar sessão de outra conta em callback inválido.
+3. [x] Bloquear formulário sem sessão válida e distinguir falha de sessão de expiração. Executar seis testes novos de callback; suíte local completa com 225 testes aprovados, sintaxe e build estático conferidos.
+4. [ ] Publicar a correção, reenviar o e-mail e validar com o usuário salvar uma senha pessoal e entrar novamente. Ainda não declarar recuperação homologada.
+
+#### Demais verificações do tópico
+
 1. [x] Executar dez verificações reais SQL de cadastro/aprovação: duas matrículas, três atuações, pessoa única, normalização de e-mail, quatro papéis, escopo, autoria e bloqueios de duplicidade/dupla aprovação. Ensaio `registration-workflow-rehearsal.sql`, gerador com argumento `registration`, transação revertida; zero contas e pedidos das fixtures restantes.
 2. [x] Corrigir resposta/erro atrasado do catálogo público para não sobrescrever login/início; duas cargas concorrentes preservam a mais recente. Três testes executáveis de regressão.
 3. [ ] Executar cadastro público e administrativo completo pelas Edge Functions/interface, incluindo primeiro acesso, contextos nos quatro perfis e revogação/desativação durante sessão. O ensaio SQL não cria senha nem comprova entrega de e-mail.

@@ -34,6 +34,7 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
     '#access-password': { value: 'senha-segura' },
   };
   runInNewContext(source, {
+    URLSearchParams,
     window: { supabase: { createClient: clientFor }, location: { hash: '', search: '' }, scrollTo() {} },
     sessionStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
     document: {

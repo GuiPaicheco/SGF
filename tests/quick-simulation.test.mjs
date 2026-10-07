@@ -25,6 +25,7 @@ async function openQuick() {
     },
   };
   runInNewContext(source, {
+    URLSearchParams,
     sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
     window: { supabase: { createClient: () => client }, location: { hash: '', search: '' }, scrollTo() {} },
     document: {
