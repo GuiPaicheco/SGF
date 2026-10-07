@@ -29,10 +29,10 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 5. [x] Executar 216 testes locais, análise de sintaxe e build estático. Reexecutar no PostgreSQL 16 verificações de calendário, oito de redistribuição e 17 de gestão, em transações revertidas. Confirmar zero usuários/pedidos das fixtures restantes.
 6. [x] Consultar Security Advisor após aplicação: sem alertas ERROR; 14 INFO de tabelas fechadas ao navegador por desenho e aviso preexistente de proteção contra senhas vazadas desativada.
 7. [ ] Validar duas sessões simultâneas, ciclo completo pela interface e revisão visual de todas as telas.
-8. [ ] Conferir Site URL/Redirect URLs no painel Supabase e testar recebimento/uso do e-mail. Painel redireciona ao login, impedindo essa conferência sem autenticação do responsável. Não considerar recuperação homologada apenas pelos testes automatizados.
+8. [x] Conferir e configurar Site URL/Redirect URLs no Supabase após autenticação e autorização do responsável: `https://sgfbetim.vercel.app/`, único retorno autorizado e sem curingas. Ainda falta testar recebimento/uso do e-mail; não considerar recuperação homologada somente pela configuração.
 9. [ ] Concluir aceite institucional, reconstrução em banco vazio e restauração de backup. Permanecem dependências dos blocos 10–12.
 10. [x] Versionar e enviar a entrega ao GitHub: commit `345349d67b6c3cd66fad2a033ef18244fecc0dd9`, em `main`, sem incluir a alteração local de `logo.png`.
-11. [ ] Liberar publicação Vercel: deploy `dpl_F4eT33CfidkzXFyuToZYyFNofNFe` está **BLOCKED**, sem build logs, com indicação de configuração de conta/colaboração (`https://vercel.com/docs/deployments/troubleshoot-project-collaboration#account-configuration`). Não afirmar que o frontend novo está no ar. Backend atualizado permanece compatível com o frontend anterior, mas o novo editor/avisos aguardam publicação.
+11. [x] Liberar publicação Vercel: bloqueio causado pelo e-mail Git local não associado à conta GitHub. Configurada apenas neste repositório a identidade já usada no deploy anterior; commit adicional `3e2675c`, sem reescrever histórico. Deploy `dpl_EJVkxq61Lv1v5PSYA1HVZ26B2XEU` **READY**, produção `https://sgfbetim.vercel.app/`. Bloqueios anteriores preservados no histórico.
 
 ### Bloco concluído: ensaio real de gestão por unidade — 07/10/2026
 
