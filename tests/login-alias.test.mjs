@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 
-const source = readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../assets/access-policy.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
 
 for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo sem CPF funciona no esquema ${schema}`, async () => {
   const listeners = {};
@@ -43,6 +43,7 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
     fetch: async (_url, options) => {
       const payload = JSON.parse(options.body);
       if (payload.action === 'archives') return { ok: true, json: async () => ({ request_ids: [] }) };
+      if (payload.action === 'contexts') return { ok: true, json: async () => ({ contexts: [{ role: 'administrador', global: true }] }) };
       loginPayload = payload;
       return { ok: true, json: async () => ({ access_token: 'token', refresh_token: 'refresh', roles: ['administrador'], must_change_password: false }) };
     },
@@ -50,7 +51,7 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
   });
   await new Promise(resolve => setImmediate(resolve));
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'login' } } : null } });
-  assert.match(app.innerHTML, /Login ou CPF/);
+  assert.match(app.innerHTML, /CPF ou e-mail/);
   const button = { disabled: false, textContent: 'Entrar no SGF' };
   await listeners.submit({ target: { id: 'login-form' }, submitter: button, preventDefault() {} });
   assert.deepEqual(loginPayload, { action: 'login', identifier: 'admin', password: 'senha-segura' });

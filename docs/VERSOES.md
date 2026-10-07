@@ -1,5 +1,13 @@
 # Versões do SGF
 
+## Decisão vigente — 07/10/2026
+
+O Supabase `ijhvbzomakbbxverqfqh` passa a ser o piloto compartilhado de produção/homologação do novo modelo, por autorização do responsável. Não há bancos independentes. Foram aplicados `multi_unit_pilot_release` (sete migrations locais) e `multi_unit_pilot_read_labels`, e publicadas sete Edge Functions. Os hotfixes de primeiro acesso abaixo foram incorporados.
+
+O workspace atual é a fonte do desenvolvimento e o `main` deve receber o piloto. Confirmar o frontend publicado no Netlify antes de testar. `SGF-estavel`, commit `52742f88e5776f457e55f26024090b5080c1a56a`, preserva o código legado e não deve operar contra o banco atualizado. As pastas `SGF-homologacao-*` são snapshots bloqueados e sem banco. Não contratar plano pago neste momento.
+
+Snapshot parcial pré-migração em `.sgf-backups/20261007-pre-upgrade/`, fora do Git; não é backup integral do projeto nem restauração automática. As seções seguintes documentam a situação histórica de 06/10, substituída por esta decisão.
+
 ## Estável hospedada
 
 - Pasta de manutenção: `../SGF-estavel`.

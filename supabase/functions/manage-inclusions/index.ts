@@ -1,18 +1,16 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
+import { contextHeaders, validateAccessContext } from '../_shared/access-context.ts';
+import { employeeInAccessContext } from '../_shared/employee-scope.ts';
+import { actionAllowed } from '../_shared/action-policy.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-sgf-role',
+  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-sgf-role, x-sgf-bond, x-sgf-cnes, x-sgf-lotacao',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
-const inclusionLocation = (item: { servidor?: { lotacao_id?: string | null } | { lotacao_id?: string | null }[] | null }) => {
-  const employee = Array.isArray(item.servidor) ? item.servidor[0] : item.servidor;
-  return employee?.lotacao_id || null;
-};
-
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
@@ -29,14 +27,16 @@ Deno.serve(async request => {
     if (!profile?.roles?.includes(actorRole) || !['administrador', 'rh'].includes(actorRole) || profile.must_change_password) {
       return json({ error: 'Acesso não autorizado.' }, 403);
     }
+    const context = await validateAccessContext(admin, request, identity.user.id, profile.roles || []);
+    const scoped = createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{...contextHeaders(context),'x-sgf-actor':identity.user.id}}});
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
+    if(!actionAllowed('inclusions',action,context.role)) return json({error:'Seu perfil não permite executar esta ação.'},403);
+    const employeeInContext = async (employeeId: string) => {
+      return employeeInAccessContext(admin,context,employeeId);
+    };
 
     if (action === 'list') {
-      const { data: ownScopes } = actorRole === 'rh'
-        ? await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id)
-        : { data: [] };
-      const scopeIds = new Set((ownScopes || []).map(scope => scope.lotacao_id));
       const [{ data: inclusions, error: inclusionError }, { data: locations, error: locationError }] = await Promise.all([
         admin.from('employee_inclusion_requests')
           .select('id,status,requested_name,requested_unit,requested_position,requested_function,requested_team,requested_employment_type,notes,created_at,servidor:servidores(id,matricula,cpf,birth_date,profile_id,lotacao_id),request:vacation_requests(protocol)')
@@ -44,12 +44,14 @@ Deno.serve(async request => {
         admin.from('lotacoes').select('id,code,name,unit_type').eq('active', true).order('name'),
       ]);
       if (inclusionError || locationError) throw inclusionError || locationError;
+      const visible = actorRole === 'rh' ? [] : inclusions || [];
+      if (actorRole === 'rh') for (const item of inclusions || []) {
+        const employee = Array.isArray(item.servidor) ? item.servidor[0] : item.servidor;
+        if (employee?.id && await employeeInContext(employee.id)) visible.push(item);
+      }
       return json({
-        inclusions: actorRole === 'rh' ? (inclusions || []).filter(item => {
-          const location = inclusionLocation(item);
-          return location && scopeIds.has(location);
-        }) : inclusions,
-        locations: actorRole === 'rh' ? (locations || []).filter(location => scopeIds.has(location.id)) : locations,
+        inclusions: visible,
+        locations: actorRole === 'rh' ? (locations || []).filter(location => location.id === context.lotacaoId) : locations,
       });
     }
 
@@ -60,13 +62,7 @@ Deno.serve(async request => {
     if (!inclusion || !['pendente', 'em_analise'].includes(inclusion.status)) {
       return json({ error: 'Pendência não encontrada ou já concluída.' }, 409);
     }
-    if (actorRole === 'rh') {
-      const { data: employee } = await admin.from('servidores').select('lotacao_id').eq('id', inclusion.servidor_id).single();
-      const { data: ownScope } = employee?.lotacao_id
-        ? await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id).eq('lotacao_id', employee.lotacao_id).maybeSingle()
-        : { data: null };
-      if (!ownScope) return json({ error: 'Esta inclusão não pertence ao seu escopo.' }, 403);
-    }
+    if (!(await employeeInContext(inclusion.servidor_id))) return json({ error: 'Esta inclusão não pertence ao contexto ativo.' }, 403);
 
     if (!['approve', 'reject'].includes(action)) return json({ error: 'Ação inválida.' }, 400);
     if (action === 'reject' && !notes) return json({ error: 'Informe a justificativa da rejeição.' }, 400);
@@ -76,14 +72,13 @@ Deno.serve(async request => {
     const team = String(payload.team ?? inclusion.requested_team ?? '').trim() || 'Não se aplica';
     if (action === 'approve' && (!locationId || !positionName || !employmentType)) return json({ error: 'Informe lotação, cargo e vínculo.' }, 400);
     if (action === 'approve' && actorRole === 'rh') {
-      const { data: allowedScope } = await admin.from('profile_scopes').select('lotacao_id').eq('profile_id', identity.user.id).eq('lotacao_id', locationId).maybeSingle();
-      if (!allowedScope) return json({ error: 'A lotação selecionada não pertence ao seu escopo.' }, 403);
+      if (locationId !== context.lotacaoId) return json({ error: 'A lotação selecionada não pertence ao contexto ativo.' }, 403);
     }
     if (action === 'approve') {
       const { error: teamError } = await admin.from('employee_inclusion_requests').update({ requested_team: team }).eq('id', id);
       if (teamError) throw teamError;
     }
-    const { error } = await admin.rpc('review_employee_inclusion', {
+    const { error } = await scoped.rpc('review_employee_inclusion', {
       inclusion_id: id,
       decision: action === 'approve' ? 'aprovada' : 'rejeitada',
       reviewer_id: identity.user.id,
@@ -96,6 +91,7 @@ Deno.serve(async request => {
     return json({ ok: true });
   } catch (error) {
     console.error('manage-inclusions', error);
+    if (error instanceof Error && error.message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o perfil e o local de atuação.' }, 403);
     return json({ error: 'Não foi possível concluir a análise.' }, 500);
   }
 });

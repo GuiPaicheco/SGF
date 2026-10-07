@@ -23,6 +23,6 @@ jwt_expiry = 3600
 enable_signup = true
 minimum_password_length = 8
 
-# Login, cadastro e recuperação são públicos; a troca de senha valida getUser.
+# Login e cadastro públicos; operações privadas verificam JWT e getUser.
 [functions.access-auth]
 verify_jwt = false
