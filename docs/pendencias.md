@@ -21,6 +21,8 @@ Este bloco substitui as restrições locais e o plano de três bancos descritos 
 5. [x] Validar 213 testes locais e 11 testes reais SQL de RLS antes/depois da aplicação, com fixtures revertidas. Confirmar online login administrativo, listas de perfis/acessos/catálogos/inclusões e consulta completa do painel. Correção de leitura de rótulos não concede escrita no navegador.
 6. [x] Consultar Security Advisor: sem erros estruturais; tabelas somente de serviço permanecem fechadas ao navegador por desenho. Proteção de senhas vazadas segue desativada e exige plano compatível.
 7. [ ] Sincronizar `main` no GitHub e confirmar publicação do frontend no Netlify. Push não é prova de deploy.
+   - Commits locais `274ebcb` (piloto) e `6fa8b5d` (integração do histórico estável) prontos. Três tentativas de push no `main` recusadas pelo GitHub com `Internal Server Error`, inclusive usando HTTP/1.1; remoto conferido ainda em `52742f8`. Não houve force-push.
+   - Netlify ainda publica `a786d982`, deploy `6abd412661ee2500085fef27`. Conector disponível apenas para consulta de deploy e navegador com timeout; não foi possível publicar por esses caminhos. Preparar pacote estático `../SGF-piloto-20261007.zip` para publicação manual no projeto existente. Não testar o site antigo contra o banco novo.
 8. [ ] Homologar cadastro/aprovação/primeiro acesso e solicitações com os múltiplos vínculos no site atualizado.
 9. [ ] Validar as três ações de gestão, avisos, auditoria, concorrência e calendários; aplicação do DDL não encerra essas pendências.
 10. [ ] Retomar os blocos funcionais seguintes após disponibilizar este piloto.
