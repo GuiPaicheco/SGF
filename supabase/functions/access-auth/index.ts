@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
+import { recoveryRedirect } from '../_shared/recovery-redirect.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -211,14 +212,15 @@ Deno.serve(async request => {
     }
 
     if (action === 'recover') {
+      let redirectTo: string;
+      try { redirectTo = recoveryRedirect(payload.redirectTo, Deno.env.get('SGF_RECOVERY_URLS') || ''); }
+      catch { return json({ error: 'Endereço de recuperação inválido. Abra o SGF no endereço oficial e tente novamente.' }, 400); }
       if (cpfInput || emailInput || loginInput) {
         const profile = await findProfile(identifier, cpf, cpfInput, emailInput);
         if (profile) {
           const { data: account } = await admin.auth.admin.getUserById(profile.id);
           if (account.user?.email) {
-            const redirectTo = String(payload.redirectTo ?? '').startsWith('https://')
-              ? String(payload.redirectTo) : undefined;
-            const { error: recoveryError } = await auth.auth.resetPasswordForEmail(account.user.email, redirectTo ? { redirectTo } : undefined);
+            const { error: recoveryError } = await auth.auth.resetPasswordForEmail(account.user.email, { redirectTo });
             if (recoveryError) {
               console.error('access-auth recovery delivery failed', recoveryError.code);
               return json({ error: 'Não foi possível enviar as instruções. Peça ao Administrador ou à TI que redefina sua senha provisória.' }, 503);

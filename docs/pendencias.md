@@ -12,13 +12,25 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 
 ### Conferência do ambiente publicado — 07/10/2026
 
-1. [x] Conferir no Supabase os releases `multi_unit_pilot_release` e `multi_unit_pilot_read_labels` e as sete Edge Functions atuais ativas. Banco atualizado para o código implementado; não há migration nova local a aplicar neste momento.
+1. [x] Conferir no Supabase os releases `multi_unit_pilot_release`, `multi_unit_pilot_read_labels` e `calendar_planning_release`. Último release aplicado em 07/10, com `access-auth` v10, `manage-catalogs` v7 e `manage-operations` v7 ativas.
 2. [x] Reexecutar os 11 cenários SQL de isolamento de acesso no banco compartilhado, em transação revertida: todos aprovados. Confirmar nenhuma conta técnica restante, 48 CNES, 176 equipes e um vínculo existente preservado; todas as tabelas públicas com RLS habilitada.
 3. [x] Disponibilizar o piloto atual no Vercel. **Situação: candidato de homologação em desenvolvimento, não versão final homologada.** Publicar migrations não conclui funcionalidades ainda ausentes.
 4. [ ] Homologar de ponta a ponta cadastro com múltiplos vínculos → aprovação → primeiro acesso → distribuição diária → decisão por unidade → inclusão explícita no calendário.
-5. [ ] Completar ajuste automático por feriado: helper instalado, mas ainda sem integração atômica com períodos/distribuições e notificações. Não prometer alteração automática dos pedidos nesta versão.
-6. [ ] Completar redistribuição pós-envio, avisos e auditoria conforme os blocos funcionais abaixo; validar concorrência real.
+5. [x] Integrar ajuste automático por feriado com períodos, responsabilidades e avisos, preservando início e quantidade de dias. Casos legados sem contagem conhecida, sobreposição ou perda de escopo exigem revisão; dias ambíguos exigem distribuição explícita. Ensaio SQL real: 16 verificações aprovadas antes e depois da aplicação.
+6. [x] Implementar redistribuição pendente para titular do vínculo, RH no próprio escopo e Administrador; criar revisão para unidade nova, retirar revisão vazia somente se pendente e preservar snapshot na auditoria. Oito verificações SQL aprovadas. Decisões existentes impedem redistribuição silenciosa; ainda falta validar concorrência real e interface completa.
 7. [ ] Conferir recuperação de senha no novo domínio, revisão visual e aceite institucional. Nenhuma mudança de usuário/senha ou limpeza de dados foi feita nesta conferência.
+
+### Entrega de calendário e redistribuição — 07/10/2026
+
+1. [x] Corrigir edição de feriados por ID e versão, inclusive mudança de data, sem criar evento novo indevidamente.
+2. [x] Serializar operações de calendário, envio, gestão e redistribuição por trava transacional compartilhada; rejeitar versões antigas. O teste sequencial não comprova concorrência entre conexões.
+3. [x] Exibir dias sem responsável e motivo de revisão no detalhe da solicitação; bloquear aprovação/inclusão quando o calendário exige revisão.
+4. [x] Restringir retorno da recuperação a URLs explicitamente permitidas; padrão `https://sgfbetim.vercel.app/`. Campo de recuperação aceita CPF/e-mail com até 160 caracteres e mantém login administrativo legado.
+5. [x] Executar 216 testes locais, análise de sintaxe e build estático. Reexecutar no PostgreSQL 16 verificações de calendário, oito de redistribuição e 17 de gestão, em transações revertidas. Confirmar zero usuários/pedidos das fixtures restantes.
+6. [x] Consultar Security Advisor após aplicação: sem alertas ERROR; 14 INFO de tabelas fechadas ao navegador por desenho e aviso preexistente de proteção contra senhas vazadas desativada.
+7. [ ] Validar duas sessões simultâneas, ciclo completo pela interface e revisão visual de todas as telas.
+8. [ ] Conferir Site URL/Redirect URLs no painel Supabase e testar recebimento/uso do e-mail. Painel redireciona ao login, impedindo essa conferência sem autenticação do responsável. Não considerar recuperação homologada apenas pelos testes automatizados.
+9. [ ] Concluir aceite institucional, reconstrução em banco vazio e restauração de backup. Permanecem dependências dos blocos 10–12.
 
 ### Bloco concluído: ensaio real de gestão por unidade — 07/10/2026
 

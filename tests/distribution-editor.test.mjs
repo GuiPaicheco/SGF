@@ -31,11 +31,11 @@ test('consulta projeta versão, candidatos vigentes e preserva unidades particip
   for(const pattern of [/is distinct from 'administrador'/,/'version',r.distribution_version/,/status<>'pendente'/,/u.bond_id=r.context_bond_id/,/u.approval_responsible/,/responsibility_date<=u.valid_until/,/other.responsibility_date<>d.responsibility_date/,/from public,anon,authenticated/]) assert.match(fn,pattern);
   assert.doesNotMatch(fn,/'cpf'|'email'|'birth_date'/);
 });
-test('salvamento usa versão consultada, valida candidato e recarrega pedido sem expor editor ao RH',()=>{
-  assert.match(app,/staff === 'administrador' \? operationRequest\(\{action:'pending-distribution-editor'/);
+test('salvamento usa versão consultada, valida candidato e recarrega pedido respeitando o perfil',()=>{
+  assert.match(app,/\['rh','administrador'\].includes\(staff\) \? operationRequest\(\{action:'pending-distribution-editor'/);
   assert.match(code,/editor.request_id !== request\?\.id/);
   assert.match(code,/day\?\.candidates.some/);
   assert.match(code,/version:editor.version/);
   assert.match(code,/await loadRequests\(\)/);
-  assert.match(code,/state.selected === request && state.route === 'detail'/);
+  assert.match(code,/state.selected === request && \['detail','employee-detail'\].includes\(state.route\)/);
 });

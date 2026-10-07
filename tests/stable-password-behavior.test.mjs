@@ -27,12 +27,13 @@ async function runAuth(payload, { deliveryError = null, signedIn = true } = {}) 
       },
     },
   };
-  const source = readFileSync(new URL('../supabase/functions/access-auth/index.ts', import.meta.url), 'utf8').replace(/^import .*;\r?\n/, '');
+  const redirectSource = readFileSync(new URL('../supabase/functions/_shared/recovery-redirect.ts', import.meta.url), 'utf8').replace('export function', 'function');
+  const source = redirectSource + '\n' + readFileSync(new URL('../supabase/functions/access-auth/index.ts', import.meta.url), 'utf8').replace(/^import .*;\r?\n/gm, '');
   let clients = 0;
   runInNewContext(stripTypeScriptTypes(source), {
     createClient: () => clients++ === 0 ? admin : { auth: { resetPasswordForEmail: async () => ({ error: deliveryError }) } },
     Deno: { env: { get: () => 'configured' }, serve: fn => { handler = fn; } },
-    Request, Response, crypto: globalThis.crypto, TextEncoder, console: { error() {} },
+    Request, Response, URL, crypto: globalThis.crypto, TextEncoder, console: { error() {} },
   });
   const response = await handler(new Request('https://example.test', {
     method: 'POST', headers: { authorization: 'Bearer session', 'content-type': 'application/json' }, body: JSON.stringify(payload),

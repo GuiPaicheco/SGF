@@ -9,7 +9,7 @@ const policies: Record<string,Record<string,string[]>>={
     'scale-list':management,'scale-save':operators,'time-bank':operators,
     'conflict-employees':management,'rejection-reasons':management,
     'rejection-reason-save':['administrador'],'legacy-approval':operators,
-    'pending-distribution-editor':['administrador'],'redistribute-pending-day':['administrador'],
+    'pending-distribution-editor':['servidor','rh','administrador'],'redistribute-pending-day':['servidor','rh','administrador'],
     'unit-review':management,'operation':['servidor',...operators]
   },
   catalogs:{list:operators,history:operators,'save-employee':operators,

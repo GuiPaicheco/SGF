@@ -161,13 +161,13 @@ Deno.serve(async request => {
       return json({status:data});
     }
     if (action === 'pending-distribution-editor') {
-      if (!context.global || actorRole !== 'administrador') return json({error:'Acesso restrito ao Administrador.'},403);
+      if (!['servidor','rh','administrador'].includes(actorRole)) return json({error:'Seu perfil não permite corrigir a distribuição.'},403);
       const {data,error} = await scoped.rpc('pending_distribution_editor',{actor_id:profile.id,target_request:payload.request_id});
       if (error) throw error;
       return json({distribution:data});
     }
     if (action === 'redistribute-pending-day') {
-      if (!context.global || actorRole !== 'administrador') return json({error:'Redistribuição nesta fase restrita ao Administrador.'},403);
+      if (!['servidor','rh','administrador'].includes(actorRole)) return json({error:'Seu perfil não permite corrigir a distribuição.'},403);
       if (!Number.isInteger(payload.version) || payload.version<1 || typeof payload.justification!=='string'
         || payload.justification.trim().length<3 || payload.justification.trim().length>2000)
         return json({error:'Informe a versão atual e uma justificativa de 3 a 2000 caracteres.'},400);
@@ -213,7 +213,8 @@ Deno.serve(async request => {
   } catch (error) {
     console.error('manage-operations', error);
     if (error instanceof Error && error.message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o perfil e o local de atuacao.' }, 403);
-    const message = error instanceof Error ? error.message : 'Falha operacional.';
+    const message = error instanceof Error ? error.message : String((error as {message?:string})?.message || 'Falha operacional.');
+    if (message === 'CALENDAR_REVIEW_REQUIRED') return json({error:'O calendário deste pedido mudou. Resolva os dias sem CNES e as pendências de revisão antes de aprovar ou adicionar ao calendário.'},409);
     const known: Record<string,string> = { TRANSITION_NOT_ALLOWED: 'Esta transicao nao e permitida.', NOTES_REQUIRED: 'Informe uma justificativa.', REJECTION_REASON_REQUIRED: 'Informe a justificativa da recusa.', APPROVAL_REQUIRED: 'A solicitacao precisa ser aprovada antes de entrar no calendario.', REVIEW_TRANSITION_INVALID: 'Esta acao nao e permitida na situacao atual.', REVIEW_VERSION_CONFLICT: 'A solicitacao foi alterada por outro gestor. Atualize a tela antes de continuar.', INSUFFICIENT_VALIDATED_BALANCE: 'Saldo validado insuficiente.', REQUEST_OUT_OF_SCOPE: 'Solicitacao fora do seu escopo.', PERIODS_INVALID: 'Periodos informados sao invalidos.' };
     if (message === 'DISTRIBUTION_VERSION_CONFLICT') return json({error:'A distribuição foi alterada. Atualize o pedido antes de continuar.'},409);
     if (message === 'DISTRIBUTION_ALREADY_DECIDED') return json({error:'Só é possível redistribuir enquanto todas as análises estiverem pendentes.'},409);

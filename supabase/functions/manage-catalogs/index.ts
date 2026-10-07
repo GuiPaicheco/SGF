@@ -50,7 +50,7 @@ Deno.serve(async request => {
 
     if (action === 'calendar-list') {
       if (actorRole !== 'administrador') return json({ error: 'Acesso exclusivo do administrador.' }, 403);
-      const { data, error } = await admin.from('calendar_events').select('id,event_date,type,name,active').order('event_date', { ascending: false }).limit(150);
+      const { data, error } = await admin.from('calendar_events').select('id,event_date,type,name,active,version').order('event_date', { ascending: false }).limit(150);
       if (error) throw error;
       return json({ events: data || [] });
     }
@@ -58,7 +58,11 @@ Deno.serve(async request => {
       if (actorRole !== 'administrador') return json({ error: 'Acesso exclusivo do administrador.' }, 403);
       const eventDate = String(payload.event_date || ''), type = String(payload.type || ''), name = String(payload.name || '').trim();
       if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || !Number.isFinite(Date.parse(eventDate)) || new Date(eventDate).toISOString().slice(0,10) !== eventDate || !['feriado', 'ponto_facultativo'].includes(type) || !name || name.length>200) return json({ error: 'Informe uma data válida, tipo e nome do evento (até 200 caracteres).' }, 400);
-      const { data, error } = await scoped.from('calendar_events').upsert({ event_date: eventDate, type, name, active: payload.active !== false }, { onConflict: 'event_date,type' }).select('id').single();
+      const { data, error } = await scoped.rpc('save_planning_calendar_event', {
+        actor_id: identity.user.id, target_id: payload.id || null, target_date: eventDate,
+        target_type: type, target_name: name, target_active: payload.active !== false,
+        expected_version: payload.version || null,
+      });
       if (error) throw error;
       return json({ id: data.id });
     }
@@ -118,7 +122,8 @@ Deno.serve(async request => {
     return json({ error: 'Ação inválida.' }, 400);
   } catch (error) {
     console.error('manage-catalogs', error);
-    const message = error instanceof Error ? error.message : '';
+    const message = error instanceof Error ? error.message : String((error as {message?:string})?.message || '');
+    if (message.includes('CALENDAR_VERSION_CONFLICT')) return json({ error: 'Outro administrador alterou esta data. Atualize o calendário antes de salvar.' }, 409);
     if (message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o perfil e o local de atuação.' }, 403);
     if (message.includes('duplicate key')) return json({ error: 'Já existe um cadastro com estes dados.' }, 409);
     if (message.includes('SCOPE')) return json({ error: 'A lotação informada está fora do seu escopo.' }, 403);

@@ -258,3 +258,12 @@ Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastame
 O arquivo `supabase/seed-demo.sql` cria uma massa fictícia e idempotente para apresentações. Os registros usam os prefixos `DEMO` e `SGF-DEMO`, contemplam diferentes cargos, equipes, modalidades e situações, além de escala mínima, banco de horas e notificações. Execute-o somente no projeto destinado à demonstração ou homologação.
 
 Antes de apresentar, confira se os filtros estão limitados aos registros fictícios e se nenhuma informação pessoal aparece nas capturas de tela. A carga pode ser reaplicada para restaurar o cenário; ela não remove dados institucionais existentes.
+# Ajustes de planejamento publicados em 07/10/2026
+
+Feriados ativos recalculam pedidos compatíveis preservando início e quantidade de dias, com aviso ao titular e aos responsáveis dos escopos envolvidos. Aprovado não significa incluído no calendário. Histórico sem contagem confiável, sobreposição e perda de escopo não são corrigidos por inferência: o pedido fica sinalizado para revisão. Dia novo com mais de uma unidade possível depende de atribuição explícita pelo RH/Administrador.
+
+Redistribuição comum exige todas as revisões pendentes; decisões existentes não são apagadas. O titular altera somente seu vínculo selecionado, e RH somente seu escopo. Cada alteração exige justificativa e versão atual. Operações compartilham uma trava transacional global no piloto; medir contenção antes de ampliar o uso.
+
+Ensaios reproduzíveis: `node scripts/prepare-workflow-rehearsal.mjs unit`, `calendar` ou `distribution`. Executar a saída inteira no banco atualizado: ela inclui BEGIN/ROLLBACK, não é seed. Não remover o rollback.
+
+Recuperação: conferir no Supabase Auth o Site URL e redirect autorizado `https://sgfbetim.vercel.app/`. O backend aceita somente esse endereço por padrão; outras URLs exatas exigem `SGF_RECOVERY_URLS`, segredo/configuração exclusivo do servidor. Ainda é necessário comprovar entrega do e-mail e troca de senha em um fluxo real.

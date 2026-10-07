@@ -4,7 +4,8 @@ import {readFile} from 'node:fs/promises';
 const edge=await readFile(new URL('../supabase/functions/manage-catalogs/index.ts',import.meta.url),'utf8');
 const sql=await readFile(new URL('../supabase/migrations/20261005170000_unit_request_workflow.sql',import.meta.url),'utf8');
 test('gravação de calendário encaminha identidade autenticada e valida data real',()=>{
-  assert.match(edge,/scoped\.from\('calendar_events'\)\.upsert/);
+  assert.match(edge,/scoped\.rpc\('save_planning_calendar_event'/);
+  assert.match(edge,/expected_version: payload.version/);
   assert.match(edge,/toISOString\(\)\.slice\(0,10\) !== eventDate/);
   assert.match(edge,/name.length>200/);
 });

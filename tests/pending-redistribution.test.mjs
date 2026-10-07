@@ -38,7 +38,7 @@ test('alteração grava autoria, justificativa e antes/depois, mas noop não aum
 test('Edge Function usa identidade autenticada e respostas de concorrência compreensíveis',async()=>{
   const endpoint=await read('supabase/functions/manage-operations/index.ts');
   const action=endpoint.slice(endpoint.indexOf("action === 'redistribute-pending-day'"),endpoint.indexOf("action === 'unit-review'"));
-  assert.match(action,/!context.global/);
+  assert.match(action,/\['servidor','rh','administrador'\].includes\(actorRole\)/);
   assert.match(action,/actor_id:profile.id/);
   assert.match(action,/Number.isInteger\(payload.version\)/);
   assert.match(endpoint,/message === 'DISTRIBUTION_VERSION_CONFLICT'.*409/);
