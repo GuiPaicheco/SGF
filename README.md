@@ -1,5 +1,7 @@
 # SGF — Sistema de Gestão de Férias e Folgas
 
+**Piloto publicado:** https://sgfbetim.vercel.app — Vercel, com deploy contínuo da branch `main`. Backend Supabase preservado. Publicação não substitui a homologação funcional/institucional; consulte [hospedagem](docs/HOSPEDAGEM.md).
+
 > **Piloto de homologação — 07/10/2026:** banco atual atualizado para múltiplos vínculos/CNES, distribuição diária e análise por unidade. Produção e homologação usam o mesmo Supabase por decisão do responsável. Sete migrations e sete Edge Functions publicadas; 213 testes locais e 11 cenários SQL de RLS aprovados. Validação institucional e testes completos de fluxo permanecem pendentes. Consulte [versões](docs/VERSOES.md) e [pendências](docs/pendencias.md); a descrição legada abaixo será revisada com a conclusão dos fluxos.
 
 Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura Municipal de Betim. O SGF permite simular períodos, registrar pedidos, acompanhar decisões da chefia e do RH, administrar cadastros e visualizar a escala. **O comprovante registra o protocolo; ele não autoriza o afastamento.**
@@ -12,7 +14,7 @@ Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura
 |---|---|
 | Interface | Site estático em HTML, CSS e JavaScript, sem compilação do frontend |
 | Dados e autenticação | Supabase Auth, PostgreSQL com RLS e Edge Functions |
-| Hospedagem prevista | Netlify publica somente `dist/`; o backend permanece no Supabase |
+| Hospedagem atual | Vercel publica somente `dist/`; o backend permanece no Supabase |
 | Acessos | Público (simulação), Servidor, Diretor, RH e Administrador; uma conta pode reunir os quatro acessos autenticados |
 | Rastreabilidade | Protocolo, duas aprovações, histórico de situação, lançamentos e eventos de auditoria |
 | Administração | CNES e lotação principal, calendário institucional, escala mínima nominal, cadastro e desativação com histórico preservado |
