@@ -15,7 +15,7 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 1. [x] Executar dez verificações reais SQL de cadastro/aprovação: duas matrículas, três atuações, pessoa única, normalização de e-mail, quatro papéis, escopo, autoria e bloqueios de duplicidade/dupla aprovação. Ensaio `registration-workflow-rehearsal.sql`, gerador com argumento `registration`, transação revertida; zero contas e pedidos das fixtures restantes.
 2. [x] Corrigir resposta/erro atrasado do catálogo público para não sobrescrever login/início; duas cargas concorrentes preservam a mais recente. Três testes executáveis de regressão.
 3. [ ] Executar cadastro público e administrativo completo pelas Edge Functions/interface, incluindo primeiro acesso, contextos nos quatro perfis e revogação/desativação durante sessão. O ensaio SQL não cria senha nem comprova entrega de e-mail.
-4. [ ] Validar recuperação com e-mail acessível: aguardando indicação de conta de teste pelo responsável. Usuário deve confirmar recebimento e escolher a nova senha; não marcar o tópico inteiro como concluído sem essa prova.
+4. [ ] Validar recuperação com e-mail acessível: conta fictícia explicitamente autorizada criada em 07/10, identificada como TESTE, matrícula `TESTE-RECUPERACAO-20261007`, perfil somente Servidor, um vínculo e equipe Não se aplica. Fluxo público de pedido/aprovação e login por e-mail com senha provisória executados online; troca obrigatória confirmada. Pedido de recuperação aceito pelo backend. Aguardando usuário confirmar recebimento, usar o link, escolher nova senha e validar novo login. Não remover a conta antes de concluir; não considerar o tópico inteiro homologado.
 
 ### Conferência do ambiente publicado — 07/10/2026
 
