@@ -1,5 +1,7 @@
 # SGF — Sistema de Gestão de Férias e Folgas
 
+> **Piloto de homologação — 07/10/2026:** banco atual atualizado para múltiplos vínculos/CNES, distribuição diária e análise por unidade. Produção e homologação usam o mesmo Supabase por decisão do responsável. Sete migrations e sete Edge Functions publicadas; 213 testes locais e 11 cenários SQL de RLS aprovados. Validação institucional e testes completos de fluxo permanecem pendentes. Consulte [versões](docs/VERSOES.md) e [pendências](docs/pendencias.md); a descrição legada abaixo será revisada com a conclusão dos fluxos.
+
 Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura Municipal de Betim. O SGF permite simular períodos, registrar pedidos, acompanhar decisões da chefia e do RH, administrar cadastros e visualizar a escala. **O comprovante registra o protocolo; ele não autoriza o afastamento.**
 
 > **Estado do projeto (02/10/2026):** piloto em desenvolvimento. Os fluxos foram implementados e verificados localmente, mas as regras de direito a férias e a política de senhas ainda exigem homologação institucional antes de uso em produção. Veja [pendências](docs/pendencias.md) e [revisão técnica](docs/REVISAO_TECNICA.md).

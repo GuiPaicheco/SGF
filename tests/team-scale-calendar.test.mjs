@@ -5,16 +5,21 @@ import { readFile } from 'node:fs/promises';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('equipe participa dos cadastros e pode receber Não se aplica', async () => {
-  const [app, auth, catalogs, migration] = await Promise.all([
+  const [app, auth, catalogs, migration, multiMigration] = await Promise.all([
     read('assets/app.js'), read('supabase/functions/access-auth/index.ts'),
     read('supabase/functions/manage-catalogs/index.ts'),
     read('supabase/migrations/20260930143000_team_scale_cycle_calendar_notifications.sql'),
+    read('supabase/migrations/20261005130000_multi_bond_access_requests.sql'),
   ]);
-  assert.match(app, /data-team-na="access-team"/);
+  assert.match(app, /class="control access-team-type"/);
+  assert.match(app, /<option value="nao_se_aplica">Não se aplica<\/option>/);
+  assert.match(app, /team\.cnes_unit_id === cnesId && team\.type_code === type/);
   assert.match(auth, /requested_team: team/);
+  assert.match(auth, /submit_multi_bond_access_request/);
   assert.match(catalogs, /target_team:/);
   assert.match(migration, /team_name text not null default 'Não se aplica'/);
   assert.match(migration, /previous_team text/);
+  assert.match(multiMigration, /ACCESS_UNIT_DATA_INVALID/);
 });
 
 test('escala mínima mantém dias vazios, origem do ciclo e edição nominal', async () => {
@@ -25,7 +30,7 @@ test('escala mínima mantém dias vazios, origem do ciclo e edição nominal', a
   assert.match(app, /dateFrom\(item\.scale_date\)\.getDay\(\) === dateFrom\(minimumDate\)\.getDay\(\)/);
   assert.match(app, /source_date: event\.target\.dataset\.sourceDate/);
   assert.match(app, /cargo\?\.name[^\n]+team_name[^\n]+funcao\?\.name[^\n]+full_name/);
-  assert.match(operation, /minimum_scale_days/);
+  assert.match(operation, /loadUnitMinimumScale/);
   assert.match(migration, /primary key \(lotacao_id, scale_date\)/);
 });
 

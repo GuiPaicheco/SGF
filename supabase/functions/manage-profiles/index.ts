@@ -1,8 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
+import { validateAccessContext } from '../_shared/access-context.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-sgf-role',
+  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-sgf-role, x-sgf-bond, x-sgf-cnes, x-sgf-lotacao',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
@@ -19,11 +20,8 @@ const validCPF = (value: string) => {
   return true;
 };
 const institutionalEmail = (value: string) => /^[^\s@]+@betim\.mg\.gov\.br$/i.test(value);
-const temporaryPassword = () => {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
-  const bytes = crypto.getRandomValues(new Uint8Array(12));
-  return `Sg1!${[...bytes].map(value => alphabet[value % alphabet.length]).join('')}`;
-};
+// Política provisória do piloto autorizada pelo responsável; trocar no primeiro login.
+const temporaryPassword = () => '123456';
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -38,20 +36,27 @@ Deno.serve(async request => {
     if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
     const { data: actor } = await admin.from('profiles').select('roles,must_change_password,disabled_at').eq('id', identity.user.id).single();
     if (!actor?.roles?.includes('administrador') || request.headers.get('x-sgf-role') !== 'administrador' || actor.must_change_password || actor.disabled_at) return json({ error: 'Acesso exclusivo do administrador.' }, 403);
+    await validateAccessContext(admin, request, identity.user.id, actor.roles || []);
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
 
     if (action === 'list') {
-      const [{ data: profiles, error: profileError }, { data: locations, error: locationError }] = await Promise.all([
+      const [{ data: profiles, error: profileError }, { data: locations, error: locationError }, units, teams, types, positions, allocations] = await Promise.all([
         admin.from('profiles').select('id,full_name,cpf,roles,must_change_password,disabled_at,primary_lotacao_id,primary_lotacao:lotacoes!profiles_primary_lotacao_id_fkey(id,code,name),servidor:servidores(matricula,active,lotacao:lotacoes!servidores_lotacao_id_fkey(id,code,name)),scopes:profile_scopes(lotacao:lotacoes!profile_scopes_lotacao_id_fkey(id,code,name))').order('full_name'),
         admin.from('lotacoes').select('id,code,name,unit_type').eq('active', true).order('name'),
+        admin.from('cnes_units').select('id,code,name').eq('active', true).order('name'),
+        admin.from('teams').select('id,cnes_unit_id,type_code,team_number,ine_code,name,needs_review').eq('active', true).order('name'),
+        admin.from('team_types').select('code,name').eq('active', true).neq('code', 'nao_se_aplica').order('name'),
+        admin.from('cargos').select('id,name').order('name'),
+        admin.from('lotacoes').select('id,name,parent_id,lotacao_cnes_units(cnes_unit_id)').eq('active', true).eq('is_internal_allocation', true).order('name'),
       ]);
-      if (profileError || locationError) throw profileError || locationError;
+      const catalogError = units.error || teams.error || types.error || positions.error || allocations.error;
+      if (profileError || locationError || catalogError) throw profileError || locationError || catalogError;
       const enriched = await Promise.all((profiles || []).map(async profile => {
         const { data } = await admin.auth.admin.getUserById(profile.id);
         return { ...profile, email: data.user?.email || '' };
       }));
-      return json({ profiles: enriched, locations });
+      return json({ profiles: enriched, locations, registrationCatalogs: { cnesUnits: units.data || [], teams: teams.data || [], teamTypes: types.data || [], positions: positions.data || [], internalAllocations: allocations.data || [] } });
     }
 
     if (action === 'set-my-location') {
@@ -66,32 +71,30 @@ Deno.serve(async request => {
 
     if (action === 'create') {
       const name = String(payload.full_name || '').trim(), email = String(payload.email || '').trim().toLowerCase();
-      const cpf = digits(payload.cpf), registration = String(payload.registration || '').trim().toUpperCase();
-      const birthDate = String(payload.birth_date || ''), locationId = String(payload.lotacao_id || '');
+      const cpf = digits(payload.cpf), birthDate = String(payload.birth_date || '');
+      const bonds = Array.isArray(payload.bonds) ? payload.bonds : [];
       const roles: string[] = Array.isArray(payload.roles) ? [...new Set<string>(payload.roles.map(String))] : [];
-      if (!name || !institutionalEmail(email) || !validCPF(cpf) || !registration || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || !roles.length || roles.some(role => !allowedRoles.includes(role))) return json({ error: 'Confira nome, e-mail institucional, CPF, matrícula, nascimento e acessos.' }, 400);
-      const { data: location } = await admin.from('lotacoes').select('id').eq('id', locationId).eq('active', true).maybeSingle();
-      if (!location) return json({ error: 'Selecione uma lotação ativa.' }, 400);
+      const scopeIds = Array.isArray(payload.scope_ids) ? [...new Set<string>(payload.scope_ids.map(String))] : [];
+      if (!name || !institutionalEmail(email) || !validCPF(cpf) || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || !bonds.length || !roles.length || roles.some(role => !allowedRoles.includes(role))) return json({ error: 'Confira os dados pessoais, vínculos e acessos.' }, 400);
+      if (roles.some(role => ['diretor', 'rh'].includes(role)) && !scopeIds.length) return json({ error: 'Selecione ao menos uma lotação para Diretor ou RH.' }, 400);
       const { data: duplicate } = await admin.from('profiles').select('id').eq('cpf', cpf).maybeSingle();
       if (duplicate) return json({ error: 'Este CPF já possui conta. Edite os acessos da conta existente.' }, 409);
+      const { data: requestId, error: requestError } = await admin.rpc('submit_multi_bond_access_request', { target_full_name: name, target_cpf: cpf, target_birth_date: birthDate, target_email: email, target_bonds: bonds });
+      if (requestError) return json({ error: requestError.message.includes('ALREADY_PENDING') || requestError.code === '23505' ? 'Já existe cadastro pendente com este CPF, e-mail ou matrícula.' : 'Confira matrícula, cargo, CNES e equipe de todos os vínculos.' }, 400);
       const initialPassword = temporaryPassword();
       const { data: created, error: authError } = await admin.auth.admin.createUser({ email, password: initialPassword, email_confirm: true, user_metadata: { full_name: name }, app_metadata: { app_roles: roles } });
-      if (authError || !created.user) return json({ error: authError?.message || 'Não foi possível criar a conta. Confira a política de senhas do Supabase.' }, 400);
+      if (authError || !created.user) { await admin.from('access_requests').delete().eq('id', requestId); return json({ error: authError?.message || 'Não foi possível criar a conta. Confira a política de senhas do Supabase.' }, 400); }
       const accountId = created.user.id;
       try {
-        const primaryRole = roles.includes('administrador') ? 'administrador' : roles.includes('rh') ? 'rh' : roles.includes('diretor') ? 'diretor' : 'servidor';
-        const { error: profileError } = await admin.from('profiles').insert({ id: accountId, full_name: name, cpf, role: primaryRole, roles, login_identifier: registration.toLowerCase(), primary_lotacao_id: locationId, must_change_password: true });
-        if (profileError) throw profileError;
-        const { error: employeeError } = await admin.from('servidores').insert({ profile_id: accountId, full_name: name, matricula: registration, cpf, birth_date: birthDate, lotacao_id: locationId, employment_type: String(payload.employment_type || 'pendente'), team_name: String(payload.team || 'Não se aplica').trim() || 'Não se aplica', active: true, declared_position: String(payload.position || '') });
-        if (employeeError) throw employeeError;
-        if (roles.some(role => ['diretor', 'rh'].includes(role))) {
-          const { error: scopeError } = await admin.from('profile_scopes').insert({ profile_id: accountId, lotacao_id: locationId });
-          if (scopeError) throw scopeError;
-        }
-        await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'user_created', entity_type: 'profile', entity_id: accountId, new_value: { roles, lotacao_id: locationId } });
+        const { error: approvalError } = await admin.rpc('approve_multi_bond_access', { actor_id: identity.user.id, target_request_id: requestId, account_id: accountId, target_roles: roles, target_scope_ids: scopeIds });
+        if (approvalError) throw approvalError;
+        const { error: passwordFlagError } = await admin.from('profiles').update({ must_change_password: true }).eq('id', accountId);
+        if (passwordFlagError) throw passwordFlagError;
+        await admin.from('audit_events').insert({ actor_id: identity.user.id, actor_role: 'administrador', action: 'user_created', entity_type: 'profile', entity_id: accountId, reason: 'Cadastro administrativo com múltiplos vínculos', new_value: { roles, scope_ids: scopeIds, bond_count: bonds.length } });
         return json({ ok: true, id: accountId, temporary_password: initialPassword });
       } catch (error) {
         await admin.auth.admin.deleteUser(accountId);
+        await admin.from('access_requests').delete().eq('id', requestId);
         throw error;
       }
     }
@@ -103,7 +106,7 @@ Deno.serve(async request => {
       if (!target || target.disabled_at) return json({ error: 'Conta indisponível.' }, 404);
       if (action === 'reset-password') {
         const initialPassword = temporaryPassword();
-        const { error } = await admin.auth.admin.updateUserById(targetId, { password: initialPassword });
+        const { error } = await admin.auth.admin.updateUserById(targetId, { password: initialPassword, email_confirm: true });
         if (error) return json({ error: error.message }, 400);
         const { error: profileError } = await admin.from('profiles').update({ must_change_password: true }).eq('id', targetId);
         if (profileError) throw profileError;
@@ -161,6 +164,7 @@ Deno.serve(async request => {
     return json({ ok: true });
   } catch (error) {
     console.error('manage-profiles', error);
+    if (error instanceof Error && error.message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o acesso administrativo.' }, 403);
     return json({ error: 'Não foi possível atualizar o perfil.' }, 500);
   }
 });

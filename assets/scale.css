@@ -82,3 +82,20 @@ button.scale-person-line:hover strong, button.scale-person-line:focus-visible st
 @media (max-width: 800px) { .scale-heading, .scale-day-panel-head { flex-direction: column; } .scale-heading > .actions { flex-wrap: wrap; } .scale-stats, .scale-day-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .scale-day-metrics > div:nth-child(2) { border-right: 0; } .scale-day-metrics > div:nth-child(-n + 2) { border-bottom: 1px solid #dce8e0; } .scale-day-columns { grid-template-columns: 1fr; } }
 @media (max-width: 620px) { .scale-filters, .scale-stats { grid-template-columns: 1fr; } .scale-day-navigation { width: 100%; grid-template-columns: auto 1fr auto; } .scale-grid .scale-person { width: 230px; min-width: 230px; } .scale-day-panel-head, .scale-day-columns { padding-inline: 1rem; } }
 @media (prefers-reduced-motion: reduce) { .scale-day.has-conflict .scale-cell-main { animation: none; } }
+
+.scale-filters { grid-template-columns: repeat(4, minmax(140px, 1fr)); }
+.scale-context { margin-top: 1rem; }
+.audit-payload { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; padding: .75rem; background: #f4f6f8; }
+.manual-conflict-row { grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 1rem; align-items: start; }
+.manual-conflict-row p { overflow-wrap: anywhere; white-space: pre-wrap; }
+.manual-conflicts-card textarea { min-height: 90px; }
+@media (max-width: 620px) { .manual-conflict-row { grid-template-columns: 1fr; } }
+.scale-day button.scale-cell-main { border: 0; font: inherit; font-size: .72rem; font-weight: 900; }
+.scale-day.is-planned .scale-cell-main { border-block: 2px dashed #9c710d; color: #493500; background: #fff0bc; }
+.scale-legend .legend-planned::before { border: 1px dashed #9c710d; background: #fff0bc; }
+.scale-day.has-conflict .scale-cell-main { outline: 2px solid #c83535; outline-offset: -2px; }
+.scale-day.is-confirmed.has-conflict .scale-cell-main { background: #3f8b65; }
+.scale-day.is-inactive { color: #667085; background: repeating-linear-gradient(135deg, #f2f4f7, #f2f4f7 4px, #e4e7ec 4px, #e4e7ec 5px); cursor: default; }
+@media (max-width: 1100px) { .scale-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .scale-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .scale-filters { grid-template-columns: 1fr; } }

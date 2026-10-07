@@ -1,9 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 import { requestedBankHours, validSubmissionPeriods } from './validate.ts';
+import { contextHeaders, validateAccessContext } from '../_shared/access-context.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role, x-sgf-bond, x-sgf-cnes, x-sgf-lotacao',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const asciiJson = (body: unknown) => JSON.stringify(body).replace(/[\u007f-\uffff]/g, char =>
@@ -30,10 +31,13 @@ Deno.serve(async (request) => {
     const { data: identity, error: identityError } = await db.auth.getUser(token);
     if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada. Entre novamente.' }, 401);
     const { data: profile, error: profileError } = await db.from('profiles')
-      .select('roles,must_change_password').eq('id', identity.user.id).single();
-    if (profileError || !profile?.roles?.includes('servidor') || request.headers.get('x-sgf-role') !== 'servidor' || profile.must_change_password) {
+      .select('roles,must_change_password,disabled_at').eq('id', identity.user.id).single();
+    if (profileError || !profile?.roles?.includes('servidor') || request.headers.get('x-sgf-role') !== 'servidor' || profile.must_change_password || profile.disabled_at) {
       return json({ error: 'A conta ainda não está liberada para solicitações.' }, 403);
     }
+    const context = await validateAccessContext(db, request, identity.user.id, profile.roles || []);
+    const scoped = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { ...contextHeaders(context), 'x-sgf-actor': identity.user.id } } });
     const payload = await request.json();
     const cpf = digits(payload.cpf);
     const registration = String(payload.registration ?? '').trim();
@@ -48,16 +52,14 @@ Deno.serve(async (request) => {
         !isoDate.test(birthDate) || !isoDate.test(admissionDate) || !allowedTypes.has(type)) {
       return json({ error: 'Dados de identifica\u00e7\u00e3o ou modalidade inv\u00e1lidos.' }, 400);
     }
-    if (!validSubmissionPeriods(periods, type, payload.dailyHours, payload.availableHours)) {
+    if (!validSubmissionPeriods(periods, type, payload.dailyHours, payload.availableHours)
+        || periods.some((period: any) => !['uteis','corridos'].includes(period.counting_mode))) {
       return json({ error: 'Per\u00edodo solicitado inv\u00e1lido.' }, 400);
     }
 
-    const [{ data: byRegistration }, { data: byCpf }] = await Promise.all([
-      db.from('servidores').select('id,profile_id').eq('matricula', registration).maybeSingle(),
-      db.from('servidores').select('id,profile_id').eq('cpf', cpf).maybeSingle(),
-    ]);
-    if (!byRegistration || !byCpf || byRegistration.id !== byCpf.id ||
-        byRegistration.profile_id !== identity.user.id) {
+    const { data: byCpf } = await db.from('servidores').select('id,profile_id,matricula').eq('cpf', cpf).maybeSingle();
+    if (!byCpf || byCpf.id !== context.servidorId || byCpf.profile_id !== identity.user.id ||
+        registration.toUpperCase() !== context.registration) {
       return json({ error: 'A conta não está vinculada aos dados funcionais informados.' }, 403);
     }
 
@@ -71,26 +73,34 @@ Deno.serve(async (request) => {
     const { data: attempt } = await db.from('submission_attempts').insert({ ip_hash: ipHash, accepted: false }).select('id').single();
 
     payload.cpf = cpf;
-    payload.registration = registration;
+    payload.registration = byCpf.matricula;
     payload.requestedHours = type === 'banco_horas' ? requestedBankHours(periods, Number(payload.dailyHours)) : null;
-    payload.addBankHours = Number(payload.addBankHours) > 0 ? Number(payload.addBankHours) : null;
-    payload.periods = periods.map((p: Record<string, unknown>, index: number) => ({ ...p, sequence: index + 1 }));
-    const { data: created, error: createError } = await db.rpc('register_vacation_submission', { payload });
+      payload.addBankHours = Number(payload.addBankHours) > 0 ? Number(payload.addBankHours) : null;
+      payload.periods = periods.map((p: Record<string, unknown>, index: number) => ({ ...p, sequence: index + 1 }));
+      payload.createdBy = identity.user.id;
+    const { data: created, error: createError } = await scoped.rpc('register_contextual_vacation_submission', {
+      payload,
+      target_bond_id: context.bondId,
+      target_cnes_unit_id: context.cnesUnitId,
+      target_lotacao_id: context.lotacaoId,
+    });
     if (createError) {
       if (createError.message?.includes('IDENTITY_CONFLICT')) {
         return json({ error: 'J\u00e1 existe um cadastro com este CPF ou matr\u00edcula e dados divergentes. Procure o RH para regulariza\u00e7\u00e3o.' }, 409);
       }
       throw createError;
     }
-    if (created?.id) {
-      const { error: ownerError } = await db.from('vacation_requests')
-        .update({ created_by: identity.user.id }).eq('id', created.id);
-      if (ownerError) throw ownerError;
-    }
     if (attempt?.id) await db.from('submission_attempts').update({ accepted: true }).eq('id', attempt.id);
     return json(created, 201);
   } catch (error) {
     console.error('submit-request', error);
+    if (error instanceof Error && error.message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o vínculo e o CNES de atuação.' }, 403);
+    if (error instanceof Error && error.message.includes('RESPONSIBILITY_DAYS_INCOMPLETE')) return json({ error: 'Defina o CNES responsável por todos os dias úteis do período.' }, 400);
+    if (error instanceof Error && error.message.includes('RESPONSIBILITY_UNIT_INVALID')) return json({ error: 'Um dos CNES informados não pertence ao vínculo selecionado.' }, 403);
+    const code = error instanceof Error ? error.message : String((error as any)?.message || '');
+    if (code.includes('RESPONSIBILITY_DAY_DUPLICATED')) return json({ error: 'Cada dia deve possuir apenas um CNES responsável. Revise a distribuição.' }, 400);
+    if (code.includes('RESPONSIBILITY_UNIT_INELIGIBLE')) return json({ error: 'Uma das atuações não está ativa, autorizada ou vigente para o dia escolhido. Confira o cadastro com o RH.' }, 400);
+    if (code.includes('SUBMISSION_ACTOR_INVALID')) return json({ error: 'A sessão não corresponde ao titular do vínculo. Entre novamente e selecione o vínculo correto.' }, 403);
     return json({ error: 'N\u00e3o foi poss\u00edvel registrar a solicita\u00e7\u00e3o. Tente novamente ou procure o RH.' }, 500);
   }
 });

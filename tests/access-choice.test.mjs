@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 
-const source = readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../assets/access-policy.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
 
 test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas', async () => {
   const listeners = {};
@@ -40,26 +40,31 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
     },
     setTimeout() {}, console,
     Headers,
-    fetch: async (_input, init) => { if (init.headers instanceof Headers) headers.push(init.headers.get('x-sgf-role')); return { ok: true, json: async () => ({ request_ids: [] }) }; },
+    fetch: async (_input, init) => {
+      if (init.headers instanceof Headers) headers.push(init.headers.get('x-sgf-role'));
+      const payload = init.body ? JSON.parse(init.body) : {};
+      if (payload.action === 'contexts') return { ok: true, json: async () => ({ contexts: ['servidor', 'diretor', 'rh', 'administrador'].map(role => ({ role, global: role === 'administrador' })) }) };
+      return { ok: true, json: async () => ({ request_ids: [] }) };
+    },
   });
   await new Promise(resolve => setImmediate(resolve));
-  assert.match(app.innerHTML, /Escolha seu acesso/);
+  assert.match(app.innerHTML, /Escolha seu perfil e local de atuação/);
   for (const role of ['Servidor', 'Diretor', 'RH', 'Administrador']) assert.match(app.innerHTML, new RegExp(role));
-  await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'servidor' } } : null } });
+  await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '0' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'servidor');
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'servidor');
   assert.match(app.innerHTML, /Meus pedidos/);
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
-  await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'diretor' } } : null } });
+  await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '1' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'diretor');
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'diretor');
   assert.match(app.innerHTML, /Solicitações/);
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
-  await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'rh' } } : null } });
+  await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '2' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'rh');
   await roleFetch('/rest/v1/vacation_requests');
@@ -67,7 +72,7 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
   assert.equal(clientsCreated, 1, 'a troca de acesso preserva a sessão do cliente');
   assert.match(app.innerHTML, /Solicitações/);
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
-  await listeners.click({ target: { closest: selector => selector === '[data-access-role]' ? { dataset: { accessRole: 'administrador' } } : null } });
+  await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '3' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'administrador');
   await roleFetch('/rest/v1/vacation_requests');

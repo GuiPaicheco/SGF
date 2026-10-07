@@ -2,7 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role, x-sgf-bond, x-sgf-cnes, x-sgf-lotacao',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (body: unknown, status = 200, extraHeaders: Record<string, string> = {}) => new Response(JSON.stringify(body), {
@@ -37,7 +37,13 @@ Deno.serve(async request => {
     if (!url || !serviceKey || !anonKey) return json({ error: 'Serviço temporariamente indisponível.' }, 503);
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const auth = createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
-    const findProfile = async (identifier: string, cpf: string, cpfInput: boolean) => {
+    const findProfile = async (identifier: string, cpf: string, cpfInput: boolean, emailInput: boolean) => {
+      if (emailInput) {
+        const { data, error } = await admin.from('profiles').select('id,role,must_change_password,disabled_at')
+          .eq('email', identifier).maybeSingle();
+        if (error) throw error;
+        return data;
+      }
       if (!cpfInput) {
         const { data, error } = await admin.from('profiles').select('id,role,must_change_password,disabled_at')
           .eq('login_identifier', identifier).maybeSingle();
@@ -62,9 +68,71 @@ Deno.serve(async request => {
       if (error) throw error;
       return json({ locations: data || [] });
     }
+    if (action === 'registration-catalogs') {
+      const [unitsResult, teamsResult, typesResult, positionsResult, allocationsResult] = await Promise.all([
+        admin.from('cnes_units').select('id,code,name').eq('active', true).order('name').limit(500),
+        admin.from('teams').select('id,cnes_unit_id,type_code,team_number,ine_code,name,needs_review').eq('active', true).order('name').limit(1000),
+        admin.from('team_types').select('code,name').eq('active', true).neq('code', 'nao_se_aplica').order('name'),
+        admin.from('cargos').select('id,name').order('name').limit(500),
+        admin.from('lotacoes').select('id,name,parent_id,lotacao_cnes_units(cnes_unit_id)').eq('active', true).eq('is_internal_allocation', true).order('name').limit(500),
+      ]);
+      const error = unitsResult.error || teamsResult.error || typesResult.error || positionsResult.error || allocationsResult.error;
+      if (error) throw error;
+      return json({
+        cnesUnits: unitsResult.data || [],
+        teams: teamsResult.data || [],
+        teamTypes: typesResult.data || [],
+        positions: positionsResult.data || [],
+        internalAllocations: allocationsResult.data || [],
+      });
+    }
+    if (action === 'contexts') {
+      const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+      if (!token) return json({ error: 'Sessão inválida.' }, 401);
+      const { data: identity, error: identityError } = await admin.auth.getUser(token);
+      if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
+      const { data: contextProfile, error: profileError } = await admin.from('profiles')
+        .select('id,roles,disabled_at,servidor:servidores(id,active)')
+        .eq('id', identity.user.id).single();
+      if (profileError || !contextProfile || contextProfile.disabled_at) return json({ error: 'Conta indisponível.' }, 403);
+      const employee = Array.isArray(contextProfile.servidor) ? contextProfile.servidor[0] : contextProfile.servidor;
+      const contexts: Record<string, unknown>[] = [];
+      if (contextProfile.roles?.includes('servidor') && employee?.id && employee.active) {
+        const { data: bonds, error } = await admin.from('employment_bonds')
+          .select('id,registration,cargo:cargos(name),units:employment_bond_units(id,active,internal_lotacao_id,cnes:cnes_units(id,code,name,active),lotacao:lotacoes(id,code,name,active),team:employment_bond_teams(not_applicable,team:teams(name)))')
+          .eq('servidor_id', employee.id).eq('active', true);
+        if (error) throw error;
+        for (const bond of bonds || []) for (const unit of bond.units || []) {
+          if(!unit.active || !unit.cnes?.active || (unit.internal_lotacao_id && !unit.lotacao?.active)) continue;
+          contexts.push({
+          role: 'servidor', servidor_id: employee.id, bond_id: bond.id, bond_unit_id: unit.id, registration: bond.registration,
+          position: bond.cargo?.name || '', cnes_unit_id: unit.cnes?.id, cnes_code: unit.cnes?.code,
+          cnes_name: unit.cnes?.name, lotacao_id: unit.internal_lotacao_id || null,
+          lotacao_name: unit.lotacao?.name || null,
+          team_name: unit.team?.not_applicable ? 'Não se aplica' : unit.team?.team?.name || null,
+        });
+        }
+      }
+      if (contextProfile.roles?.some((role: string) => ['diretor', 'rh'].includes(role))) {
+        const { data: scopes, error } = await admin.from('profile_scopes')
+          .select('lotacao:lotacoes(id,code,name,active,lotacao_cnes_units(cnes:cnes_units(id,code,name,active)))')
+          .eq('profile_id', identity.user.id);
+        if (error) throw error;
+        for (const role of contextProfile.roles.filter((value: string) => ['diretor', 'rh'].includes(value))) {
+          for (const scope of scopes || []) {
+            if(!scope.lotacao?.active) continue;
+            const mappings = (scope.lotacao?.lotacao_cnes_units || []).filter((mapping:any)=>mapping.cnes?.active);
+            for (const mapping of mappings) contexts.push({ role, lotacao_id: scope.lotacao?.id, lotacao_name: scope.lotacao?.name, cnes_unit_id: mapping.cnes?.id, cnes_code: mapping.cnes?.code, cnes_name: mapping.cnes?.name });
+          }
+        }
+      }
+      if (contextProfile.roles?.includes('administrador')) contexts.push({ role: 'administrador', global: true });
+      return json({ contexts });
+    }
     const identifier = String(payload.identifier ?? payload.cpf ?? '').trim().toLowerCase();
     const cpf = digits(identifier);
     const cpfInput = /^[\d.\-\s]+$/.test(identifier) && validCpf(cpf);
+    const emailInput = /^[^\s@]+@[^\s@]+$/.test(identifier);
     const loginInput = /^[a-z0-9._-]{3,40}$/.test(identifier);
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const identityKey = `access-auth:${await sha256(`${ip}:${action}:${cpfInput ? cpf : identifier}`)}`;
@@ -96,9 +164,33 @@ Deno.serve(async request => {
     if (action === 'request-access') {
       const cpf = digits(payload.cpf);
       const fullName = String(payload.name ?? '').trim();
-      const registration = String(payload.registration ?? '').trim().toUpperCase();
       const birthDate = String(payload.birthDate ?? '');
       const email = String(payload.email ?? '').trim().toLowerCase();
+      if (Array.isArray(payload.bonds)) {
+        if (!fullName || !validCpf(cpf) || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) ||
+          !/^[^\s@]+@betim\.mg\.gov\.br$/.test(email) || !payload.bonds.length || payload.bonds.length > 10) {
+          return json({ error: 'Confira os dados pessoais e os vínculos da solicitação.' }, 400);
+        }
+        const { data, error } = await admin.rpc('submit_multi_bond_access_request', {
+          target_full_name: fullName,
+          target_cpf: cpf,
+          target_birth_date: birthDate,
+          target_email: email,
+          target_bonds: payload.bonds,
+        });
+        if (error) {
+          if (error.message.includes('ALREADY_PENDING') || error.code === '23505') {
+            return json({ error: 'Já existe uma solicitação pendente para este CPF, e-mail ou matrícula.' }, 409);
+          }
+          if (error.message.includes('TEAM_OUT_OF_CNES')) return json({ error: 'A equipe escolhida não pertence ao CNES informado.' }, 400);
+          if (error.message.includes('ALLOCATION')) return json({ error: 'A lotação interna não pertence à Secretaria/CNES selecionados.' }, 400);
+          if (error.message.includes('ACCESS_')) return json({ error: 'Confira os vínculos, CNES, equipes e cargas horárias informados.' }, 400);
+          throw error;
+        }
+        await acceptAttempts();
+        return json({ ok: true, id: data }, 202);
+      }
+      const registration = String(payload.registration ?? '').trim().toUpperCase();
       const position = String(payload.position ?? '').trim();
       const unit = String(payload.unit ?? '').trim();
       const team = String(payload.team ?? '').trim() || 'Não se aplica';
@@ -119,14 +211,18 @@ Deno.serve(async request => {
     }
 
     if (action === 'recover') {
-      if (cpfInput || loginInput) {
-        const profile = await findProfile(identifier, cpf, cpfInput);
+      if (cpfInput || emailInput || loginInput) {
+        const profile = await findProfile(identifier, cpf, cpfInput, emailInput);
         if (profile) {
           const { data: account } = await admin.auth.admin.getUserById(profile.id);
           if (account.user?.email) {
             const redirectTo = String(payload.redirectTo ?? '').startsWith('https://')
               ? String(payload.redirectTo) : undefined;
-            await auth.auth.resetPasswordForEmail(account.user.email, redirectTo ? { redirectTo } : undefined);
+            const { error: recoveryError } = await auth.auth.resetPasswordForEmail(account.user.email, redirectTo ? { redirectTo } : undefined);
+            if (recoveryError) {
+              console.error('access-auth recovery delivery failed', recoveryError.code);
+              return json({ error: 'Não foi possível enviar as instruções. Peça ao Administrador ou à TI que redefina sua senha provisória.' }, 503);
+            }
           }
         }
       }
@@ -138,6 +234,7 @@ Deno.serve(async request => {
       const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
       const password = String(payload.password ?? '');
       if (!token) return json({ error: 'Sessão inválida.' }, 401);
+      if (password === '123456') return json({ error: 'Escolha uma senha pessoal diferente da senha provisória 123456.' }, 400);
       if (password.length < 4 || password.length > 72) return json({ error: 'A senha deve ter entre 4 e 72 caracteres.' }, 400);
       const { data: identity, error: identityError } = await admin.auth.getUser(token);
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
@@ -147,21 +244,22 @@ Deno.serve(async request => {
       if (password.length < min) return json({ error: `Esta conta exige pelo menos ${min} caracteres.` }, 400);
       const { error: updateError } = await admin.auth.admin.updateUserById(identity.user.id, { password });
       if (updateError) throw updateError;
-      await admin.from('profiles').update({ must_change_password: false }).eq('id', identity.user.id);
+      const { error: flagError } = await admin.from('profiles').update({ must_change_password: false }).eq('id', identity.user.id);
+      if (flagError) throw flagError;
       return json({ ok: true });
     }
 
     if (action !== 'login') return json({ error: 'Ação inválida.' }, 400);
     const password = String(payload.password ?? '');
-    if ((!cpfInput && !loginInput) || password.length < 4 || password.length > 72) return json({ error: 'Login, CPF ou senha inválidos.' }, 401);
-    const profile = await findProfile(identifier, cpf, cpfInput);
-    if (!profile || profile.disabled_at) return json({ error: 'Login, CPF ou senha inválidos.' }, 401);
+    if ((!cpfInput && !emailInput && !loginInput) || password.length < 4 || password.length > 72) return json({ error: 'CPF, e-mail ou senha inválidos.' }, 401);
+    const profile = await findProfile(identifier, cpf, cpfInput, emailInput);
+    if (!profile || profile.disabled_at) return json({ error: 'CPF, e-mail ou senha inválidos.' }, 401);
     const { data: account } = await admin.auth.admin.getUserById(profile.id);
-    if (!account.user?.email) return json({ error: 'Login, CPF ou senha inválidos.' }, 401);
+    if (!account.user?.email) return json({ error: 'CPF, e-mail ou senha inválidos.' }, 401);
     const { data: signedIn, error: signInError } = await auth.auth.signInWithPassword({
       email: account.user.email, password,
     });
-    if (signInError || !signedIn.session) return json({ error: 'Login, CPF ou senha inválidos.' }, 401);
+    if (signInError || !signedIn.session) return json({ error: 'CPF, e-mail ou senha inválidos.' }, 401);
     const access = await admin.from('profiles').select('roles').eq('id', profile.id).single();
     if (access.error && !missingColumn(access.error, 'roles')) throw access.error;
     const roles = Array.isArray(access.data?.roles) && access.data.roles.length ? access.data.roles : [profile.role];
