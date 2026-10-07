@@ -31,6 +31,8 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 7. [ ] Validar duas sessões simultâneas, ciclo completo pela interface e revisão visual de todas as telas.
 8. [ ] Conferir Site URL/Redirect URLs no painel Supabase e testar recebimento/uso do e-mail. Painel redireciona ao login, impedindo essa conferência sem autenticação do responsável. Não considerar recuperação homologada apenas pelos testes automatizados.
 9. [ ] Concluir aceite institucional, reconstrução em banco vazio e restauração de backup. Permanecem dependências dos blocos 10–12.
+10. [x] Versionar e enviar a entrega ao GitHub: commit `345349d67b6c3cd66fad2a033ef18244fecc0dd9`, em `main`, sem incluir a alteração local de `logo.png`.
+11. [ ] Liberar publicação Vercel: deploy `dpl_F4eT33CfidkzXFyuToZYyFNofNFe` está **BLOCKED**, sem build logs, com indicação de configuração de conta/colaboração (`https://vercel.com/docs/deployments/troubleshoot-project-collaboration#account-configuration`). Não afirmar que o frontend novo está no ar. Backend atualizado permanece compatível com o frontend anterior, mas o novo editor/avisos aguardam publicação.
 
 ### Bloco concluído: ensaio real de gestão por unidade — 07/10/2026
 
