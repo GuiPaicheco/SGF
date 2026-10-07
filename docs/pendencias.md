@@ -10,6 +10,16 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 
 ## Situação atual
 
+### Conferência do ambiente publicado — 07/10/2026
+
+1. [x] Conferir no Supabase os releases `multi_unit_pilot_release` e `multi_unit_pilot_read_labels` e as sete Edge Functions atuais ativas. Banco atualizado para o código implementado; não há migration nova local a aplicar neste momento.
+2. [x] Reexecutar os 11 cenários SQL de isolamento de acesso no banco compartilhado, em transação revertida: todos aprovados. Confirmar nenhuma conta técnica restante, 48 CNES, 176 equipes e um vínculo existente preservado; todas as tabelas públicas com RLS habilitada.
+3. [x] Disponibilizar o piloto atual no Vercel. **Situação: candidato de homologação em desenvolvimento, não versão final homologada.** Publicar migrations não conclui funcionalidades ainda ausentes.
+4. [ ] Homologar de ponta a ponta cadastro com múltiplos vínculos → aprovação → primeiro acesso → distribuição diária → decisão por unidade → inclusão explícita no calendário.
+5. [ ] Completar ajuste automático por feriado: helper instalado, mas ainda sem integração atômica com períodos/distribuições e notificações. Não prometer alteração automática dos pedidos nesta versão.
+6. [ ] Completar redistribuição pós-envio, avisos e auditoria conforme os blocos funcionais abaixo; validar concorrência real.
+7. [ ] Conferir recuperação de senha no novo domínio, revisão visual e aceite institucional. Nenhuma mudança de usuário/senha ou limpeza de dados foi feita nesta conferência.
+
 ### Publicação do piloto compartilhado — plano vigente em 07/10/2026
 
 Este bloco substitui as restrições locais e o plano de três bancos descritos historicamente abaixo. Não houve contratação de plano pago nem clonagem de bancos.
@@ -71,8 +81,8 @@ A manutenção legada acima é histórica. A autorização de 07/10 permite publ
 4. [ ] Completar separação final das áreas/permissões; intervalo livre no calendário e seletor de atuação para recusas por CNES preparados localmente, ainda requerem homologação.
 5. [ ] Completar direitos/saldos por vínculo, catálogo organizacional, migração e reconciliação de históricos e hotfixes compatíveis.
 6. [ ] Homologar decisões institucionais, referências e regras com RH/Jurídico.
-7. [ ] Disponibilizar banco independente, executar migrations, testar permissões/concorrência/notificações e revisar visualmente todos os fluxos.
-8. [ ] Fazer revisão final de segurança, ambientes, documentação e aceite; versionar/publicar somente após autorização.
+7. [ ] Testar concorrência/notificações e revisar visualmente todos os fluxos no piloto compartilhado já autorizado e atualizado. Banco independente permanece plano futuro, não bloqueio do piloto atual.
+8. [ ] Fazer revisão final de segurança, ambientes, documentação e aceite institucional. Versionamento e publicação técnica já autorizados; isso não constitui aceite para uso institucional.
 
 ### Acompanhamento enumerado
 
