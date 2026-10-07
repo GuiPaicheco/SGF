@@ -1,4 +1,5 @@
 .netlify/
+.vercel/
 dist/
 supabase/.temp/
 .env
