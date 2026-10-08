@@ -2,7 +2,7 @@
 
 ## Catálogo e recursos por matrícula — 08/10/2026
 
-Em **Cadastros → CNES e equipes**, o Administrador pesquisa, cadastra e edita unidades e equipes. CNES possui sete dígitos e seu código não é substituído em um cadastro existente. Para conferir/preencher INE, informe a fonte oficial e a justificativa. Equipes sem INE permanecem explicitamente pendentes. Desativação preserva histórico.
+Em **Cadastros → CNES e equipes**, o Administrador pesquisa, cadastra e edita unidades e equipes. CNES possui sete dígitos e seu código não é substituído em um cadastro existente. Equipes são identificadas pelo nome, tipo/número e unidade, como **eMulti 004 Bueno Franco** ou **eMulti 018 Vila Cristina**; não é necessário INE. Ausência de INE não é pendência nem impede seleção. Metadados históricos permanecem armazenados, sem campos visíveis ou exigência de preenchimento. Desativação preserva histórico.
 
 Em **Cadastros → Lotações**, selecione o CNES cadastrado. UBS utiliza a própria unidade; somente subdivisão de Secretaria usa **Lotação interna**, com Secretaria superior. Diretorias podem compartilhar CNES sem compartilhar o escopo interno. Responsáveis ativos RH/Diretor e cada mudança estrutural são registrados com justificativa e versão.
 

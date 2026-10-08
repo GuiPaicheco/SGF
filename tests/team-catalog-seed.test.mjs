@@ -33,7 +33,7 @@ test("o catálogo contém todas as 176 equipes fornecidas", () => {
   );
 });
 
-test("códigos INE ausentes ficam explicitamente pendentes de conferência", () => {
+test("importação histórica preserva os dois INE não fornecidos, sem inventar códigos", () => {
   const pending = entries.filter(({ needsReview }) => needsReview);
   assert.deepEqual(
     pending.map(({ label }) => label),

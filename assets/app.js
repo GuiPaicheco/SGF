@@ -459,7 +459,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
     const teamSelect = unitCard.querySelector('.access-team');
     const previousTeam = teamSelect.value;
     const teams = state.registrationCatalogs.teams.filter(team => team.cnes_unit_id === cnesId && team.type_code === type);
-    teamSelect.innerHTML = type === 'nao_se_aplica' ? '<option value="">Não se aplica</option>' : catalogOptions(teams, teams.length ? 'Selecione a equipe' : 'Nenhuma equipe cadastrada', item => `${item.name}${item.ine_code ? ` · INE ${item.ine_code}` : ' · código em conferência'}`);
+    teamSelect.innerHTML = type === 'nao_se_aplica' ? '<option value="">Não se aplica</option>' : catalogOptions(teams, teams.length ? 'Selecione a equipe' : 'Nenhuma equipe cadastrada', item => item.name);
     teamSelect.value = teams.some(team => team.id === previousTeam) && type !== 'nao_se_aplica' ? previousTeam : '';
     teamSelect.disabled = type === 'nao_se_aplica' || !cnesId || !type || !teams.length;
     teamSelect.required = type !== 'nao_se_aplica';

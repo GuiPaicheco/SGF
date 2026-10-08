@@ -7,7 +7,7 @@ Atualização: 08/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 246 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 247 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -16,13 +16,11 @@ Atualização: 08/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 
 Itens ativos retirados após os ensaios de cadastro/identidade, equipes, primeiro acesso, quatro perfis, revogação/desativação e intervalo de login. Evidências e limites em [VALIDACAO_BLOCO_01.md](VALIDACAO_BLOCO_01.md). Contas técnicas deste bloco desativadas, sem exclusão do histórico; conta TESTE de recuperação preservada. Direitos/saldos por vínculo continuam no bloco 02; aceite institucional continua no bloco 08.
 
-## 02. Catálogo organizacional, direitos e saldos por vínculo — implementação técnica concluída; conferências institucionais restantes
+## 02. Catálogo organizacional, direitos e saldos por vínculo — concluído tecnicamente no escopo atual
 
-Administração organizacional e recursos por matrícula implementados e ensaiados. Itens técnicos retirados da fila ativa; evidências, limitações e procedimentos em [VALIDACAO_BLOCO_02.md](VALIDACAO_BLOCO_02.md). Não equivale a homologação institucional nem ao ciclo completo de interface do bloco 03.
+Administração organizacional e recursos por matrícula implementados e ensaiados. Itens técnicos retirados da fila ativa; evidências, limitações e procedimentos em [VALIDACAO_BLOCO_02.md](VALIDACAO_BLOCO_02.md). INE dispensado pelo responsável em 08/10: equipes são identificadas pelo nome, tipo/número e CNES, sem avisos de código pendente. Dados históricos existentes foram preservados.
 
-1. [ ] Confirmar institucionalmente a responsabilidade quando duas unidades compartilham a jornada no mesmo dia. Até a decisão, conservar um responsável por dia; não implementar divisão de horas por suposição.
-2. [ ] Receber fonte oficial, confirmar e preencher os códigos INE de EMULTI 004 BUENO FRANCO e EMULTI 018 VILA CRISTINA. Tela de edição exige referência para preencher/alterar INE; não inventar códigos.
-3. [ ] Homologar a matriz oficial de CNES, lotações internas, equipes, vínculos e autorizadores. Catálogo contém 48 CNES e 176 equipes; existência dos registros não é aceite institucional.
+O fluxo atual mantém um responsável por dia, escolhido entre as unidades cadastradas; divisão de horas entre unidades no mesmo dia não foi solicitada nem implementada. A hipótese foi retirada da fila deste bloco, sem alterar a regra diária. Conferência cadastral pelo RH continua no bloco 08, como parte do aceite antes do uso institucional; não é funcionalidade faltante. O ciclo completo de interface continua no bloco 03.
 
 ## 03. Solicitações, gestão por unidade e redistribuição
 
@@ -73,7 +71,7 @@ Administração organizacional e recursos por matrícula implementados e ensaiad
 ## 08. Homologação institucional, revisão visual e documentação
 
 1. [ ] Obter validação de RH/Jurídico para admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual; usar HOMOLOGACAO_REGRAS.md.
-2. [ ] Homologar solicitações com múltiplos autorizadores e validar os quatro perfis com usuários responsáveis.
+2. [ ] Homologar solicitações com múltiplos autorizadores e validar os quatro perfis com usuários responsáveis. Conferir se CNES, lotações internas, equipes, vínculos e autorizadores cadastrados correspondem à organização real; isso não bloqueia o desenvolvimento do piloto nem exige INE.
 3. [ ] Revisar todas as telas com dados representativos: codificação de texto, botões, alinhamento, navegação, responsividade e acessibilidade.
 4. [ ] Validar navegadores/equipamentos usados pela Prefeitura.
 5. [ ] Atualizar manual operacional, hospedagem, guia de testes e treinamento/apresentação com imagens da versão validada.

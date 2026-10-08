@@ -33,4 +33,10 @@ Evidências visuais locais (ignoradas no Git): `.sgf-backups/bloco02/catalogo-pu
 
 Não encerra testes de duas sessões realmente concorrentes, ciclo completo das solicitações pela interface, reconstrução em banco vazio ou revisão normativa. Direitos cadastrados não são concessão legal nem consumo automático; cálculos legais continuam sujeitos à validação do RH/Jurídico. Dados legados ambíguos exigem reconciliação explícita.
 
-Para encerrar institucionalmente o bloco, faltam: decisão sobre duas unidades no mesmo dia; fonte dos INE de EMULTI 004 BUENO FRANCO/EMULTI 018 VILA CRISTINA; aceite da matriz de CNES/lotação/equipes/vínculos/autorizadores. Nenhuma dessas informações foi inventada.
+### Esclarecimento de escopo — 08/10/2026
+
+O responsável dispensou o INE: cadastro, busca e seleção de equipe utilizam nome, tipo/número e CNES. Ausência de INE não é pendência. Campos visíveis e avisos foram retirados, preservando metadados existentes; não há migração nem alteração dos registros do Supabase.
+
+A hipótese de dividir a jornada entre duas unidades no mesmo dia não faz parte do fluxo solicitado. Continua um CNES/lotação responsável por dia, selecionado entre as atuações cadastradas. Não foi implementada divisão de horas nem registrada decisão institucional por suposição.
+
+Conferir a matriz significa apenas verificar, antes do uso institucional, se cada unidade, equipe e autorizador está cadastrado corretamente. Essa conferência permanece no bloco 08, sem ser tratada como funcionalidade faltante do bloco 02. O bloco 02 está encerrado tecnicamente no escopo atual; não representa aceite institucional nem encerramento dos demais blocos.

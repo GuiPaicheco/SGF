@@ -16,15 +16,28 @@ test('troca de contexto e saída limpam recursos de matrícula',()=>{
   assert.match(app,/querySelector\('#registry-team'\)\?\.value/);
   assert.match(app,/bond_id: state\.selected\.context_bond_id, version: state\.detailBondResources\.account\.version, entry_key: event\.target\.dataset\.entryKey/);
 });
-test('catálogo escapa nomes e evidencia INE pendente',()=>{
+test('catálogo escapa nomes e não trata INE ausente como pendência',()=>{
   const html=ui.SGFOrganization.registryPage(data);
   assert.ok(html.includes('&lt;img onerror=x&gt;')); assert.ok(!html.includes('<img onerror=x>'));
-  assert.match(html,/aguardam conferência do INE/);
+  assert.doesNotMatch(html,/aguardam conferência do INE|<th>INE<\/th>|Pendente de conferência/);
 });
-test('editor de equipe tem fonte oficial, justificativa e versão',()=>{
+test('editor dispensa INE e preserva metadados existentes sem exibi-los',()=>{
   const html=ui.SGFOrganization.registryEditor('team',{id:'t',version:4},data);
   for(const name of ['source_reference','reason','cnes_unit_id','type_code','ine_code']) assert.ok(html.includes(`name="${name}"`));
   assert.match(html,/data-version="4"/);
+  assert.match(html,/type="hidden" name="ine_code"/);
+  assert.match(html,/type="hidden" name="source_reference"/);
+  assert.doesNotMatch(html,/label[^>]*>Código INE/);
+  assert.match(html,/Não é necessário informar INE/);
+});
+test('eMulti sem INE permanece selecionável pelo nome e unidade',()=>{
+  const team={id:'t',cnes_unit_id:'u',name:'eMulti 004 Bueno Franco',type_code:'emulti',ine_code:null,needs_review:true,active:true};
+  const html=ui.SGFOrganization.registryPage({...data,teams:[team]});
+  assert.match(html,/eMulti 004 Bueno Franco/);
+  assert.doesNotMatch(html,/Pendente de conferência|aguardam conferência/);
+  const app=read('assets/app.js');
+  assert.match(app,/catalogOptions\(teams,[^\n]+item => item\.name\)/);
+  assert.doesNotMatch(app,/código em conferência/);
 });
 test('lotação separa CNES da subdivisão de Secretaria',()=>{
   assert.match(ui.SGFOrganization.locationExtra({},data),/Lotação interna de uma Secretaria/);
