@@ -66,3 +66,18 @@ test('falha na consulta de escopos não mantém acesso salvo', async () => {
   assert.equal(state.activeContext, null);
   assert.equal(state.accessContexts.length, 0);
 });
+
+test('conta desativada encerra sessão e elimina contexto salvo', async () => {
+  const removed = [];
+  const state = { activeContext: { role: 'rh' }, accessContexts: [{ role: 'rh' }] };
+  const context = vm.createContext({ state, client: { auth: { getSession: async () => ({ data: { session: { user: { id: 'p' } } } }), signOut: async () => {} }, from: () => ({ select() { return this; }, eq() { return this; }, single: async () => ({ data: { roles: ['rh'], disabled_at: '2026-10-08' } }) }) }, sessionStorage: { removeItem: key => removed.push(key) }, console });
+  vm.runInContext(extract('  async function loadSession()', '  async function loadRequests()'), context);
+  await context.loadSession();
+  assert.equal(state.session, null); assert.equal(state.activeContext, null);
+  assert.equal(state.accessContexts.length, 0);
+  assert.deepEqual(removed.sort(), ['sgf-access-context', 'sgf-access-role']);
+});
+
+test('cabeçalho usa o perfil de gestão ativo, não o cargo de servidor', () => {
+  assert.match(extract('  function renderHeaderUser()', '  function renderNavigation'), /state\.profile\.role === 'servidor'/);
+});
