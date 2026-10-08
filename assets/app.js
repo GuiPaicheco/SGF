@@ -73,7 +73,7 @@
   const formatDateTime = value => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '—';
   const formatDayMonth = value => value ? new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(dateFrom(value)) : '—';
   const accessLabel = role => ({ servidor: 'Servidor', diretor: 'Diretor', rh: 'RH', administrador: 'Administrador' })[role] || role;
-  const passwordMin = roles => roles?.includes('administrador') ? 8 : roles?.some(role => ['diretor', 'rh'].includes(role)) ? 6 : 4;
+  const passwordMin = roles => roles?.includes('administrador') ? 8 : 6;
   const institutionalEmail = value => /^[^\s@]+@betim\.mg\.gov\.br$/i.test(String(value || '').trim());
   const accessHome = role => role === 'servidor' ? 'employee-dashboard' : 'dashboard';
   const sessionHeaders = session => ({ 'Content-Type': 'application/json', apikey: SUPABASE_KEY, ...(state.multiAccess && state.profile?.role ? { 'x-sgf-role': state.profile.role } : {}), ...(state.activeContext?.bond_id ? { 'x-sgf-bond': state.activeContext.bond_id } : {}), ...(state.activeContext?.cnes_unit_id ? { 'x-sgf-cnes': state.activeContext.cnes_unit_id } : {}), ...(state.activeContext?.lotacao_id ? { 'x-sgf-lotacao': state.activeContext.lotacao_id } : {}), Authorization: `Bearer ${session.access_token}` });
@@ -514,6 +514,7 @@
   }
   async function setPassword(event) { event.preventDefault(); const button = event.submitter, password = document.querySelector('#set-password').value, confirmation = document.querySelector('#set-password-confirmation').value; if (password !== confirmation) return showToast('As senhas informadas não coincidem.'); await saveNewPassword(button, password); }
   async function saveNewPassword(button, password) {
+    if (password.length < passwordMin(state.profile?.roles) || password.length > 72) return showToast(`A senha deve ter entre ${passwordMin(state.profile?.roles)} e 72 caracteres.`);
     button.disabled = true; button.textContent = 'Salvando…';
     try { const { data, error: sessionError } = await client.auth.getSession(); if (sessionError) throw new Error('Não foi possível confirmar sua sessão. Confira a conexão e tente novamente.'); const session = data.session; if (!session || state.recoveryError) throw new Error('A sessão de recuperação não está disponível neste navegador. Solicite um novo e-mail.'); const response = await fetch(`${SUPABASE_URL}/functions/v1/access-auth`, { method: 'POST', headers: sessionHeaders(session), body: JSON.stringify({ action: 'change-password', password }) }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || 'Não foi possível alterar a senha.'); await loadSession(); history.replaceState({}, document.title, window.location.pathname); showToast('Senha definida com sucesso.'); go(state.profile?.role ? accessHome(state.profile.role) : 'choose-access'); }
     catch (error) { showToast(error.message); button.disabled = false; button.textContent = 'Salvar senha'; }

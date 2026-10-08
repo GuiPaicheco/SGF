@@ -14,6 +14,8 @@ Plano ativo e ordenado das alterações do sistema. Os passos abaixo devem ser e
 
 #### Recuperação de senha — correção de 07/10
 
+**Correção adicional — 08/10:** os logs confirmaram `weak_password` ao salvar: Supabase exige seis caracteres, mas o SGF permitia quatro para Servidor. Mínimo alinhado em frontend/backend (seis; oito para Administrador), mantendo compatibilidade de login existente. Recusas `weak_password` e `same_password` agora retornam orientação específica, sem retirar a troca obrigatória. Suíte local: 227 testes aprovados. A troca real da senha pessoal continua pendente de confirmação do usuário.
+
 1. [x] Investigar o erro ao salvar: Auth registrou `/recover` com sucesso e `/verify` aceito três minutos depois; não há evidência de expiração naquele primeiro clique. O frontend tratava qualquer ausência de sessão como link expirado.
 2. [x] Inicializar o cliente após o estado da aplicação e aguardar explicitamente `setSession` no retorno de convite/recuperação antes de carregar o perfil e exibir o formulário. Remover tokens da URL, limpar contexto anterior e não reutilizar sessão de outra conta em callback inválido.
 3. [x] Bloquear formulário sem sessão válida e distinguir falha de sessão de expiração. Executar seis testes novos de callback; suíte local completa com 225 testes aprovados, sintaxe e build estático conferidos.

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 import { runInNewContext } from 'node:vm';
 
-async function runAuth(payload, { deliveryError = null, signedIn = true } = {}) {
+async function runAuth(payload, { deliveryError = null, signedIn = true, passwordError = null } = {}) {
   let handler;
   const updates = [];
   const admin = {
@@ -23,7 +23,7 @@ async function runAuth(payload, { deliveryError = null, signedIn = true } = {}) 
       getUser: async () => ({ data: { user: signedIn ? { id: 'user' } : null }, error: null }),
       admin: {
         getUserById: async () => ({ data: { user: { email: 'teste@betim.mg.gov.br' } } }),
-        updateUserById: async (_id, value) => { updates.push(value); return { error: null }; },
+        updateUserById: async (_id, value) => { updates.push(value); return { error: passwordError }; },
       },
     },
   };
@@ -57,6 +57,24 @@ test('troca de senha rejeita sessão inválida', async () => {
   const result = await runAuth({ action: 'change-password', password: 'Pessoal!987' }, { signedIn: false });
   assert.equal(result.status, 401);
   assert.equal(result.updates.length, 0);
+});
+
+test('senha pessoal curta é rejeitada antes de alterar Auth ou perfil', async () => {
+  for (const password of ['abcd', 'abcde']) {
+    const result = await runAuth({ action: 'change-password', password });
+    assert.equal(result.status, 400);
+    assert.match(result.body.error, /6 e 72/);
+    assert.equal(result.updates.length, 0);
+  }
+});
+
+test('requisitos de senha e repetição retornam orientação sem liberar perfil', async () => {
+  for (const code of ['weak_password', 'same_password']) {
+    const result = await runAuth({ action: 'change-password', password: 'TestOnly!987' }, { passwordError: { code } });
+    assert.equal(result.status, 400);
+    assert.equal(result.updates.length, 1);
+    assert.ok(!result.body.error.includes('concluir a operação'));
+  }
 });
 
 test('recuperação reporta falha de entrega em vez de sucesso', async () => {

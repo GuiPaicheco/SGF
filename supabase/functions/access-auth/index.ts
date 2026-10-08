@@ -237,14 +237,16 @@ Deno.serve(async request => {
       const password = String(payload.password ?? '');
       if (!token) return json({ error: 'Sessão inválida.' }, 401);
       if (password === '123456') return json({ error: 'Escolha uma senha pessoal diferente da senha provisória 123456.' }, 400);
-      if (password.length < 4 || password.length > 72) return json({ error: 'A senha deve ter entre 4 e 72 caracteres.' }, 400);
+      if (password.length < 6 || password.length > 72) return json({ error: 'A senha deve ter entre 6 e 72 caracteres.' }, 400);
       const { data: identity, error: identityError } = await admin.auth.getUser(token);
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
       const { data: passwordProfile } = await admin.from('profiles').select('roles,disabled_at').eq('id', identity.user.id).single();
       if (!passwordProfile || passwordProfile.disabled_at) return json({ error: 'Conta indisponível.' }, 403);
-      const min = passwordProfile.roles?.includes('administrador') ? 8 : passwordProfile.roles?.some((role: string) => ['diretor', 'rh'].includes(role)) ? 6 : 4;
+      const min = passwordProfile.roles?.includes('administrador') ? 8 : 6;
       if (password.length < min) return json({ error: `Esta conta exige pelo menos ${min} caracteres.` }, 400);
       const { error: updateError } = await admin.auth.admin.updateUserById(identity.user.id, { password });
+      if (updateError?.code === 'weak_password') return json({ error: 'A senha não atende aos requisitos de segurança. Use pelo menos 6 caracteres e escolha uma senha pessoal mais forte.' }, 400);
+      if (updateError?.code === 'same_password') return json({ error: 'Escolha uma senha diferente da senha atual.' }, 400);
       if (updateError) throw updateError;
       const { error: flagError } = await admin.from('profiles').update({ must_change_password: false }).eq('id', identity.user.id);
       if (flagError) throw flagError;
