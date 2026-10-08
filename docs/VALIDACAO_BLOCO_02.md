@@ -40,3 +40,11 @@ O responsável dispensou o INE: cadastro, busca e seleção de equipe utilizam n
 A hipótese de dividir a jornada entre duas unidades no mesmo dia não faz parte do fluxo solicitado. Continua um CNES/lotação responsável por dia, selecionado entre as atuações cadastradas. Não foi implementada divisão de horas nem registrada decisão institucional por suposição.
 
 Conferir a matriz significa apenas verificar, antes do uso institucional, se cada unidade, equipe e autorizador está cadastrado corretamente. Essa conferência permanece no bloco 08, sem ser tratada como funcionalidade faltante do bloco 02. O bloco 02 está encerrado tecnicamente no escopo atual; não representa aceite institucional nem encerramento dos demais blocos.
+
+### Conferência após dispensa do INE — 08/10/2026
+
+- Suíte local: 247 testes aprovados; análise de sintaxe e `git diff --check` sem erros.
+- Commit funcional `6301de9` publicado no GitHub/main; Vercel `dpl_AJzexz6Z8t6zezFZL6ew4zA7Z269` em READY, com o mesmo commit.
+- Interface hospedada: login administrativo, catálogo filtrado para EMULTI 004 BUENO FRANCO e EMULTI 018 VILA CRISTINA, edição aberta e cancelada sem gravação. Confirmados nome/CNES, ausência de coluna e campo visível de INE e ausência de avisos de código pendente. Nenhum erro de console observado nesse percurso.
+- Nenhuma alteração de registros ou estrutura do Supabase nesta revisão; metadados antigos preservados conforme a orientação de compatibilidade da skill Supabase.
+- Evidência local: `.sgf-backups/bloco02/equipes-sem-ine.png` (não versionada).
