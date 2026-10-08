@@ -123,7 +123,7 @@ insert into block_two_checks select 'outra matrícula conserva seus dados',admis
 do $$ begin
   begin perform public.save_bond_registry('f1000000-0000-0000-0000-000000000001','f1000000-0000-0000-0000-000000000301',
     '{"version":1,"employment_type":"estatutario","admission_date":"2021-01-01","reason":"Versão antiga"}'); raise exception 'EXPECTED_BOND_VERSION';
-    exception when serialization_failure then if sqlerrm<>'BOND_VERSION_CONFLICT' then raise; end if; end;
+    exception when raise_exception then if sqlerrm<>'BOND_VERSION_CONFLICT' then raise; end if; end;
   insert into block_two_checks values('edição concorrente do vínculo exige atualização',true);
 end $$;
 select * from block_two_checks order by name;
@@ -149,7 +149,7 @@ do $$ begin
   insert into block_two_checks values('unidade geral utilizada não vira diretoria silenciosamente',true);
   begin perform public.save_organization_registry('f1000000-0000-0000-0000-000000000001','cnes',jsonb_build_object('id',(select id from block_two_ids where name='cnes'),
     'version',0,'name','TESTE CNES','code','9999997','reason','Versão antiga')); raise exception 'EXPECTED_REGISTRY_VERSION';
-    exception when serialization_failure then if sqlerrm<>'REGISTRY_VERSION_CONFLICT' then raise; end if; end;
+    exception when raise_exception then if sqlerrm<>'REGISTRY_VERSION_CONFLICT' then raise; end if; end;
   insert into block_two_checks values('catálogo rejeita versão antiga',true);
 end $$;
 select * from block_two_checks order by name;

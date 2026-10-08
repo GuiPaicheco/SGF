@@ -96,9 +96,12 @@ begin
   perform public.manage_unit_request_review(actor,a,'schedule',null,2);
   perform public.manage_unit_request_review(actor,b,'reject','Justificativa sintética de recusa',1,'{"code":"other"}');
   insert into block_three_checks select 'recusa global retira confirmações e estorna novo débito',status='rejeitada' and (select validated_minutes=600 from public.bond_time_bank_accounts where bond_id=context_bond_id) from public.vacation_requests where id=replacement;
+  perform public.set_unit_minimum_scale(actor,'f3000000-0000-0000-0000-000000000901',null,'2026-12-01',array['f3000000-0000-0000-0000-000000000401']::uuid[],0,null);
+  insert into block_three_checks values('recusa global não deixa bloqueio fantasma na escala',true);
+  insert into block_three_checks select 'todas as unidades recebem aviso de recusa global',exists(select 1 from public.notifications where request_id=replacement and context_cnes_unit_id='f3000000-0000-0000-0000-000000000901' and title='Solicitação atualizada');
   insert into block_three_checks select 'cliente não executa reprogramação privilegiada',not has_function_privilege('authenticated','public.commit_request_revision(uuid,uuid,jsonb,jsonb,text,text)','EXECUTE');
 end $$;
 select * from block_three_checks order by name;
-do $$ begin if (select count(*) from block_three_checks)<>22 or exists(select 1 from block_three_checks where passed is distinct from true)
+do $$ begin if (select count(*) from block_three_checks)<>24 or exists(select 1 from block_three_checks where passed is distinct from true)
   then raise exception 'BLOCK_THREE_ASSERTIONS_FAILED'; end if; end $$;
 ROLLBACK;

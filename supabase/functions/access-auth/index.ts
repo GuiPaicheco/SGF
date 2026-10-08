@@ -116,14 +116,14 @@ Deno.serve(async request => {
       }
       if (contextProfile.roles?.some((role: string) => ['diretor', 'rh'].includes(role))) {
         const { data: scopes, error } = await admin.from('profile_scopes')
-          .select('lotacao:lotacoes(id,code,name,active,lotacao_cnes_units(cnes:cnes_units(id,code,name,active)))')
+          .select('lotacao:lotacoes(id,code,name,active,is_internal_allocation,lotacao_cnes_units(cnes:cnes_units(id,code,name,active)))')
           .eq('profile_id', identity.user.id);
         if (error) throw error;
         for (const role of contextProfile.roles.filter((value: string) => ['diretor', 'rh'].includes(value))) {
           for (const scope of scopes || []) {
             if(!scope.lotacao?.active) continue;
             const mappings = (scope.lotacao?.lotacao_cnes_units || []).filter((mapping:any)=>mapping.cnes?.active);
-            for (const mapping of mappings) contexts.push({ role, lotacao_id: scope.lotacao?.id, lotacao_name: scope.lotacao?.name, cnes_unit_id: mapping.cnes?.id, cnes_code: mapping.cnes?.code, cnes_name: mapping.cnes?.name });
+            for (const mapping of mappings) contexts.push({ role, lotacao_id: scope.lotacao?.id, lotacao_name: scope.lotacao?.name, internal_lotacao_id: scope.lotacao?.is_internal_allocation ? scope.lotacao.id : null, cnes_unit_id: mapping.cnes?.id, cnes_code: mapping.cnes?.code, cnes_name: mapping.cnes?.name });
           }
         }
       }

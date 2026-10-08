@@ -42,7 +42,7 @@ begin
   begin
     perform public.manage_unit_request_review(actor,review_a,'schedule',null,1);
     raise exception 'TEST_EXPECTED_STALE_VERSION';
-  exception when serialization_failure then
+  exception when raise_exception then
     insert into access_checks values ('stale version rejected',sqlerrm='REVIEW_VERSION_CONFLICT');
   end;
   insert into access_checks select 'stale action produces no notification',count(*)=notices from public.notifications

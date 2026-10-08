@@ -31,7 +31,7 @@ export function projectUnitCalendar(units: any[], requests: any[], mappings: any
     };
   });
   const calendarRequests = employees.flatMap(employee => requests.flatMap(request => {
-    if (request.servidor_id !== employee.id || ['rascunho', 'cancelada'].includes(request.status)) return [];
+    if (request.servidor_id !== employee.id || ['rascunho', 'cancelada', 'rejeitada'].includes(request.status)) return [];
     const responsibilities = (request.responsibilities || []).filter((item: any) => item.bond_unit_id === employee.row_id);
     const modern = Boolean(request.context_bond_id || request.responsibilities?.length);
     const review = (request.unit_reviews || []).find((item: any) => item.cnes_unit_id === employee.cnes.id

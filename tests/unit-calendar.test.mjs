@@ -65,3 +65,8 @@ test('pedidos legados aprovados são planejamento; somente programados são conf
   assert.equal(project(units, [legacy], maps).requests[0].calendar_confirmed, false);
   assert.equal(project(units, [{ ...legacy, status: 'programada' }], maps).requests[0].calendar_confirmed, true);
 });
+
+test('recusa global retira todos os dias mesmo com revisão programada preservada no histórico',()=>{
+  const rejected={...request,status:'rejeitada',unit_reviews:[...request.unit_reviews,{cnes_unit_id:'Y',status:'rejeitada',lotacao_id:null}]};
+  assert.deepEqual(project([unit('uX','X'),unit('uY','Y')],[rejected],[mapping('X','UBS-X'),mapping('Y','UBS-Y')]).requests,[]);
+});

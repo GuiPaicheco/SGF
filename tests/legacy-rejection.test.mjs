@@ -4,6 +4,13 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const read = path => readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const app = await read('assets/app.js');
+test('pedido devolvido oferece ao servidor somente a operação aceita pela API',async()=>{
+  const correction=app.slice(app.indexOf('    const correction ='),app.indexOf('    const correction =')+1100);
+  assert.match(correction,/data-operation="reenviar"/);
+  assert.doesNotMatch(correction,/data-operation="cancelar"/);
+  const edge=await read('supabase/functions/manage-operations/index.ts');
+  assert.match(edge,/actorRole==='servidor' && payload.operation!=='reenviar'/);
+});
 const inputCode = app.slice(app.indexOf('  function readRejectionInput('),app.indexOf('  function updateRejectionFields('));
 function readInput(mode, values = {}, valid = true) {
   const nodes = Object.fromEntries(Object.entries(values).map(([key,value]) => [key,{value,reportValidity:() => valid}]));

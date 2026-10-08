@@ -636,7 +636,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
       try { const result = await operationRequest({action:'pending-distribution-editor',request_id:r.id}); if (state.selected !== r || state.route !== 'employee-detail') return; state.distributionEditor = result.distribution; }
       catch (error) { if (state.selected !== r || state.route !== 'employee-detail') return; showToast(error.message); }
     }
-    const correction = r.status === 'devolvida' ? `<section class="decision-panel"><h3>Correção solicitada</h3><p>Leia a justificativa no histórico, escreva sua resposta e reenvie o pedido.</p><div class="field"><label for="decision-notes">Resposta ou justificativa</label><textarea class="control" id="decision-notes" rows="3" required></textarea></div><div class="actions"><button class="button button-primary" data-operation="reenviar">Reenviar solicitação</button></div><details class="work-panel work-panel-danger"><summary>Cancelar solicitação</summary><p class="panel-hint">Explique o cancelamento no campo acima.</p><button class="button button-danger" data-operation="cancelar">Confirmar cancelamento</button></details></section>` : '';
+    const correction = r.status === 'devolvida' ? `<section class="decision-panel"><h3>Correção solicitada</h3><p>Leia a justificativa no histórico, escreva sua resposta e reenvie o pedido. Caso precise cancelar, procure o RH.</p><div class="field"><label for="decision-notes">Resposta ou justificativa</label><textarea class="control" id="decision-notes" rows="3" required></textarea></div><div class="actions"><button class="button button-primary" data-operation="reenviar">Reenviar solicitação</button></div></section>` : '';
     const reviewProgress = r.unit_reviews?.length ? `<h3>Análise por CNES</h3>${renderUnitReviews(r.unit_reviews)}` : `<h3>Etapas de aprovação</h3>${renderApprovals(r.approvals)}`;
     app.innerHTML = shell(`Protocolo ${esc(r.protocol || r.id.slice(0, 8))}`, labelType(r.type), `<button class="text-button" data-go="employee-dashboard">← Voltar aos pedidos</button><div class="summary"><div class="summary-row"><span>Situação</span><strong><span class="badge badge-${r.status}">${labelStatus(r.status)}</span></strong></div><div class="summary-row"><span>Solicitado em</span><strong>${formatDate(r.created_at)}</strong></div>${(r.periods || []).map((p, i) => `<div class="summary-row"><span>${r.periods.length > 1 ? `${i + 1}º período` : 'Período'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)} · retorno ${formatDate(p.return_date)}</strong></div>`).join('')}${r.notes ? `<div class="summary-row"><span>Observações</span><strong>${esc(r.notes)}</strong></div>` : ''}</div>${reviewProgress}${correction}<details class="work-panel"><summary>Histórico da solicitação</summary>${renderHistory(r.status_history)}</details><details class="work-panel"><summary>Ver calendário do afastamento</summary>${renderCalendar(r.periods, r.servidor?.birth_date)}</details><p class="page-footnote">O acompanhamento mostra o andamento do pedido. O afastamento depende da decisão administrativa.</p>`);
     document.querySelector('.summary')?.insertAdjacentHTML('afterend', renderCalendarAdjustment(r));
@@ -1158,7 +1158,7 @@ async function saveLocation(event) { event.preventDefault(); const button = even
     const actions = managerActions + rhActions + operational;
     const legacyDecision = actions || reschedule || cancel ? `<section class="decision-panel"><h3>Análise da solicitação legada</h3>${managerActions || rhActions ? renderRejectionControls() : ''}<div class="field"><label for="decision-notes">Parecer ou justificativa</label><textarea class="control" id="decision-notes" rows="3" maxlength="2000"></textarea><small>Na recusa, selecione um motivo padronizado, preencha seus dados e justifique (3 a 2000 caracteres). Obrigatório para rejeitar, devolver, reprogramar ou cancelar.</small></div>${actions ? `<div class="actions">${actions}</div>` : ''}${reschedule}${cancel}</section>` : '';
     const reviewActions = unitReviews.map(review => {
-      if(['cancelada','concluida','rejeitada'].includes(r.status)) return '';
+      if(['cancelada','concluida','rejeitada'].includes(r.status) || !canActOnUnitReview(review)) return '';
       const buttons = review.status === 'pendente' ? `<button class="button button-primary" data-unit-review-action="approve" data-review-id="${review.id}" data-review-version="${review.version}">Aprovar</button><button class="button button-danger" data-unit-review-action="reject" data-review-id="${review.id}" data-review-version="${review.version}">Recusar</button>` : review.status === 'aprovada' ? `<button class="button button-primary" data-unit-review-action="schedule" data-review-id="${review.id}" data-review-version="${review.version}">Adicionar ao Calendário</button><button class="button button-danger" data-unit-review-action="reject" data-review-id="${review.id}" data-review-version="${review.version}">Recusar</button>` : '';
       return buttons ? `<div class="unit-review-action"><div><strong>${esc(review.cnes?.code ? `CNES ${review.cnes.code}` : 'Unidade')}</strong><span>${esc(review.cnes?.name || '')}</span></div><div class="actions">${buttons}</div></div>` : '';
     }).join('');
@@ -1300,10 +1300,20 @@ const bank = canManage && (!r.context_bond_id || state.detailBondResources) ? `<
     const employees = state.conflictEmployees || [];
     return `<div class="field field-full"><label for="rejection-employee">Funcionário e atuação relacionados ao conflito</label><select class="control" id="rejection-employee" required><option value="">Selecione a atuação no CNES da revisão</option>${employees.map(employee => `<option value="${esc(employee.id)}">${esc([employee.full_name,employee.registration,employee.position,employee.cnes_name,employee.location_name].filter(Boolean).join(' · '))}</option>`).join('')}</select><small>${employees.length ? 'A atuação deve pertencer ao CNES/lotação analisado e estar vigente em todo o período informado. Explique o conflito na justificativa.' : 'Não há atuação elegível neste escopo. Confira o cadastro e o contexto antes de registrar uma recusa por conflito.'}</small></div>`;
   }
+  function canActOnUnitReview(review) {
+    const context=state.activeContext;
+    if(state.profile?.role!==context?.role || !review) return false;
+    if(context.role==='administrador') return context.global===true;
+    return ['rh','diretor'].includes(context.role) && Boolean(context.cnes_unit_id)
+      && review.cnes_unit_id===context.cnes_unit_id
+      && (review.lotacao_id || null)===(context.internal_lotacao_id || null);
+  }
   let unitReviewBusy=false;
   async function updateUnitReview(button) {
     if(unitReviewBusy) return;
     const selected=state.selected,current=captureView();
+    const review=selected?.unit_reviews?.find(item=>item.id===button.dataset.reviewId);
+    if(!canActOnUnitReview(review)) return showToast('Esta análise não pertence ao seu perfil e CNES/lotação selecionados.');
     const action = button.dataset.unitReviewAction;
     const notes = document.querySelector('#decision-notes')?.value.trim() || '';
     if (action === 'reject' && !notes) return showToast('Informe a justificativa da recusa.');
