@@ -8,6 +8,9 @@
     rh:new Set(['dashboard','detail','scale','audit-history','catalogs','inclusions','inclusion-detail','access-requests','access-request-detail','employee-registry-detail','location-detail']),
     administrador:new Set(['dashboard','detail','scale','audit-history','catalogs','inclusions','inclusion-detail','access-requests','access-request-detail','employee-registry-detail','location-detail','reference-detail','profiles','profile-detail','profile-create','calendar-admin','rejection-catalog'])
   };
+  routes.rh.add('bond-resources');
+  routes.administrador.add('bond-resources');
+  routes.administrador.add('organization');
   function allowed(route,role,session) {
     return publicRoutes.has(route) || Boolean(session && (sessionRoutes.has(route) || (Object.hasOwn(routes,role) && routes[role].has(route))));
   }

@@ -112,10 +112,30 @@ Deno.serve(async request => {
       if (error) throw error;
       return json({ ok: true });
     }
+    if (action === 'bond-resources') {
+      const {data,error}=await scoped.rpc('get_bond_resources',{actor_id:profile.id,target_bond:payload.bond_id});
+      if(error) throw error; return json(data);
+    }
+    if (action === 'bond-right-save') {
+      const {data,error}=await scoped.rpc('save_bond_vacation_right',{actor_id:profile.id,target_bond:payload.bond_id,item:payload.item});
+      if(error) throw error; return json({id:data});
+    }
+    if (action === 'bond-save') {
+      const {data,error}=await scoped.rpc('save_bond_registry',{actor_id:profile.id,target_bond:payload.bond_id,item:payload.item});
+      if(error) throw error; return json({id:data});
+    }
     if (action === 'time-bank') {
       if (!['rh', 'administrador'].includes(actorRole)) return json({ error: 'Somente RH ou administrador pode lancar saldo.' }, 403);
       const minutes = Math.round(Number(payload.hours) * 60);
       if (!Number.isFinite(minutes) || minutes === 0) return json({ error: 'Informe uma quantidade de horas diferente de zero.' }, 400);
+      if (payload.bond_id) {
+        const {data,error}=await scoped.rpc('manage_bond_time_bank',{actor_id:profile.id,target_bond:payload.bond_id,target_minutes:minutes,target_description:payload.description,target_date:payload.occurred_on || null,expected_version:payload.version,target_entry_key:payload.entry_key});
+        if(error) throw error; return json(data);
+      }
+      // Não permitir lançamentos por pessoa em cadastros que já têm matrículas.
+      const {count,error:bondError}=await admin.from('employment_bonds').select('id',{count:'exact',head:true}).eq('servidor_id',payload.servidor_id);
+      if(bondError) throw bondError;
+      if(count) return json({error:'Selecione a matrícula para lançar horas. O saldo não pode ser compartilhado entre vínculos.'},400);
       if (!(await employeeInContext(String(payload.servidor_id || '')))) return json({ error: 'Servidor fora do contexto ativo.' }, 403);
       const { data, error } = await scoped.rpc('manage_time_bank', { actor_id: profile.id, target_servidor_id: payload.servidor_id, target_minutes: minutes, target_description: payload.description, target_date: payload.occurred_on || null });
       if (error) throw error; return json({ balance_minutes: data });
@@ -246,6 +266,11 @@ Deno.serve(async request => {
     if (message === 'CONFIRMED_ABSENCE_ON_SCALE') return json({ error: 'Uma atuação selecionada possui afastamento confirmado neste dia. Atualize a visão e revise a escala.' }, 400);
     if (message === 'BOND_UNIT_OUT_OF_CONTEXT') return json({ error: 'Uma atuação não pertence à unidade ou não está vigente nesta data.' }, 400);
     const status = message.includes('REVIEW_VERSION_CONFLICT') ? 409 : /NOT_ALLOWED|OUT_OF_SCOPE|INVALID_ACCESS_CONTEXT/.test(message) ? 403 : 400;
+    if (message.includes('BOND_SCOPE_REQUIRED')) return json({error:'A matrícula está fora do contexto do seu acesso.'},403);
+    if (/BANK_VERSION_CONFLICT|RIGHT_VERSION_CONFLICT|ENTRY_KEY_CONFLICT|BOND_VERSION_CONFLICT/.test(message)) return json({error:'O vínculo, saldo ou direito foi alterado em outra sessão. Atualize antes de continuar.'},409);
+    if (/BOND_DATA_INVALID|POLE_OUT_OF_BOND|WEEKLY_HOURS_INVALID/.test(message)) return json({error:'Confira admissão, tipo, jornada e polo pertencente à matrícula. Informe uma justificativa.'},400);
+    if (/RIGHT_DUPLICATED|RIGHT_IN_USE/.test(message)) return json({error:'O período já está cadastrado ou associado a um pedido. Preserve o histórico e confira o vínculo.'},409);
+    if (message.includes('RIGHT_DATA_INVALID')) return json({error:'Confira período aquisitivo, dias, referência oficial e justificativa.'},400);
     return json({ error: known[message] || message }, status);
   }
 });

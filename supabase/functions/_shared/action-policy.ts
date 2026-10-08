@@ -6,7 +6,7 @@ const policies: Record<string,Record<string,string[]>>={
     'audit-history':management,'notifications':['servidor',...management],
     'read-notifications':['servidor',...management],'archives':management,'archive-request':operators,
     'unit-calendar':management,'manual-conflicts':management,'manual-conflict-save':management,
-    'scale-list':management,'scale-save':operators,'time-bank':operators,
+    'scale-list':management,'scale-save':operators,'time-bank':operators,'bond-resources':['servidor',...management],'bond-right-save':operators,'bond-save':operators,
     'conflict-employees':management,'rejection-reasons':management,
     'rejection-reason-save':['administrador'],'legacy-approval':operators,
     'pending-distribution-editor':['servidor','rh','administrador'],'redistribute-pending-day':['servidor','rh','administrador'],
@@ -14,7 +14,8 @@ const policies: Record<string,Record<string,string[]>>={
   },
   catalogs:{list:operators,history:operators,'save-employee':operators,
     'save-location':['administrador'],'save-reference':['administrador'],
-    'calendar-list':['administrador'],'calendar-save':['administrador']},
+    'calendar-list':['administrador'],'calendar-save':['administrador'],
+    'organization-list':['administrador'],'organization-save':['administrador']},
   inclusions:{list:operators,approve:operators,reject:operators},
   access:{list:operators,approve:operators,reject:operators}
 };

@@ -7,7 +7,7 @@ Atualização: 08/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 236 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 246 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -16,13 +16,13 @@ Atualização: 08/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 
 Itens ativos retirados após os ensaios de cadastro/identidade, equipes, primeiro acesso, quatro perfis, revogação/desativação e intervalo de login. Evidências e limites em [VALIDACAO_BLOCO_01.md](VALIDACAO_BLOCO_01.md). Contas técnicas deste bloco desativadas, sem exclusão do histórico; conta TESTE de recuperação preservada. Direitos/saldos por vínculo continuam no bloco 02; aceite institucional continua no bloco 08.
 
-## 02. Catálogo organizacional, direitos e saldos por vínculo — próximo bloco
+## 02. Catálogo organizacional, direitos e saldos por vínculo — implementação técnica concluída; conferências institucionais restantes
 
-1. [ ] Completar/revisar administração de Secretaria, CNES/unidade, lotação interna, equipes e escopos; UBS deve funcionar sem subdivisão administrativa artificial.
-2. [ ] Associar direitos, períodos aquisitivos e banco de horas ao vínculo correto, evitando duplicação entre CNES.
-3. [ ] Definir institucionalmente a responsabilidade quando duas unidades compartilham a jornada no mesmo dia; o modelo atual aceita um responsável por dia.
-4. [ ] Confirmar e preencher os códigos INE de EMULTI 004 BUENO FRANCO e EMULTI 018 VILA CRISTINA.
-5. [ ] Homologar a matriz oficial de CNES, lotações internas, equipes, vínculos e autorizadores.
+Administração organizacional e recursos por matrícula implementados e ensaiados. Itens técnicos retirados da fila ativa; evidências, limitações e procedimentos em [VALIDACAO_BLOCO_02.md](VALIDACAO_BLOCO_02.md). Não equivale a homologação institucional nem ao ciclo completo de interface do bloco 03.
+
+1. [ ] Confirmar institucionalmente a responsabilidade quando duas unidades compartilham a jornada no mesmo dia. Até a decisão, conservar um responsável por dia; não implementar divisão de horas por suposição.
+2. [ ] Receber fonte oficial, confirmar e preencher os códigos INE de EMULTI 004 BUENO FRANCO e EMULTI 018 VILA CRISTINA. Tela de edição exige referência para preencher/alterar INE; não inventar códigos.
+3. [ ] Homologar a matriz oficial de CNES, lotações internas, equipes, vínculos e autorizadores. Catálogo contém 48 CNES e 176 equipes; existência dos registros não é aceite institucional.
 
 ## 03. Solicitações, gestão por unidade e redistribuição
 

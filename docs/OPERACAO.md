@@ -1,5 +1,19 @@
 # Operação e preparação do piloto
 
+## Catálogo e recursos por matrícula — 08/10/2026
+
+Em **Cadastros → CNES e equipes**, o Administrador pesquisa, cadastra e edita unidades e equipes. CNES possui sete dígitos e seu código não é substituído em um cadastro existente. Para conferir/preencher INE, informe a fonte oficial e a justificativa. Equipes sem INE permanecem explicitamente pendentes. Desativação preserva histórico.
+
+Em **Cadastros → Lotações**, selecione o CNES cadastrado. UBS utiliza a própria unidade; somente subdivisão de Secretaria usa **Lotação interna**, com Secretaria superior. Diretorias podem compartilhar CNES sem compartilhar o escopo interno. Responsáveis ativos RH/Diretor e cada mudança estrutural são registrados com justificativa e versão.
+
+Em **Cadastros → Direitos e saldos por matrícula**, selecione o vínculo, não apenas o nome da pessoa. RH opera somente vínculos de seu contexto; Administrador opera globalmente. Edite dados funcionais da matrícula, polo dentre suas unidades, períodos aquisitivos e saldo validado com justificativa. Créditos/débitos manuais registram autor, data e versão. Saldos declarados pelo servidor não são saldos validados pelo RH.
+
+O banco é único por vínculo mesmo com vários CNES. Aprovar não debita horas. A primeira inclusão no calendário debita uma vez as horas solicitadas; inclusões adicionais da mesma solicitação não duplicam o débito. Saldo insuficiente reverte a inclusão inteira. Rejeição/cancelamento após consumo gera estorno único, mantendo o extrato. Teste completo do ciclo de interface e concorrência real continua no bloco 03.
+
+Direitos informados são referências conferidas pelo RH, não concessão automática nem consumo automático de dias. Um direito de outra matrícula não pode sustentar a solicitação. Saldo legado é associado automaticamente somente quando há exatamente um vínculo; situações ambíguas são sinalizadas para reconciliação, sem cópia para cada CNES. Histórico legado permanece preservado.
+
+Os ensaios do bloco 02 estão em `tests/block-two-rehearsal.sql`, com BEGIN/ROLLBACK obrigatórios e 29 verificações. Resultado e limites: [VALIDACAO_BLOCO_02.md](VALIDACAO_BLOCO_02.md).
+
 ## Ensaio SQL de gestão por CNES
 
 `node scripts/prepare-workflow-rehearsal.mjs` imprime um script completo com `BEGIN` e `ROLLBACK`. Executá-lo como uma única requisição SQL no ambiente autorizado; nunca remover o rollback ou executar apenas as fixtures. Não cria contas acessíveis por senha nem envia e-mails externos, mas exercita as notificações internas transacionais.

@@ -48,6 +48,21 @@ Deno.serve(async request => {
       return [...new Set((data || []).map(item => (Array.isArray(item.bond) ? item.bond[0] : item.bond)?.servidor_id).filter(Boolean))];
     };
 
+    if (action === 'organization-list') {
+      const [units, teams, types, mappings] = await Promise.all([
+        admin.from('cnes_units').select('id,code,name,active,version').order('name'),
+        admin.from('teams').select('id,cnes_unit_id,type_code,team_number,ine_code,name,active,needs_review,source_reference,version').order('name'),
+        admin.from('team_types').select('code,name').eq('active',true),
+        admin.from('lotacao_cnes_units').select('lotacao_id,cnes_unit_id,is_primary'),
+      ]);
+      if (units.error || teams.error || types.error || mappings.error) throw units.error || teams.error || types.error || mappings.error;
+      return json({cnesUnits:units.data,teams:teams.data,teamTypes:types.data,mappings:mappings.data});
+    }
+    if (action === 'organization-save') {
+      const {data,error}=await scoped.rpc('save_organization_registry',{actor_id:identity.user.id,registry_kind:payload.kind,item:payload.item});
+      if(error) throw error;
+      return json({id:data});
+    }
     if (action === 'calendar-list') {
       if (actorRole !== 'administrador') return json({ error: 'Acesso exclusivo do administrador.' }, 403);
       const { data, error } = await admin.from('calendar_events').select('id,event_date,type,name,active,version').order('event_date', { ascending: false }).limit(150);
@@ -69,7 +84,7 @@ Deno.serve(async request => {
 
     if (action === 'list') {
       let employeeQuery = admin.from('servidores').select('id,full_name,matricula,cpf,birth_date,admission_date,employment_type,weekly_hours,team_name,active,profile_id,lotacao:lotacoes!servidores_lotacao_id_fkey(id,code,name),cargo:cargos(id,name),funcao:funcoes(id,name)').order('full_name');
-      let locationQuery = admin.from('lotacoes').select('id,code,name,unit_type,parent_id,active').order('name');
+      let locationQuery = admin.from('lotacoes').select('id,code,name,unit_type,parent_id,is_internal_allocation,active,version').order('name');
       if (actorRole === 'rh') {
         const employeeIds = await employeesInContext();
         employeeQuery = employeeQuery.in('id', employeeIds?.length ? employeeIds : ['00000000-0000-0000-0000-000000000000']);
@@ -79,12 +94,15 @@ Deno.serve(async request => {
         employeeQuery, locationQuery,
         admin.from('cargos').select('id,name').order('name'),
         admin.from('funcoes').select('id,name').order('name'),
-        actorRole === 'administrador' ? admin.from('profiles').select('id,full_name,roles').contains('roles', ['rh']).order('full_name') : Promise.resolve({ data: [] }),
+        actorRole === 'administrador' ? admin.from('profiles').select('id,full_name,roles').overlaps('roles', ['rh','diretor']).is('disabled_at',null).order('full_name') : Promise.resolve({ data: [] }),
         actorRole === 'administrador' ? admin.from('profile_scopes').select('profile_id,lotacao_id') : Promise.resolve({ data: [] }),
       ]);
       const error = employeesResult.error || locationsResult.error || positionsResult.error || functionsResult.error;
       if (error) throw error;
-      return json({ employees: employeesResult.data, locations: locationsResult.data, positions: positionsResult.data, functions: functionsResult.data, managers: profilesResult.data, managerScopes: scopesResult.data, actorRole });
+      const employees = employeesResult.data || [];
+      const {data:bonds,error:bondError}=await scoped.rpc('list_bond_registry',{actor_id:identity.user.id});
+      if(bondError) throw bondError;
+      return json({ employees, bonds:bonds || [], locations: locationsResult.data, positions: positionsResult.data, functions: functionsResult.data, managers: profilesResult.data, managerScopes: scopesResult.data, actorRole });
     }
 
     if (action === 'history') {
@@ -98,7 +116,7 @@ Deno.serve(async request => {
     }
 
     if (action === 'save-location') {
-      const { data, error } = await scoped.rpc('manage_location_registry', { actor_id: identity.user.id, target_id: payload.id || null, target_name: String(payload.name ?? ''), target_code: String(payload.code ?? ''), target_unit_type: String(payload.unit_type ?? 'unidade'), target_parent_id: payload.parent_id || null, target_active: payload.active !== false, responsible_ids: Array.isArray(payload.responsible_ids) ? payload.responsible_ids : [] });
+      const { data, error } = await scoped.rpc('save_organization_registry', { actor_id: identity.user.id, registry_kind:'location', item:payload });
       if (error) throw error; return json({ id: data });
     }
     if (action === 'save-reference') {
@@ -123,6 +141,13 @@ Deno.serve(async request => {
   } catch (error) {
     console.error('manage-catalogs', error);
     const message = error instanceof Error ? error.message : String((error as {message?:string})?.message || '');
+    if (message.includes('REGISTRY_VERSION_CONFLICT')) return json({error:'O cadastro mudou em outra sessão. Atualize antes de salvar.'},409);
+    if (/CNES_REQUIRED|CNES_INVALID/.test(message)) return json({error:'Selecione um CNES ativo e válido (sete dígitos).'},400);
+    if (message.includes('CNES_CODE_IMMUTABLE')) return json({error:'O código CNES identifica a unidade e não pode ser substituído. Cadastre a unidade correta.'},400);
+    if (message.includes('INE_SOURCE_REQUIRED')) return json({error:'Informe o INE válido e a referência oficial usada na conferência.'},400);
+    if (message.includes('TEAM_DUPLICATED')) return json({error:'Esta equipe já existe no CNES selecionado.'},409);
+    if (/ALLOCATION_IN_USE|SECRETARIAT_IN_USE|TEAM_IN_USE/.test(message)) return json({error:'Esta alteração invalidaria atuações existentes. Regularize os vínculos antes de mudar a estrutura.'},409);
+    if (/INTERNAL_ALLOCATION_REQUIRES_SECRETARIAT|PARENT_CYCLE|PARENT_NOT_FOUND|TEAM_TYPE_INVALID|INVALID_RESPONSIBLE/.test(message)) return json({error:'Confira Secretaria superior, hierarquia, tipo de equipe e responsáveis ativos.'},400);
     if (message.includes('CALENDAR_VERSION_CONFLICT')) return json({ error: 'Outro administrador alterou esta data. Atualize o calendário antes de salvar.' }, 409);
     if (message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o perfil e o local de atuação.' }, 403);
     if (message.includes('duplicate key')) return json({ error: 'Já existe um cadastro com estes dados.' }, 409);
