@@ -9,6 +9,8 @@ function allowed(role,context,review){const sandbox={state:{profile:{role},activ
 test('RH com perfil servidor não recebe ação de outra unidade',()=>{
   const context={role:'rh',cnes_unit_id:'A',lotacao_id:'UBS-A',internal_lotacao_id:null};
   assert.equal(allowed('rh',context,{cnes_unit_id:'A',lotacao_id:null}),true);
+  assert.equal(allowed('rh',context,{cnes:{id:'A'},lotacao_id:null}),true);
+  assert.equal(allowed('rh',context,{cnes:{id:'B'},lotacao_id:null}),false);
   assert.equal(allowed('rh',context,{cnes_unit_id:'B',lotacao_id:null}),false);
   assert.match(app,/!canActOnUnitReview\(review\)/);
 });

@@ -1305,7 +1305,7 @@ const bank = canManage && (!r.context_bond_id || state.detailBondResources) ? `<
     if(state.profile?.role!==context?.role || !review) return false;
     if(context.role==='administrador') return context.global===true;
     return ['rh','diretor'].includes(context.role) && Boolean(context.cnes_unit_id)
-      && review.cnes_unit_id===context.cnes_unit_id
+      && (review.cnes_unit_id || review.cnes?.id)===context.cnes_unit_id
       && (review.lotacao_id || null)===(context.internal_lotacao_id || null);
   }
   let unitReviewBusy=false;
