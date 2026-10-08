@@ -34,6 +34,6 @@ test('política carrega antes do app e protege entrada e renderização',async()
   const app=await readFile(new URL('../assets/app.js',import.meta.url),'utf8');
   const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
   assert.ok(html.indexOf('assets/access-policy.js')<html.indexOf('assets/app.js'));
-  assert.match(app,/const go = route => \{ state.route = SGFAccessPolicy.resolve/);
+  assert.match(app,/const go = route => \{ navigationVersion\+\+; state.route = SGFAccessPolicy.resolve/);
   assert.match(app,/function render\(\) \{ state.route = SGFAccessPolicy.resolve/);
 });

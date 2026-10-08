@@ -19,7 +19,7 @@
   }
   const capabilities={
     structure:['administrador'],permissions:['administrador'],calendar:['administrador'],
-    archive:['rh','administrador'],timeBank:['rh','administrador'],minimumScale:['rh','administrador'],
+    archive:['rh','administrador'],timeBank:['rh','administrador'],minimumScale:['rh','administrador'],distribution:['servidor','rh','administrador'],
     review:['diretor','rh','administrador'],legacyOperation:['rh','administrador']
   };
   function can(capability,role,session=true) { return Boolean(session && Object.hasOwn(capabilities,capability) && capabilities[capability].includes(role)); }
