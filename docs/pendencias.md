@@ -7,7 +7,7 @@ Atualização: 08/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 247 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 253 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -24,10 +24,12 @@ O fluxo atual mantém um responsável por dia, escolhido entre as unidades cadas
 
 ## 03. Solicitações, gestão por unidade e redistribuição
 
+Em execução. Nova análise vinculada ao pedido anterior implementada e publicada no backend; ensaios SQL transacionais aprovados. Evidências e limites em [VALIDACAO_BLOCO_03.md](VALIDACAO_BLOCO_03.md). Ainda não encerrado pela interface/concorrência.
+
 1. [ ] Validar pela interface o ciclo completo: simulação → distribuição dos dias → envio → análise independente por unidade → Aprovar/Recusar → Adicionar ao Calendário. Aprovação não deve confirmar ausência automaticamente.
 2. [ ] Validar preenchimento por dia/semana, sextas alternadas, múltiplos CNES, vigência e desativação concorrente de atuações; conferir comprovante e assinaturas do servidor e do RH/chefia que autorizou.
 3. [ ] Homologar redistribuição pendente por titular, RH no próprio escopo e Administrador, incluindo revisão criada/removida, justificativa, versões, autoria e avisos. Esse núcleo já foi implementado e ensaiado em SQL.
-4. [ ] Definir e implementar tratamento explícito de redistribuição/reprogramação quando já existem decisões, incluindo mudanças de períodos e inclusão/remoção compensatória do calendário. Não sobrescrever decisões silenciosamente.
+4. [ ] Validar pela interface a reprogramação/redistribuição já implementada: novo protocolo vinculado, cancelamento compensatório, estorno, histórico anterior preservado e todas as unidades novamente pendentes.
 5. [ ] Testar dois gestores simultâneos, cliques repetidos, versões antigas e operações cruzadas; confirmar ausência de gravações parciais/deadlocks.
 6. [ ] Validar compatibilidade do ciclo legado, devolução/reenvio e bloqueio das operações legadas em pedidos do novo modelo.
 

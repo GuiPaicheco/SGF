@@ -26,7 +26,8 @@
   const restrictedControls = {
     '[data-catalog-new="cargo"], [data-catalog-new="funcao"], [data-catalog-new="location"], [data-catalog-reference], [data-catalog-location]':'structure',
     '[data-action="request-archive"]':'archive', '#time-bank-form':'timeBank',
-    '[data-approval-stage]':'legacyOperation', '[data-distribution-save]':'distribution'
+    '[data-approval-stage]':'legacyOperation', '[data-distribution-save]':'distribution',
+    '[data-revision-plan], [data-revision-commit]':'structure'
   };
   function controlAllowed(target) {
     for(const [selector,capability] of Object.entries(restrictedControls)) {
@@ -598,7 +599,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
     state.profile = { ...profile, role };
     sessionAction.classList.remove('hidden');
   }
-  async function loadRequests() { const current = captureView(); const { data, error } = await client.from('vacation_requests').select('id,context_bond_id,protocol,type,status,calendar_adjustment_state,calendar_pending_dates,calendar_adjustment_reason,start_date,end_date,return_date,requested_hours,created_at,notes,bond:employment_bonds!vacation_requests_context_bond_id_fkey(registration),context_cnes:cnes_units!vacation_requests_context_cnes_unit_id_fkey(code,name),servidor:servidores(id,full_name,matricula,birth_date,lotacao:lotacoes!servidores_lotacao_id_fkey(id,name),cargo:cargos(id,name),funcao:funcoes(id,name),time_bank_accounts(declared_minutes,validated_minutes),time_bank_entries(id,minutes,description,occurred_on,validated,request_id)),periods:request_periods(*),responsibilities:request_day_responsibilities(responsibility_date,bond_unit_id,cnes:cnes_units(code,name),lotacao:lotacoes(name)),unit_reviews:request_unit_reviews(id,lotacao_id,lotacao:lotacoes(id,name),status,notes,rejection_code,rejection_label,version,decided_at,scheduled_at,cnes:cnes_units(id,code,name),decided_by:profiles!request_unit_reviews_decided_by_fkey(full_name),scheduled_by:profiles!request_unit_reviews_scheduled_by_fkey(full_name)),approvals:request_approvals(id,stage,decision,notes,rejection_code,rejection_label,version,decided_at,decided_by:profiles(full_name)),status_history:request_status_history(id,previous_status,new_status,notes,occurred_at,actor:profiles(full_name))').order('created_at', { ascending: false }); if (!current()) return; if (error) throw error; state.requests = data || []; }
+  async function loadRequests() { const current = captureView(); const { data, error } = await client.from('vacation_requests').select('id,context_bond_id,replaces_request_id,protocol,type,status,calendar_adjustment_state,calendar_pending_dates,calendar_adjustment_reason,start_date,end_date,return_date,requested_hours,created_at,notes,bond:employment_bonds!vacation_requests_context_bond_id_fkey(registration),context_cnes:cnes_units!vacation_requests_context_cnes_unit_id_fkey(code,name),servidor:servidores(id,full_name,matricula,birth_date,lotacao:lotacoes!servidores_lotacao_id_fkey(id,name),cargo:cargos(id,name),funcao:funcoes(id,name),time_bank_accounts(declared_minutes,validated_minutes),time_bank_entries(id,minutes,description,occurred_on,validated,request_id)),periods:request_periods(*),responsibilities:request_day_responsibilities(responsibility_date,bond_unit_id,cnes:cnes_units(code,name),lotacao:lotacoes(name)),unit_reviews:request_unit_reviews(id,lotacao_id,lotacao:lotacoes(id,name),status,notes,rejection_code,rejection_label,version,decided_at,scheduled_at,cnes:cnes_units(id,code,name),decided_by:profiles!request_unit_reviews_decided_by_fkey(full_name),scheduled_by:profiles!request_unit_reviews_scheduled_by_fkey(full_name)),approvals:request_approvals(id,stage,decision,notes,rejection_code,rejection_label,version,decided_at,decided_by:profiles(full_name)),status_history:request_status_history(id,previous_status,new_status,notes,occurred_at,actor:profiles(full_name))').order('created_at', { ascending: false }); if (!current()) return; if (error) throw error; state.requests = data || []; }
   async function loadScaleEmployees() { const data = await operationRequest({ action: 'unit-calendar', month: state.scale.month }); state.scaleEmployees = data.employees || []; state.scaleRequests = data.requests || []; }
   function renderApprovals(approvals = []) { const ordered = ['chefia_imediata', 'rh'].map(stage => approvals.find(item => item.stage === stage) || { stage, decision: 'pendente' }); return `<div class="summary">${ordered.map(item => `<div class="summary-row"><span>${labelApprovalStage(item.stage)}</span><strong>${labelApprovalDecision(item.decision)}${item.decided_by?.full_name ? ` · ${esc(item.decided_by.full_name)}` : ''}${item.decided_at ? `<br><small>${formatDateTime(item.decided_at)}</small>` : ''}${item.rejection_label ? `<br><small>Motivo: ${esc(item.rejection_label)}</small>` : ''}${item.notes ? `<br><small>${esc(item.notes)}</small>` : ''}</strong></div>`).join('')}</div>`; }
   function renderUnitReviews(reviews = []) { return `<div class="summary">${reviews.map(review => `<div class="summary-row"><span>${esc(review.cnes?.code ? `CNES ${review.cnes.code}` : 'Unidade')}<br><small>${esc(review.cnes?.name || '')}${review.lotacao?.name ? ` · ${esc(review.lotacao.name)}` : ''}</small></span><strong>${esc(labelUnitReview(review.status))}${review.decided_by?.full_name ? `<br><small>Decisão: ${esc(review.decided_by.full_name)} · ${formatDateTime(review.decided_at)}</small>` : ''}${review.scheduled_by?.full_name ? `<br><small>Calendário: ${esc(review.scheduled_by.full_name)} · ${formatDateTime(review.scheduled_at)}</small>` : ''}${review.rejection_label ? `<br><small>Motivo: ${esc(review.rejection_label)}</small>` : ''}${review.notes ? `<br><small>${esc(review.notes)}</small>` : ''}</strong></div>`).join('')}</div>`; }
@@ -639,6 +640,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
     const reviewProgress = r.unit_reviews?.length ? `<h3>Análise por CNES</h3>${renderUnitReviews(r.unit_reviews)}` : `<h3>Etapas de aprovação</h3>${renderApprovals(r.approvals)}`;
     app.innerHTML = shell(`Protocolo ${esc(r.protocol || r.id.slice(0, 8))}`, labelType(r.type), `<button class="text-button" data-go="employee-dashboard">← Voltar aos pedidos</button><div class="summary"><div class="summary-row"><span>Situação</span><strong><span class="badge badge-${r.status}">${labelStatus(r.status)}</span></strong></div><div class="summary-row"><span>Solicitado em</span><strong>${formatDate(r.created_at)}</strong></div>${(r.periods || []).map((p, i) => `<div class="summary-row"><span>${r.periods.length > 1 ? `${i + 1}º período` : 'Período'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)} · retorno ${formatDate(p.return_date)}</strong></div>`).join('')}${r.notes ? `<div class="summary-row"><span>Observações</span><strong>${esc(r.notes)}</strong></div>` : ''}</div>${reviewProgress}${correction}<details class="work-panel"><summary>Histórico da solicitação</summary>${renderHistory(r.status_history)}</details><details class="work-panel"><summary>Ver calendário do afastamento</summary>${renderCalendar(r.periods, r.servidor?.birth_date)}</details><p class="page-footnote">O acompanhamento mostra o andamento do pedido. O afastamento depende da decisão administrativa.</p>`);
     document.querySelector('.summary')?.insertAdjacentHTML('afterend', renderCalendarAdjustment(r));
+    showRevisionRelation(r);
     document.querySelector('.summary')?.insertAdjacentHTML('afterend', renderDistributionEditor());
     document.querySelector('.page-footnote')?.insertAdjacentHTML('beforebegin', '<div class="actions"><button class="button button-primary" data-go="stored-receipt">Reimprimir comprovante</button><button class="button button-secondary" data-action="copy-selected-email">Copiar texto do e-mail</button><button class="button button-secondary" data-action="copy-selected-data">Copiar dados</button></div>');
   }
@@ -1156,16 +1158,61 @@ async function saveLocation(event) { event.preventDefault(); const button = even
     const actions = managerActions + rhActions + operational;
     const legacyDecision = actions || reschedule || cancel ? `<section class="decision-panel"><h3>Análise da solicitação legada</h3>${managerActions || rhActions ? renderRejectionControls() : ''}<div class="field"><label for="decision-notes">Parecer ou justificativa</label><textarea class="control" id="decision-notes" rows="3" maxlength="2000"></textarea><small>Na recusa, selecione um motivo padronizado, preencha seus dados e justifique (3 a 2000 caracteres). Obrigatório para rejeitar, devolver, reprogramar ou cancelar.</small></div>${actions ? `<div class="actions">${actions}</div>` : ''}${reschedule}${cancel}</section>` : '';
     const reviewActions = unitReviews.map(review => {
+      if(['cancelada','concluida','rejeitada'].includes(r.status)) return '';
       const buttons = review.status === 'pendente' ? `<button class="button button-primary" data-unit-review-action="approve" data-review-id="${review.id}" data-review-version="${review.version}">Aprovar</button><button class="button button-danger" data-unit-review-action="reject" data-review-id="${review.id}" data-review-version="${review.version}">Recusar</button>` : review.status === 'aprovada' ? `<button class="button button-primary" data-unit-review-action="schedule" data-review-id="${review.id}" data-review-version="${review.version}">Adicionar ao Calendário</button><button class="button button-danger" data-unit-review-action="reject" data-review-id="${review.id}" data-review-version="${review.version}">Recusar</button>` : '';
       return buttons ? `<div class="unit-review-action"><div><strong>${esc(review.cnes?.code ? `CNES ${review.cnes.code}` : 'Unidade')}</strong><span>${esc(review.cnes?.name || '')}</span></div><div class="actions">${buttons}</div></div>` : '';
     }).join('');
     const unitDecision = unitReviews.length && canManage ? `<section class="decision-panel"><h3>Análise do contexto atual</h3><p>Aprovar apenas registra a decisão. A ausência somente entra no calendário após a ação específica.</p>${renderRejectionControls()}<div class="field"><label for="decision-notes">Explique a decisão</label><textarea class="control" id="decision-notes" rows="3" minlength="3" maxlength="2000"></textarea><small>Ao recusar, escolha o motivo, preencha seus dados específicos e justifique (3 a 2000 caracteres). A primeira inclusão no calendário debita as horas solicitadas uma única vez por matrícula. Recusa ou cancelamento estorna eventual débito, preservando o histórico. Em dúvidas sobre direitos, consulte a norma homologada e o RH; problemas técnicos devem ser encaminhados aos Administradores ou à TI da Prefeitura de Betim. Aprovação e inclusão no calendário ficam registradas pelo usuário logado.</small></div>${reviewActions || '<div class="notice">Não há ação pendente para este CNES.</div>'}</section>` : '';
-    const decision = (unitReviews.length ? unitDecision : legacyDecision) + (unitReviews.length && ['rh','administrador'].includes(staff) ? renderDistributionEditor() : '');
+    state.revisionPlan = null;
+    const decision = (unitReviews.length ? unitDecision : legacyDecision) + (unitReviews.length && ['rh','administrador'].includes(staff) ? renderDistributionEditor() : '') + SGFRequestRevision.panel(r,staff);
 const bank = canManage && (!r.context_bond_id || state.detailBondResources) ? `<details class="work-panel"><summary>Banco de horas</summary><div class="summary"><div class="summary-row"><span>Saldo declarado</span><strong>${((account?.declared_minutes || 0) / 60).toFixed(1)} h</strong></div><div class="summary-row"><span>Saldo validado</span><strong>${((account?.validated_minutes || 0) / 60).toFixed(1)} h</strong></div></div><form id="time-bank-form" class="form-grid"><div class="field"><label for="bank-hours">Horas a lançar</label><input class="control" id="bank-hours" type="number" step="0.5" required><small>Use um número negativo para descontar horas.</small></div><div class="field"><label for="bank-date">Data do lançamento</label><input class="control" id="bank-date" type="date" value="${iso(new Date())}" required></div><div class="field field-full"><label for="bank-description">Motivo do lançamento</label><input class="control" id="bank-description" required></div><div class="field field-full"><button class="button button-primary">Registrar horas</button></div></form></details>` : '';
     const reviewSummary = unitReviews.length ? `<h3>Análise por CNES</h3>${renderUnitReviews(unitReviews)}` : `<h3>Etapas de aprovação</h3>${renderApprovals(approvals)}`;
     app.innerHTML = shell(`Solicitação ${esc(r.protocol || r.id.slice(0, 8))}`, `${esc(r.servidor?.full_name || 'Servidor')} · ${labelType(r.type)}`, `<button class="text-button" data-go="dashboard">← Voltar às solicitações</button><div class="summary"><div class="summary-row"><span>Situação</span><strong><span class="badge badge-${r.status}">${labelStatus(r.status)}</span></strong></div><div class="summary-row"><span>Lotação</span><strong>${esc(r.context_cnes?.name || r.servidor?.lotacao?.name || '—')}</strong></div>${(r.periods || []).map((p, i) => `<div class="summary-row"><span>${r.periods.length > 1 ? `${i + 1}º período` : 'Período'}</span><strong>${formatDate(p.start_date)} a ${formatDate(p.end_date)} · retorno ${formatDate(p.return_date)}</strong></div>`).join('')}</div>${conflicts.length ? `<div class="notice notice-warning"><strong>Atenção: ${conflicts.length} sobreposição(ões) de escala.</strong> ${conflicts.map(item => esc(item.servidor?.full_name)).join(', ')}.</div>` : ''}${reviewSummary}${decision}${bank}<details class="work-panel"><summary>Histórico da solicitação</summary>${renderHistory(r.status_history)}</details><details class="work-panel"><summary>Ver calendário do afastamento</summary>${renderCalendar(r.periods, r.servidor?.birth_date)}</details><div class="actions"><button class="button button-secondary" data-action="request-archive">${state.archivedRequestIds.has(r.id) ? 'Restaurar à fila' : 'Arquivar na minha fila'}</button></div>`);
     showCalendarAdjustmentInDetail(r);
+    showRevisionRelation(r);
+    document.querySelector('.actions')?.insertAdjacentHTML('beforeend','<button class="button button-secondary" data-go="stored-receipt">Reimprimir comprovante</button>');
     const bankForm=document.querySelector('#time-bank-form'); if(bankForm) bankForm.dataset.entryKey=crypto.randomUUID();
+  }
+  function showRevisionRelation(request) {
+    const predecessor=state.requests.find(item=>item.id===request.replaces_request_id);
+    const successor=state.requests.find(item=>item.replaces_request_id===request.id);
+    const text=request.replaces_request_id?`Nova análise de ${predecessor?.protocol || request.replaces_request_id}. Decisões anteriores não autorizam este novo período.`
+      :successor?`Pedido substituído por ${successor.protocol}. As decisões e datas abaixo pertencem ao histórico anterior, não ao calendário confirmado.`:'';
+    if(text) document.querySelector('.summary')?.insertAdjacentHTML('beforebegin',`<div class="notice notice-warning">${esc(text)}</div>`);
+  }
+  async function prepareRequestRevision(button) {
+    const selected=state.selected;
+    const starts=[...document.querySelectorAll('[data-revision-start]')];
+    if(state.profile?.role!=='administrador' || !selected || starts.some(input=>!input.reportValidity())) return;
+    button.disabled=true;
+    state.revisionPlan=null;
+    document.getElementById('revision-plan').innerHTML='';
+    const values=starts.map(input=>input.value);
+    try {
+      const result=await operationRequest({action:'revision-plan',request_id:selected.id,starts:values});
+      if(state.selected!==selected || state.route!=='detail' || starts.some((input,i)=>input.value!==values[i])) return;
+      state.revisionPlan={...result.plan,starts:values};
+      document.getElementById('revision-plan').innerHTML=SGFRequestRevision.planView(result.plan,selected);
+    } catch(error){showToast(error.message);} finally{button.disabled=false;}
+  }
+  async function commitRequestRevision(button) {
+    const selected=state.selected,plan=state.revisionPlan;
+    if(state.profile?.role!=='administrador' || !plan || plan.request_id!==selected?.id) return showToast('Simule novamente antes de confirmar.');
+    const starts=[...document.querySelectorAll('[data-revision-start]')].map(input=>input.value);
+    if(starts.some((value,i)=>value!==plan.starts[i])) return showToast('As datas mudaram. Simule novamente.');
+    const inputs=[...document.querySelectorAll('[data-revision-date]'),document.getElementById('revision-reason'),document.getElementById('revision-confirm')];
+    if(inputs.some(input=>!input || !input.reportValidity())) return;
+    const justification=document.getElementById('revision-reason').value.trim();
+    if(justification.length<3 || justification.length>2000) return showToast('Justifique em 3 a 2000 caracteres.');
+    const days=[...document.querySelectorAll('[data-revision-date]')].map(input=>({date:input.dataset.revisionDate,bond_unit_id:input.value}));
+    button.disabled=true;
+    try {
+      const result=await operationRequest({action:'revision-commit',request_id:selected.id,starts,days,fingerprint:plan.fingerprint,justification});
+      showToast(`Novo protocolo ${result.replacement.protocol}. Todas as unidades precisam analisar novamente.`);
+      await loadRequests();
+      if(state.selected===selected && state.route==='detail'){state.selected=state.requests.find(item=>item.id===result.replacement.id);await renderDetail();}
+    }catch(error){state.revisionPlan=null;document.getElementById('revision-plan')?.replaceChildren();showToast(error.message);}
+    finally{button.disabled=false;}
   }
   function renderDistributionEditor() {
     const editor = state.distributionEditor;
@@ -1253,18 +1300,28 @@ const bank = canManage && (!r.context_bond_id || state.detailBondResources) ? `<
     const employees = state.conflictEmployees || [];
     return `<div class="field field-full"><label for="rejection-employee">Funcionário e atuação relacionados ao conflito</label><select class="control" id="rejection-employee" required><option value="">Selecione a atuação no CNES da revisão</option>${employees.map(employee => `<option value="${esc(employee.id)}">${esc([employee.full_name,employee.registration,employee.position,employee.cnes_name,employee.location_name].filter(Boolean).join(' · '))}</option>`).join('')}</select><small>${employees.length ? 'A atuação deve pertencer ao CNES/lotação analisado e estar vigente em todo o período informado. Explique o conflito na justificativa.' : 'Não há atuação elegível neste escopo. Confira o cadastro e o contexto antes de registrar uma recusa por conflito.'}</small></div>`;
   }
+  let unitReviewBusy=false;
   async function updateUnitReview(button) {
+    if(unitReviewBusy) return;
+    const selected=state.selected,current=captureView();
     const action = button.dataset.unitReviewAction;
     const notes = document.querySelector('#decision-notes')?.value.trim() || '';
     if (action === 'reject' && !notes) return showToast('Informe a justificativa da recusa.');
     let rejection = null;
     if (action === 'reject') { try { rejection = readRejectionInput(notes); } catch (error) { return showToast(error.message); } }
+    unitReviewBusy=true;
+    const reviewButtons=[...document.querySelectorAll('[data-unit-review-action]')];
+    reviewButtons.forEach(item=>item.disabled=true);
     button.disabled = true; button.textContent = 'Salvando…';
     try {
       await operationRequest({ action: 'unit-review', review_id: button.dataset.reviewId, review_action: action, version: Number(button.dataset.reviewVersion), notes, rejection });
       showToast(action === 'approve' ? 'Solicitação aprovada neste CNES.' : action === 'reject' ? 'Solicitação recusada neste CNES.' : 'Solicitação adicionada ao calendário deste CNES.');
-      await loadRequests(); state.selected = state.requests.find(item => item.id === state.selected.id); await renderDetail();
-    } catch (error) { showToast(error.message); button.disabled = false; button.textContent = action === 'approve' ? 'Aprovar' : action === 'reject' ? 'Recusar' : 'Adicionar ao Calendário'; }
+      if(!current() || state.selected!==selected) return;
+      await loadRequests();
+      if(!current() || state.selected!==selected) return;
+      state.selected = state.requests.find(item => item.id === selected.id); await renderDetail();
+    } catch (error) { if(current() && state.selected===selected){showToast(error.message);reviewButtons.forEach(item=>item.disabled=false);button.textContent = action === 'approve' ? 'Aprovar' : action === 'reject' ? 'Recusar' : 'Adicionar ao Calendário';} }
+    finally{unitReviewBusy=false;}
   }
   async function updateApproval(stage, decision) {
     const notes = document.querySelector('#decision-notes')?.value.trim() || '';
@@ -1285,6 +1342,8 @@ function render() { state.route = SGFAccessPolicy.resolve(state.route,state.prof
 
   document.addEventListener('click', async event => {
     if(!controlAllowed(event.target)) { event.preventDefault(); return showToast('Ação indisponível para o perfil ativo.'); }
+    const revisionPlanButton=event.target.closest('[data-revision-plan]'); if(revisionPlanButton){await prepareRequestRevision(revisionPlanButton);return;}
+    const revisionCommitButton=event.target.closest('[data-revision-commit]'); if(revisionCommitButton){await commitRequestRevision(revisionCommitButton);return;}
     const distributionButton = event.target.closest('[data-distribution-save]'); if (distributionButton) { await savePendingDistribution(distributionButton); return; }
     const reasonEdit = event.target.closest('[data-reason-edit]');
     if (reasonEdit) { editReasonCatalog(reasonEdit.dataset.reasonEdit); return; }

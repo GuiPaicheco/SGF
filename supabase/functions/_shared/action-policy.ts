@@ -10,6 +10,7 @@ const policies: Record<string,Record<string,string[]>>={
     'conflict-employees':management,'rejection-reasons':management,
     'rejection-reason-save':['administrador'],'legacy-approval':operators,
     'pending-distribution-editor':['servidor','rh','administrador'],'redistribute-pending-day':['servidor','rh','administrador'],
+    'revision-plan':['administrador'],'revision-commit':['administrador'],
     'unit-review':management,'operation':['servidor',...operators]
   },
   catalogs:{list:operators,history:operators,'save-employee':operators,

@@ -34,6 +34,7 @@ begin
   v:=public.change_pending_day_responsibility(actor,req,'2026-10-08',a,2,'Retorno à unidade após conferência administrativa');
   select id into review_id from public.request_unit_reviews where request_id=req;
   perform public.manage_unit_request_review(actor,review_id,'approve',null,2);
+  select distribution_version into v from public.vacation_requests where id=req;
   begin perform public.change_pending_day_responsibility(actor,req,'2026-10-08',b,v,'Tentativa após decisão'); raise exception 'EXPECTED_DECISION_PRESERVED';
     exception when others then if sqlerrm<>'DISTRIBUTION_ALREADY_DECIDED' then raise; end if;
       insert into access_checks values('decision preserved blocks silent redistribution',true); end;

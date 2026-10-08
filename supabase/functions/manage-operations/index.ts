@@ -198,6 +198,20 @@ Deno.serve(async request => {
       if (error) throw error;
       return json({version:data});
     }
+    if (action === 'revision-plan' || action === 'revision-commit') {
+      if (actorRole !== 'administrador' || !Array.isArray(payload.starts) || payload.starts.length < 1 || payload.starts.length > 2
+        || payload.starts.some((day:unknown)=>typeof day!=='string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)))
+        return json({error:'Reprogramação global exclusiva do Administrador. Confira as datas de início.'},400);
+      const parameters: Record<string,unknown> = {actor_id:profile.id,target_request:payload.request_id,target_starts:payload.starts};
+      if (action === 'revision-commit') {
+        if (!Array.isArray(payload.days) || typeof payload.fingerprint!=='string' || typeof payload.justification!=='string'
+          || payload.justification.trim().length<3 || payload.justification.trim().length>2000)
+          return json({error:'Confira a distribuição de todos os dias e justifique a reprogramação.'},400);
+        Object.assign(parameters,{target_days:payload.days,expected_fingerprint:payload.fingerprint,target_reason:payload.justification.trim()});
+      }
+      const {data,error}=await scoped.rpc(action==='revision-plan'?'prepare_request_revision':'commit_request_revision',parameters);
+      if(error) throw error; return json(action==='revision-plan'?{plan:data}:{replacement:data});
+    }
     if (action === 'unit-review') {
       if (!['diretor', 'rh', 'administrador'].includes(actorRole)) return json({ error: 'Acesso indisponivel.' }, 403);
       const reviewId = String(payload.review_id || '');
@@ -236,6 +250,11 @@ Deno.serve(async request => {
     const message = error instanceof Error ? error.message : String((error as {message?:string})?.message || 'Falha operacional.');
     if (message === 'CALENDAR_REVIEW_REQUIRED') return json({error:'O calendário deste pedido mudou. Resolva os dias sem CNES e as pendências de revisão antes de aprovar ou adicionar ao calendário.'},409);
     const known: Record<string,string> = { TRANSITION_NOT_ALLOWED: 'Esta transicao nao e permitida.', NOTES_REQUIRED: 'Informe uma justificativa.', REJECTION_REASON_REQUIRED: 'Informe a justificativa da recusa.', APPROVAL_REQUIRED: 'A solicitacao precisa ser aprovada antes de entrar no calendario.', REVIEW_TRANSITION_INVALID: 'Esta acao nao e permitida na situacao atual.', REVIEW_VERSION_CONFLICT: 'A solicitacao foi alterada por outro gestor. Atualize a tela antes de continuar.', INSUFFICIENT_VALIDATED_BALANCE: 'Saldo validado insuficiente.', REQUEST_OUT_OF_SCOPE: 'Solicitacao fora do seu escopo.', PERIODS_INVALID: 'Periodos informados sao invalidos.' };
+    if (message === 'REVISION_VERSION_CONFLICT') return json({error:'O pedido, as decisões ou o calendário mudaram. Simule novamente a reprogramação antes de confirmar.'},409);
+    if (message === 'REVISION_NOT_ALLOWED') return json({error:'Este pedido não pode ser substituído: pode já estar cancelado, concluído, substituído ou pertencer ao fluxo antigo.'},409);
+    if (message === 'REVISION_PERIOD_CONFLICT') return json({error:'O novo período se sobrepõe a outro pedido ativo da mesma matrícula. Confira os pedidos com o RH.'},400);
+    if (message === 'REVISION_ACQUISITION_RULE') return json({error:'O novo início precisa ser posterior ao término do período aquisitivo. Confira o direito com o RH.'},400);
+    if (message === 'RESPONSIBILITY_DAYS_INCOMPLETE') return json({error:'Escolha uma unidade autorizadora vigente para cada dia exibido na simulação.'},400);
     if (message === 'DISTRIBUTION_VERSION_CONFLICT') return json({error:'A distribuição foi alterada. Atualize o pedido antes de continuar.'},409);
     if (message === 'DISTRIBUTION_ALREADY_DECIDED') return json({error:'Só é possível redistribuir enquanto todas as análises estiverem pendentes.'},409);
     if (message === 'DISTRIBUTION_SCOPE_CHANGE_PENDING') return json({error:'Nesta fase, mantenha ao menos um dia em cada CNES e use apenas unidades já presentes na análise.'},400);
