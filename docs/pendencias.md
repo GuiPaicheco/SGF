@@ -7,20 +7,16 @@ Atualização: 08/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 227 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 236 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
 
-## 01. Cadastro, primeiro acesso e perfis — próximo bloco
+## 01. Cadastro, primeiro acesso e perfis — concluído tecnicamente
 
-1. [ ] Homologar cadastro público e administrativo com CPF único, várias matrículas e vários CNES no mesmo vínculo, sem duplicar identidade ou saldos.
-2. [ ] Validar unidade polo opcional, equipes filtradas, uma equipe por atuação/CNES, Não se aplica e lotação interna somente em Secretaria.
-3. [ ] Validar aprovação de acesso novo/adicional, senha provisória, troca obrigatória e login por CPF, além do login por e-mail já testado.
-4. [ ] Testar Servidor, Diretor, RH e Administrador na interface: escolha/troca de perfil, vínculo e escopo, cabeçalho, navegação e botões internos. Revisar possíveis bloqueios visuais contraditórios com a permissão do backend.
-5. [ ] Testar revogação/desativação durante sessão e respostas atrasadas após troca de contexto. Confirmar isolamento entre diretorias que compartilham CNES e manutenção do intervalo de login de três segundos.
+Itens ativos retirados após os ensaios de cadastro/identidade, equipes, primeiro acesso, quatro perfis, revogação/desativação e intervalo de login. Evidências e limites em [VALIDACAO_BLOCO_01.md](VALIDACAO_BLOCO_01.md). Contas técnicas deste bloco desativadas, sem exclusão do histórico; conta TESTE de recuperação preservada. Direitos/saldos por vínculo continuam no bloco 02; aceite institucional continua no bloco 08.
 
-## 02. Catálogo organizacional, direitos e saldos por vínculo
+## 02. Catálogo organizacional, direitos e saldos por vínculo — próximo bloco
 
 1. [ ] Completar/revisar administração de Secretaria, CNES/unidade, lotação interna, equipes e escopos; UBS deve funcionar sem subdivisão administrativa artificial.
 2. [ ] Associar direitos, períodos aquisitivos e banco de horas ao vínculo correto, evitando duplicação entre CNES.

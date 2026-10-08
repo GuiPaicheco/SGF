@@ -150,7 +150,7 @@
     const employee = Array.isArray(state.profile.servidor) ? state.profile.servidor[0] : state.profile.servidor;
     const context = state.activeContext;
     const contextLabel = context?.global ? 'Visão geral' : context?.cnes_name || context?.lotacao_name || employee?.lotacao?.name || state.profile.primary_lotacao?.name || 'Contexto a definir';
-    const roleLabel = state.profile.role === 'servidor' ? (context?.position || employee?.cargo?.name || employee?.declared_position || 'Servidor') : accessLabel(state.profile.role || '');
+    const roleLabel = state.profile.role === 'servidor' ? (context?.position || employee?.cargo?.name || employee?.declared_position || 'Servidor') : (accessLabel(state.profile.role || '') || 'Escolha um perfil');
     headerUser.innerHTML = `<strong>${esc(name)}</strong><small>${esc(roleLabel)} · ${esc(contextLabel)}</small>`;
   }
   function catalogTabs() {
