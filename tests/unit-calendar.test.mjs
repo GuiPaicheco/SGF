@@ -20,6 +20,16 @@ const request = { id: 'request', servidor_id: 'person', context_bond_id: 'bond',
   ], unit_reviews: [{ cnes_unit_id: 'X', lotacao_id: null, status: 'programada' }, { cnes_unit_id: 'Y', lotacao_id: null, status: 'aprovada' }] };
 const project = (units, requests, mappings, context = globalContext) => projectUnitCalendar(units, requests, mappings, context, '2026-10-01', '2026-10-31');
 
+test('pedido legado ambíguo não é duplicado entre matrículas e exige conferência', () => {
+  const second = {...unit('uX2','X'),bond:{...bond,id:'bond2',registration:'MAT-2'}};
+  const legacy = {...request,context_bond_id:null,responsibilities:[],legacy_lotacao_id:'UBS-X'};
+  const result = project([unit('uX','X'),second],[legacy],[mapping('X','UBS-X')]);
+  assert.equal(result.requests.length,0);
+  assert.deepEqual(result.legacy_warnings,[{request_id:'request',protocol:undefined,reason:'legacy_assignment_ambiguous'}]);
+  assert.equal(project([unit('uY','Y')],[legacy],[mapping('Y','UBS-Y')],{global:false,cnesUnitId:'Y',lotacaoId:'UBS-Y'}).legacy_warnings.length,0);
+  assert.equal(project([unit('uX','X'),second],[{...legacy,status:'cancelada'}],[mapping('X','UBS-X')]).legacy_warnings.length,0);
+});
+
 test('cada unidade recebe somente seus dias, inclusive quando o estado geral ainda é aprovado', () => {
   const result = project([unit('uX', 'X'), unit('uY', 'Y')], [request], [mapping('X', 'UBS-X'), mapping('Y', 'UBS-Y')]);
   assert.equal(result.employees.length, 2);

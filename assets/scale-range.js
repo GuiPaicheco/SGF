@@ -26,6 +26,7 @@
     }
     return {
       employees,
+      legacy_warnings:unique(batches.flatMap(batch=>batch.calendar.legacy_warnings || []),item=>item.request_id),
       requests:[...requests.values()].filter(item=>item.assigned_dates ? item.assigned_dates.some(day=>day>=window.start && day<=window.end) || item.periods.some(p=>p.return_date>=window.start && p.return_date<=window.end) : item.periods.some(p=>p.start_date<=window.end && p.return_date>=window.start)),
       assignments:unique(batches.flatMap(batch=>batch.minimum.assignments || []),item=>`${item.lotacao_id}:${item.scale_date}:${item.bond_unit_id}`),
       planned_days:unique(batches.flatMap(batch=>batch.minimum.planned_days || []),item=>`${item.lotacao_id}:${item.scale_date}`).sort((a,b)=>b.scale_date.localeCompare(a.scale_date)),

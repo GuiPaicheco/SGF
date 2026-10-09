@@ -30,7 +30,14 @@ export function projectUnitCalendar(units: any[], requests: any[], mappings: any
       valid_until: [unit.valid_until, bond.valid_until].filter(Boolean).sort()[0] || null,
     };
   });
+  const legacyWarnings = requests.filter(request => !request.context_bond_id && !request.responsibilities?.length
+    && !['rascunho', 'cancelada', 'rejeitada'].includes(request.status)
+    && request.periods?.some((period: any) => period.start_date <= end && period.return_date >= start)
+    && employees.filter(employee => request.servidor_id === employee.id && request.legacy_lotacao_id === employee.lotacao.id).length > 1
+  ).map(request => ({ request_id: request.id, protocol: request.protocol, reason: 'legacy_assignment_ambiguous' }));
+  const ambiguousLegacyIds = new Set(legacyWarnings.map(item => item.request_id));
   const calendarRequests = employees.flatMap(employee => requests.flatMap(request => {
+    if (ambiguousLegacyIds.has(request.id)) return [];
     if (request.servidor_id !== employee.id || ['rascunho', 'cancelada', 'rejeitada'].includes(request.status)) return [];
     const responsibilities = (request.responsibilities || []).filter((item: any) => item.bond_unit_id === employee.row_id);
     const modern = Boolean(request.context_bond_id || request.responsibilities?.length);
@@ -53,7 +60,7 @@ export function projectUnitCalendar(units: any[], requests: any[], mappings: any
       legacy: !modern,
     }];
   }));
-  return { employees, requests: calendarRequests };
+  return { employees, requests: calendarRequests, legacy_warnings: legacyWarnings };
 }
 
 export async function loadUnitCalendar(admin: any, context: AccessContext, month: string) {

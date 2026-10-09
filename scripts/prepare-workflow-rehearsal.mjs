@@ -15,4 +15,4 @@ if(['legacy','block4','block5','block6'].includes(scenario)){
   const end=foundation.indexOf('do $$');
   if(end<0) throw new Error('Fixtures do bloco 03 não encontradas.');
   process.stdout.write(`${foundation.slice(0,end)}\n${checks}\nrollback;\n`);
-}else process.stdout.write(`begin;\n${fixture.slice(0, boundary)}\nset local role service_role;\n${checks}\nrollback;\n`);
+}else process.stdout.write(`begin;\n${fixture.slice(0, boundary)}\ngrant all on access_checks to service_role;\nset local role service_role;\n${checks}\nrollback;\n`);
