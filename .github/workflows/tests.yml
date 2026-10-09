@@ -33,4 +33,15 @@ jobs:
       - name: Iniciar banco local e aplicar todas as migrations
         run: |
           supabase db start
-          supabase db reset
+          supabase db reset --local --no-seed
+      - name: Ensaiar fluxos SQL integrados sem persistir fixtures
+        run: |
+          set -euo pipefail
+          for scenario in unit calendar distribution registration legacy block4 block5 block6; do
+            node scripts/prepare-workflow-rehearsal.mjs "$scenario" | docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1
+          done
+          docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < tests/block-three-rehearsal.sql
+      - name: Restaurar backup sintético em banco novo e comparar integridade
+        env:
+          SGF_ISOLATED_DATABASE: 'yes'
+        run: node scripts/verify-database-rebuild.mjs
