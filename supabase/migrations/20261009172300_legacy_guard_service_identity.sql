@@ -1,3 +1,4 @@
+-- Versão aplicada no piloto: 20261009172300.
 -- O proprietário de SECURITY DEFINER pode ser supabase_admin numa reconstrução.
 -- O JWT de serviço é validado pelo PostgREST; não confiar em x-sgf-actor para bypass.
 create or replace function private.guard_request_update()
