@@ -271,9 +271,9 @@ Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastame
 
 ## Ambiente de demonstração
 
-O arquivo `supabase/seed-demo.sql` cria uma massa fictícia e idempotente para apresentações. Os registros usam os prefixos `DEMO` e `SGF-DEMO`, contemplam diferentes cargos, equipes, modalidades e situações, além de escala mínima, banco de horas e notificações. Execute-o somente no projeto destinado à demonstração ou homologação.
+O arquivo `supabase/seed-demo.sql` é legado e não deve ser executado para demonstrar o modelo atual de múltiplos vínculos. Use `node scripts/prepare-demo.mjs`: gera SQL identificado `DEMO07`, duas matrículas/CNES, responsabilidades diárias e situações distintas, com rollback por padrão. Não define senhas nem envia e-mails. Procedimento, consentimento explícito para persistência e limitações em [VALIDACAO_BLOCO_07.md](VALIDACAO_BLOCO_07.md).
 
-Antes de apresentar, confira se os filtros estão limitados aos registros fictícios e se nenhuma informação pessoal aparece nas capturas de tela. A carga pode ser reaplicada para restaurar o cenário; ela não remove dados institucionais existentes.
+Antes de apresentar, confira se os filtros estão limitados aos registros fictícios e se nenhuma informação pessoal aparece nas capturas de tela. A nova carga não sobrescreve colisões nem remove dados institucionais. Executar persistência exclusivamente em destino isolado conferido; uma execução local do frontend continua conectada ao Supabase compartilhado.
 # Ajustes de planejamento publicados em 07/10/2026
 
 Recusas e orientação (09/10): antes de enviar, confira os impedimentos de dados e aquisição. Na análise, escolha motivo ativo e justifique; banco insuficiente exige saldo real/horas necessárias, conflito exige colega/atuação vigente e datas. Renomear o motivo não muda o rótulo histórico. Catálogo global exclusivo do Administrador, com versão e justificativa. Procedimentos, canais RH/TI e referências pendentes em [CATALOGO_MENSAGENS.md](CATALOGO_MENSAGENS.md); evidências em [VALIDACAO_BLOCO_06.md](VALIDACAO_BLOCO_06.md).

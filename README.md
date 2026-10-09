@@ -2,7 +2,7 @@
 
 **Piloto publicado:** https://sgfbetim.vercel.app — Vercel, com deploy contínuo da branch `main`. Backend Supabase preservado. Publicação não substitui a homologação funcional/institucional; consulte [hospedagem](docs/HOSPEDAGEM.md).
 
-> **Piloto de homologação — 07/10/2026:** banco atual atualizado para múltiplos vínculos/CNES, distribuição diária e análise por unidade. Produção e homologação usam o mesmo Supabase por decisão do responsável. Sete migrations e sete Edge Functions publicadas; 213 testes locais e 11 cenários SQL de RLS aprovados. Validação institucional e testes completos de fluxo permanecem pendentes. Consulte [versões](docs/VERSOES.md) e [pendências](docs/pendencias.md); a descrição legada abaixo será revisada com a conclusão dos fluxos.
+> **Piloto de homologação — 09/10/2026:** múltiplos vínculos/CNES, distribuição diária e análise por unidade publicados em https://sgfbetim.vercel.app/. O Supabase é compartilhado por decisão do responsável. 283 testes locais aprovados; ensaios SQL integrados, reconstrução do banco vazio e restauração de dump sintético em banco isolado confirmados. Consulte [bloco 07](docs/VALIDACAO_BLOCO_07.md) e [pendências](docs/pendencias.md). Os trechos históricos abaixo não substituem a situação atual nem o aceite institucional.
 
 Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura Municipal de Betim. O SGF permite simular períodos, registrar pedidos, acompanhar decisões da chefia e do RH, administrar cadastros e visualizar a escala. **O comprovante registra o protocolo; ele não autoriza o afastamento.**
 
