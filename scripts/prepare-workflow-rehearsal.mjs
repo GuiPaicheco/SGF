@@ -6,11 +6,11 @@ const fixture = await readFile(new URL('../tests/access-rls-rehearsal.sql', impo
 const marker = "select set_config('request.jwt.claim.sub'";
 const boundary = fixture.indexOf(marker);
 if (boundary < 0) throw new Error('Limite das fixtures não encontrado; ensaio cancelado.');
-const scenarios = { unit: 'unit-workflow', calendar: 'calendar-planning', distribution: 'distribution-planning', registration: 'registration-workflow', legacy: 'legacy-cycle' };
+const scenarios = { unit: 'unit-workflow', calendar: 'calendar-planning', distribution: 'distribution-planning', registration: 'registration-workflow', legacy: 'legacy-cycle', block4: 'block-four' };
 const scenario = process.argv[2] || 'unit';
-if (!Object.hasOwn(scenarios, scenario)) throw new Error('Cenário inválido: use unit, calendar, distribution, registration ou legacy.');
+if (!Object.hasOwn(scenarios, scenario)) throw new Error('Cenário inválido: use unit, calendar, distribution, registration, legacy ou block4.');
 const checks = await readFile(new URL(`../tests/${scenarios[scenario]}-rehearsal.sql`, import.meta.url), 'utf8');
-if(scenario==='legacy'){
+if(['legacy','block4'].includes(scenario)){
   const foundation=await readFile(new URL('../tests/block-three-rehearsal.sql',import.meta.url),'utf8');
   const end=foundation.indexOf('do $$');
   if(end<0) throw new Error('Fixtures do bloco 03 não encontradas.');

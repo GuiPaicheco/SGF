@@ -226,11 +226,13 @@ As 48 lotações da carga inicial estão versionadas em `docs/cnes-lotacoes.md`.
 
 `declared_minutes` é o saldo informado pelo servidor; `validated_minutes` é o saldo oficial confirmado pelo RH. A aprovação não deve se apoiar apenas no saldo declarado.
 
-O RH registra créditos e débitos validados na análise da solicitação. Cada lançamento permanece em `time_bank_entries`. Na conclusão de uma folga por banco de horas, somente as horas correspondentes aos dias solicitados e à jornada são debitadas de forma atômica; a conclusão é impedida quando o saldo validado for insuficiente. A migration de 29/09/2026 corrige pedidos ainda não concluídos; pedidos já concluídos antes dela exigem conferência do extrato e eventual ajuste auditável.
+No modelo atual, o RH registra créditos e débitos na matrícula selecionada, em `bond_time_bank_entries`. A primeira ação **Adicionar ao Calendário** consome as horas solicitadas uma única vez por pedido, mesmo com vários CNES. Aprovar não debita horas. Recusa global ou cancelamento estorna eventual consumo, sem apagar o extrato. Saldo insuficiente impede a confirmação inteira. Registros legados continuam no extrato por pessoa (`time_bank_entries`), com consumo na conclusão; não misturar esses saldos com os vínculos atuais. Pedidos antigos já concluídos exigem conferência e eventual ajuste auditável.
 
 ## Operação das solicitações
 
-A linha do tempo apresenta todas as mudanças de situação, responsável, data e justificativa. RH e Administrador podem devolver um pedido para correção conforme seu estágio; o servidor pode reenviar ou cancelar uma solicitação devolvida. RH e Administrador podem programar, reprogramar datas, cancelar e concluir.
+A linha do tempo apresenta mudanças de situação, responsável, data e justificativa. No modelo atual, cada CNES/lotação analisa somente os seus dias e dispõe de **Aprovar**, **Recusar** com justificativa ou **Adicionar ao Calendário** após aprovação. A aprovação não confirma ausência. Uma recusa encerra o pedido inteiro; decisões anteriores ficam no histórico, mas não confirmam afastamento nem bloqueiam a escala.
+
+Pedidos legados preservam chefia → RH → inclusão explícita no calendário. RH/Administrador podem devolver para correção; o titular pode responder e reenviar. Para cancelar, o servidor procura o RH. Operações legadas não podem decidir ou alterar silenciosamente pedidos com distribuição por CNES.
 
 O calendário de escala apresenta todos os funcionários ativos do escopo em uma grade mensal, com uma linha por funcionário e uma coluna por dia, inclusive quando não há afastamento. Os filtros de lotação, cargo, função e situação atualizam a visão sem alterar os pedidos. As marcações identificam início, fim, retorno, feriado, day-off de aniversário e dias de afastamento; células vermelhas indicam sobreposição por lotação, cargo ou função. Ao selecionar uma célula colorida, o gestor abre a solicitação correspondente.
 
@@ -257,7 +259,7 @@ Feriados e pontos facultativos ativos são carregados da tabela `calendar_events
 
 ## Alterações no calendário
 
-Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastamento em andamento, o sistema atualiza o calendário visual e cria notificações para o servidor, RH responsável e administradores. A notificação solicita a revisão do período e do retorno; ela não altera silenciosamente uma solicitação já protocolada.
+Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastamento compatível, o sistema preserva início e quantidade de dias, recalcula fim/retorno e avisa o servidor e os responsáveis envolvidos. Dias novos sem responsável inequívoco e dados históricos sem contagem confiável exigem revisão explícita. Não inferir responsáveis nem ignorar avisos de revisão. A homologação integrada dessa rotina permanece no bloco 04.
 
 ## 6. Revisões periódicas
 
@@ -280,4 +282,15 @@ Redistribuição comum exige todas as revisões pendentes; decisões existentes 
 
 Ensaios reproduzíveis: `node scripts/prepare-workflow-rehearsal.mjs unit`, `calendar` ou `distribution`. Executar a saída inteira no banco atualizado: ela inclui BEGIN/ROLLBACK, não é seed. Não remover o rollback.
 
-Recuperação: conferir no Supabase Auth o Site URL e redirect autorizado `https://sgfbetim.vercel.app/`. O backend aceita somente esse endereço por padrão; outras URLs exatas exigem `SGF_RECOVERY_URLS`, segredo/configuração exclusivo do servidor. Ainda é necessário comprovar entrega do e-mail e troca de senha em um fluxo real.
+Recuperação: Site URL e redirect autorizado `https://sgfbetim.vercel.app/`. O backend aceita somente esse endereço por padrão; outras URLs exatas exigem `SGF_RECOVERY_URLS`, configuração exclusiva do servidor. Entrega, salvamento de senha e login da conta teste confirmados pelo usuário em 08/10/2026; não repetir redefinições dessa conta para ensaios.
+
+## Reprogramação com nova análise — 08/10/2026
+
+1. Antes das decisões, use **Redistribuir responsabilidade de um dia**. Titular altera apenas sua matrícula; RH apenas seu escopo; Administrador pode coordenar unidades. Justificativa e versão atual são obrigatórias.
+2. Após decisões, procure o Administrador. Em **Reprogramar ou redistribuir com nova análise**, mantenha o início se mudar somente os responsáveis, ou informe o novo início de cada parcela.
+3. Clique em **Simular novo período e distribuição**. A quantidade e a contagem são preservadas; confira fim, retorno e o responsável por todos os dias.
+4. Justifique e confirme a ciência da substituição. O pedido anterior será cancelado e sairá do calendário; eventual consumo será estornado. Datas, decisões e autoria anteriores não são apagadas.
+5. O novo protocolo fica vinculado ao anterior e aguarda todas as análises. Cada unidade deverá aprovar e adicionar novamente ao calendário. O comprovante tem uma assinatura do servidor e outra de quem autorizou no RH/chefia.
+6. Se outra sessão decidir, alterar calendário/cadastro ou substituir o pedido, atualize e simule novamente. Não repetir o clique para forçar a gravação.
+
+Ensaios do bloco: `node --test tests/*.test.mjs`; SQL em `tests/block-three-rehearsal.sql` e `node scripts/prepare-workflow-rehearsal.mjs legacy`, sempre com rollback. O script `scripts/verify-block-three-pilot.mjs` é exclusivo do ensaio identificado de 08/10, requer credenciais por variáveis de ambiente e não é carga institucional. Evidências e limites em [VALIDACAO_BLOCO_03.md](VALIDACAO_BLOCO_03.md).

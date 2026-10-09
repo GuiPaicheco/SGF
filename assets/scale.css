@@ -96,6 +96,8 @@ button.scale-person-line:hover strong, button.scale-person-line:focus-visible st
 .scale-day.has-conflict .scale-cell-main { outline: 2px solid #c83535; outline-offset: -2px; }
 .scale-day.is-confirmed.has-conflict .scale-cell-main { background: #3f8b65; }
 .scale-day.is-inactive { color: #667085; background: repeating-linear-gradient(135deg, #f2f4f7, #f2f4f7 4px, #e4e7ec 4px, #e4e7ec 5px); cursor: default; }
+.scale-scroll:focus-visible { outline: 3px solid #246a43; outline-offset: 3px; }
+.scale-day button.scale-cell-main:focus-visible { outline: 3px solid #124f78; outline-offset: -3px; }
 @media (max-width: 1100px) { .scale-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 800px) { .scale-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .scale-filters { grid-template-columns: 1fr; } }

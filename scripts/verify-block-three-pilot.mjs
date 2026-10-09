@@ -117,6 +117,30 @@ if(mode==='prepare'){
  const balance=await ok('manage-operations',{action:'bond-resources',bond_id:owner.bond_id},admin.access_token,adminContext);
  assert.equal(balance.account.validated_minutes,14400);
  record('Calendário exclui pedidos substituídos/recusados; dias preservados e saldo sintético totalmente estornado');
+}else if(mode==='block4'){
+ const scale=await ok('manage-operations',{action:'scale-list',month:'2026-10'},admin.access_token,adminContext);
+ const days=scale.planned_days.filter(d=>d.cnes_unit_id===a.id&&d.scale_date==='2026-10-09');
+ const payload={action:'scale-save',cnes_unit_id:a.id,date:'2026-10-09',bond_unit_ids:[owner.bond_unit_id],version:days[0]?.version||0};
+ const pair=await Promise.all([call('manage-operations',payload,admin.access_token,adminContext),call('manage-operations',payload,signed.access_token,rh)]);
+ assert.equal(pair.filter(r=>r.status===200).length,1); assert.equal(pair.filter(r=>r.status===409).length,1);
+ record('Escala mínima: dois gestores simultâneos, uma gravação e um conflito 409');
+ const denied=await call('manage-operations',{...payload,cnes_unit_id:b.id,date:'2026-10-09',bond_unit_ids:[other.bond_unit_id],version:0},signed.access_token,rh);
+ assert.equal(denied.status,403);record('Escala mínima de outro CNES bloqueada para o RH');
+}else if(['calendar4-add','calendar4-move','calendar4-remove'].includes(mode)){
+ const current=(await rest(`vacation_requests?context_bond_id=eq.${owner.bond_id}&status=in.(enviada,em_analise)&select=id,start_date,end_date,return_date,calendar_adjustment_state&order=created_at.desc`,admin.access_token,adminContext))[0];
+ assert.ok(current&&current.start_date==='2027-03-02','Ensaio exige pedido sintético em março.');
+ const others=await rest(`vacation_requests?servidor_id=neq.${owner.servidor_id||'4de0e360-7a5b-42a0-b59b-4a9b6458f3ea'}&status=in.(enviada,em_analise,aprovada,programada,reprogramada)&start_date=lte.2027-03-31&end_date=gte.2027-03-01&select=id`,admin.access_token,adminContext);
+ assert.equal(others.length,0,'Não alterar calendário com pedidos de outras pessoas no período.');
+ const {events}=await ok('manage-catalogs',{action:'calendar-list'},admin.access_token,adminContext);
+ const name='TESTE BLOCO 04 — ajuste dinâmico março 2027';
+ const event=events.find(e=>e.name===name);
+ assert.ok(mode==='calendar4-add'?!event||!event.active:event?.active);
+ await ok('manage-catalogs',{action:'calendar-save',id:event?.id,event_date:mode==='calendar4-move'?'2027-03-04':event?.event_date||'2027-03-03',type:'feriado',name,active:mode!=='calendar4-remove',version:event?.version},admin.access_token,adminContext);
+ const row=(await rest(`vacation_requests?id=eq.${current.id}&select=start_date,end_date,return_date,calendar_adjustment_state`,admin.access_token,adminContext))[0];
+ assert.equal(row.start_date,'2027-03-02');assert.equal(row.end_date,mode!=='calendar4-remove'?'2027-03-16':'2027-03-15');
+ assert.equal(row.return_date,mode!=='calendar4-remove'?'2027-03-17':'2027-03-16');
+ record(mode==='calendar4-add'?'Feriado estende pedido real sintético em um dia útil e preserva início':mode==='calendar4-move'?'Mudança de data do feriado preserva contagem e reavalia responsabilidades':'Desativação do feriado restaura fim/retorno do pedido sintético');
+ console.log(JSON.stringify({requestId:current.id,...row}));
 }else if(mode==='legacy'){
  const req='ecb33183-482d-4c79-83f2-1f077c44a8ec';
  const modern=(await rest(`vacation_requests?context_bond_id=eq.${owner.bond_id}&select=id&order=created_at.desc&limit=1`,admin.access_token,adminContext))[0];
@@ -134,6 +158,13 @@ if(mode==='prepare'){
  await ok('manage-operations',{action:'operation',request_id:req,operation:'cancelar',notes:'Encerrar TESTE legado, preservando decisões'},admin.access_token,adminContext);
  record('Edge Functions: legado devolvido, reenviado pelo titular, aprovado por etapas, programado explicitamente e cancelado; novo modelo bloqueia operação antiga');
 }else if(mode==='cleanup'){
+ const scale=await ok('manage-operations',{action:'scale-list',month:'2026-10'},admin.access_token,adminContext);
+ for(const day of scale.planned_days){
+  const assignments=scale.assignments.filter(item=>item.day_id===day.id);
+  if(!assignments.some(item=>[owner.bond_unit_id,other.bond_unit_id].includes(item.bond_unit_id))) continue;
+  await ok('manage-operations',{action:'scale-save',cnes_unit_id:day.cnes_unit_id,internal_lotacao_id:day.lotacao_id.split(':')[1]||null,date:day.scale_date,
+   bond_unit_ids:assignments.filter(item=>![owner.bond_unit_id,other.bond_unit_id].includes(item.bond_unit_id)).map(item=>item.bond_unit_id),version:day.version},admin.access_token,adminContext);
+ }
  const rows=await rest(`vacation_requests?context_bond_id=eq.${owner.bond_id}&select=id,status`,admin.access_token,adminContext);
  for(const row of rows.filter(r=>!['cancelada','rejeitada','concluida'].includes(r.status))) await ok('manage-operations',{action:'operation',request_id:row.id,operation:'cancelar',notes:'Encerramento de ensaio técnico Bloco 03; preservar histórico'},admin.access_token,adminContext);
  await ok('manage-profiles',{action:'deactivate',profile_id:profile.id},admin.access_token,adminContext);

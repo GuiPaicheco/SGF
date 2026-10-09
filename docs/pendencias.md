@@ -1,13 +1,13 @@
 # Pendências do SGF
 
-Atualização: 08/10/2026. Esta é a lista ativa, agrupada por dependência. Contém somente trabalho restante; implementação existente e validação pendente são diferenciadas. Detalhes anteriores estão em [HISTORICO_PENDENCIAS_20261008.md](HISTORICO_PENDENCIAS_20261008.md) e não formam uma segunda fila de tarefas.
+Atualização: 09/10/2026. Esta é a lista ativa, agrupada por dependência. Contém somente trabalho restante; implementação existente e validação pendente são diferenciadas. Detalhes anteriores estão em [HISTORICO_PENDENCIAS_20261008.md](HISTORICO_PENDENCIAS_20261008.md) e não formam uma segunda fila de tarefas.
 
 ## Situação confirmada
 
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 253 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 265 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -22,26 +22,15 @@ Administração organizacional e recursos por matrícula implementados e ensaiad
 
 O fluxo atual mantém um responsável por dia, escolhido entre as unidades cadastradas; divisão de horas entre unidades no mesmo dia não foi solicitada nem implementada. A hipótese foi retirada da fila deste bloco, sem alterar a regra diária. Conferência cadastral pelo RH continua no bloco 08, como parte do aceite antes do uso institucional; não é funcionalidade faltante. O ciclo completo de interface continua no bloco 03.
 
-## 03. Solicitações, gestão por unidade e redistribuição
+## 03. Solicitações, gestão por unidade e redistribuição — concluído tecnicamente
 
-Em execução. Nova análise vinculada ao pedido anterior implementada e publicada no backend; ensaios SQL transacionais aprovados. Evidências e limites em [VALIDACAO_BLOCO_03.md](VALIDACAO_BLOCO_03.md). Ainda não encerrado pela interface/concorrência.
+Fluxo integrado, redistribuição pendente, nova análise com protocolo vinculado, decisões independentes e inclusão explícita no calendário implementados e ensaiados. Conferência de interface, concorrência real entre sessões, compatibilidade legada e isolamento de conta com múltiplos perfis realizados. Evidências e limites em [VALIDACAO_BLOCO_03.md](VALIDACAO_BLOCO_03.md). Desativação entre simulação e confirmação validada em SQL; não representa ensaio de carga nem aceite institucional. Calendário amplo e aceite por responsáveis continuam nos grupos 04 e 08.
 
-1. [ ] Validar pela interface o ciclo completo: simulação → distribuição dos dias → envio → análise independente por unidade → Aprovar/Recusar → Adicionar ao Calendário. Aprovação não deve confirmar ausência automaticamente.
-2. [ ] Validar preenchimento por dia/semana, sextas alternadas, múltiplos CNES, vigência e desativação concorrente de atuações; conferir comprovante e assinaturas do servidor e do RH/chefia que autorizou.
-3. [ ] Homologar redistribuição pendente por titular, RH no próprio escopo e Administrador, incluindo revisão criada/removida, justificativa, versões, autoria e avisos. Esse núcleo já foi implementado e ensaiado em SQL.
-4. [ ] Validar pela interface a reprogramação/redistribuição já implementada: novo protocolo vinculado, cancelamento compensatório, estorno, histórico anterior preservado e todas as unidades novamente pendentes.
-5. [ ] Testar dois gestores simultâneos, cliques repetidos, versões antigas e operações cruzadas; confirmar ausência de gravações parciais/deadlocks.
-6. [ ] Validar compatibilidade do ciclo legado, devolução/reenvio e bloqueio das operações legadas em pedidos do novo modelo.
+## 04. Calendário, feriados, escala mínima e conflitos — concluído tecnicamente no piloto
 
-## 04. Calendário, feriados, escala mínima e conflitos
+Calendário por atuação/contexto, planejamento separado da confirmação, filtros e marcadores cobertos pelos testes. Feriado incluído, movido e desativado por API com conferência de recálculo, pendência, atribuição diária e avisos na interface. Escala cíclica nominal, dia explicitamente vazio e conflito justificado criados/encerrados pela tela; concorrência real de gravação validada. Correções de integridade e histórico publicadas. Evidências e limites em [VALIDACAO_BLOCO_04.md](VALIDACAO_BLOCO_04.md).
 
-1. [ ] Homologar calendário por CNES/lotação: planejamento versus confirmado, filtros por cargo/equipe/função, vigência, aniversário, início, fim, retorno e acessibilidade.
-2. [ ] Validar intervalo livre entre meses/anos, troca rápida de contexto e desempenho nos dispositivos institucionais.
-3. [ ] Homologar ajuste por inclusão, remoção ou mudança de feriado durante férias: preservar início e quantidade de dias, recalcular fim/retorno, responsabilidades, revisões e avisos. Integração já aplicada; falta validação completa pela interface.
-4. [ ] Validar dias acrescentados sem responsável, parcelas sobrepostas, períodos legados de contagem desconhecida e decisões existentes; exigir revisão quando não houver atribuição inequívoca.
-5. [ ] Homologar gravação/ciclo da escala mínima por atuação, dias explicitamente vazios, composição sugerida, exceções do RH e concorrência com inclusão de afastamentos.
-6. [ ] Converter histórico da escala mínima legada apenas quando a associação à atuação for comprovável; preservar casos ambíguos para reconciliação.
-7. [ ] Homologar conflitos conforme filtro e criação/encerramento manual justificado, sem recusa automática; conferir impacto de alterações posteriores no planejamento.
+Não há registros nas tabelas legadas de escala mínima a converter. Não criar associações sem evidência; reconciliação de futuros registros ambíguos permanece no bloco 07. Desempenho nos equipamentos institucionais, revisão completa de acessibilidade e aceite do RH continuam no bloco 08; não foram considerados concluídos pelos testes técnicos.
 
 ## 05. Notificações e auditoria
 

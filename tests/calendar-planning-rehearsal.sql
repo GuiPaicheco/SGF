@@ -1,5 +1,7 @@
 -- Usar fixtures iniciais do ensaio de acesso, após calendar_planning.sql, com rollback.
 update public.vacation_requests set status='enviada' where id::text like 'f0000000%';
+-- O pedido legado é independente; não simular colisão pré-existente nesta fixture.
+update public.vacation_requests set context_bond_id=null where id='f0000000-0000-0000-0000-000000000502';
 insert into public.request_periods(request_id,sequence,start_date,end_date,return_date,days,counting_mode)
 select id,1,start_date,end_date,return_date,2,case when id='f0000000-0000-0000-0000-000000000502' then null else 'uteis' end
 from public.vacation_requests where id::text like 'f0000000%';
