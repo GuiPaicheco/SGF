@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {demoSql} from '../scripts/prepare-demo.mjs';
 import {readFile} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
 test('demonstração é rollback por padrão e possui identificadores próprios',async()=>{
  const sql=await demoSql();assert.match(sql,/ROLLBACK;\s*$/);assert.doesNotMatch(sql,/f3000000|COMMIT;/);assert.match(sql,/SGF-DEMO07-M2/);
 });
@@ -18,4 +19,9 @@ test('guard legado não depende do proprietário e não confia no cabeçalho de 
  assert.match(sql,/coalesce\(\(select auth.role\(\)\),''\)/);
  assert.match(sql,/<>\s*'service_role'/);assert.match(sql,/Campos de identificacao/);
  assert.doesNotMatch(sql,/headers->>|current_user.*supabase_admin/);
+});
+
+test('restauração recusa execução sem destino isolado explicitamente habilitado',()=>{
+ const result=spawnSync(process.execPath,['scripts/verify-database-rebuild.mjs'],{encoding:'utf8',env:{...process.env,CI:'true',SGF_ISOLATED_DATABASE:''}});
+ assert.equal(result.status,1);assert.match(result.stderr,/Ensaio restrito ao banco Docker isolado/);assert.equal(result.stdout,'');
 });
