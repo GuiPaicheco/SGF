@@ -7,7 +7,7 @@ Atualização: 09/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 273 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 277 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -38,13 +38,11 @@ Avisos operacionais complementados, chaves de feriado corrigidas por protocolo, 
 
 Procedimentos de desativação, compensação e anonimização condicionada formalizados em [AUDITORIA_RETENCAO.md](AUDITORIA_RETENCAO.md). Não foi realizado descarte/anonimização nem escolhido prazo legal: ratificação institucional permanece no bloco 08. Separação de ambientes e restauração integral continuam nos blocos 07/09. Contas técnicas desativadas, alertas encerrados e conta TESTE de recuperação preservada.
 
-## 06. Recusas, regras e orientação ao usuário
+## 06. Recusas, regras e orientação ao usuário — concluído tecnicamente no piloto
 
-1. [ ] Homologar catálogo de motivos: criação/edição, ativação, campos obrigatórios, permissões, auditoria e concorrência.
-2. [ ] Validar recusas Banco de Horas Insuficiente, Conflito com Funcionário e Outros, incluindo seletor de atuação, saldo informado e rótulo histórico.
-3. [ ] Completar separação entre impedimento normativo antes do envio e recusa administrativa; revisar validações existentes e mensagens objetivas.
-4. [ ] Criar catálogo de mensagens com explicação, referência normativa aprovada, vigência e canal de apoio.
-5. [ ] Padronizar orientação: direitos/regras ao RH; problemas técnicos aos Administradores/TI. Não inventar referências legais.
+Catálogo de motivos ensaiado com permissões, auditoria, campos obrigatórios e concorrência real; três recusas estruturadas conferidas no banco, com saldo, atuação e rótulo histórico preservados. Impedimentos de datas/admissão/aquisição separados da recusa administrativa e repetidos no banco. Orientação versionada e canais RH/TI entregues. Procedimentos em [CATALOGO_MENSAGENS.md](CATALOGO_MENSAGENS.md); evidências e limites em [VALIDACAO_BLOCO_06.md](VALIDACAO_BLOCO_06.md).
+
+Não existe referência normativa ratificada fornecida para preencher nesta entrega. Campos de aprovação/vigência permanecem explicitamente pendentes; aprovação pelo RH/Jurídico e consolidação normativa integral dos cálculos continuam no bloco 08, não foram eliminadas nem consideradas concluídas. Catálogo versionado no código, sem editor livre de legislação no painel.
 
 ## 07. Históricos, migração e testes integrados
 
@@ -56,7 +54,7 @@ Procedimentos de desativação, compensação e anonimização condicionada form
 
 ## 08. Homologação institucional, revisão visual e documentação
 
-1. [ ] Obter validação de RH/Jurídico para admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual; usar HOMOLOGACAO_REGRAS.md.
+1. [ ] Obter validação de RH/Jurídico para admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual; usar HOMOLOGACAO_REGRAS.md. Fornecer referências normativas aprovadas, responsável pelo aceite e vigências para o catálogo de mensagens; consolidar no servidor os cálculos normativos integralmente homologados. Conferências técnicas de datas do bloco 06 não substituem esse aceite.
 2. [ ] Homologar solicitações com múltiplos autorizadores e validar os quatro perfis com usuários responsáveis. Conferir se CNES, lotações internas, equipes, vínculos e autorizadores cadastrados correspondem à organização real; isso não bloqueia o desenvolvimento do piloto nem exige INE.
 3. [ ] Revisar todas as telas com dados representativos: codificação de texto, botões, alinhamento, navegação, responsividade e acessibilidade.
 4. [ ] Validar navegadores/equipamentos usados pela Prefeitura.

@@ -13,11 +13,17 @@ Migration aplicada: `20261009132736_block_six_submission_guards.sql`. Edge Funct
 1. Suíte local: `node --test tests/*.test.mjs` — 277 aprovados, zero falhas; sintaxe, build estático e `git diff --check` aprovados.
 2. SQL real: `node scripts/prepare-workflow-rehearsal.mjs block6` — 20 verificações aprovadas, transação integral com ROLLBACK. Datas, aquisição, admissão, criação/edição, campos obrigatórios, versão obsoleta, modo imutável, RH sem permissão global, três recusas, saldo intacto, atuação/nome canônico, rótulo histórico, motivo desativado, último ativo e trilha com autor. Fixtures não permaneceram no banco.
 3. API real: `scripts/verify-block-six-pilot.mjs` — cinco grupos aprovados. Duas gravações simultâneas com a mesma versão retornaram 200 e 409; criação, campos obrigatórios, modo imutável, auditoria e desativação conferidos. Motivo técnico identificado e desativado; catálogo original preservado integralmente. Credencial administrativa somente por variável de ambiente; nenhuma conta nova criada.
-4. Regressões SQL: unidade (17), calendário (16), cadastro (10), redistribuição (8), bloco 04 (16) e bloco 05 (21) aprovados após a migration, sempre com ROLLBACK.
+4. Regressões SQL: unidade (17), calendário (16), cadastro (10), redistribuição (8), bloco 03 (24), bloco 04 (16) e bloco 05 (21) aprovados após a migration, sempre com ROLLBACK.
 5. Security Advisor: zero ERROR; 16 INFO de RLS sem políticas em tabelas internas intencionalmente indisponíveis ao cliente. Aviso preexistente de [proteção contra senhas vazadas desabilitada](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) mantido no bloco 09; nenhuma proteção foi desabilitada nesta entrega.
 
 ## 03. Limites
 
 Não foi realizado ensaio de carga. A validação SQL da recusa não representa aceite do RH para um caso real. O catálogo de orientação não contém lei inventada: referências, vigências e aprovação jurídica permanecem pendentes no bloco 08. A consistência de datas não certifica integralmente os cálculos de direito por regime.
 
-Históricos não foram apagados. Conta TESTE de recuperação e alteração local preexistente de `logo.png` preservadas. Conclusões adicionais de publicação/interface devem ser registradas após conferência da versão hospedada.
+Históricos não foram apagados. Conta TESTE de recuperação e alteração local preexistente de `logo.png` preservadas. Dois ensaios API utilizaram motivos técnicos distintos, ambos desativados, conservando trilha e catálogo original.
+
+## 04. Publicação
+
+Código `e4bf9a4` publicado na `main`; Vercel READY no projeto sgfbetim, destino técnico production/piloto. Navegador confirmou `assets/app.js?v=20261009-block6-1`, login administrativo e sessão preservada após recarregar. Edge Functions finais: `manage-operations` v16 e `submit-request` v10. Migrations/funções aplicadas não são pendências de implantação. Logs operacionais centralizados e aceite institucional permanecem nos blocos 08/09.
+
+Interface Chrome: três motivos originais ativos e os dois motivos técnicos inativos; novo motivo oferece código, nome, modo, ordem, ativação e justificativa. Envio vazio bloqueado pelo campo obrigatório, sem criar registro. Textos/acentos legíveis, sem overflow horizontal nem erro/warning de console no recorte observado. Captura local preservada em `.sgf-backups/bloco06/motivos-publicados.png`; não inclui cadastro pessoal. Essa inspeção é do catálogo, não revisão completa de todas as telas (bloco 08).
