@@ -7,7 +7,7 @@ Atualização: 09/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 265 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 273 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -32,16 +32,11 @@ Calendário por atuação/contexto, planejamento separado da confirmação, filt
 
 Não há registros nas tabelas legadas de escala mínima a converter. Não criar associações sem evidência; reconciliação de futuros registros ambíguos permanece no bloco 07. Desempenho nos equipamentos institucionais, revisão completa de acessibilidade e aceite do RH continuam no bloco 08; não foram considerados concluídos pelos testes técnicos.
 
-## 05. Notificações e auditoria
+## 05. Notificações e auditoria — concluído tecnicamente no piloto
 
-1. [ ] Completar avisos de mudanças de períodos, reprogramações e demais eventos operacionais ainda não cobertos.
-2. [ ] Validar disparos existentes de nova análise, decisões, redistribuição, feriados, conflitos, escala mínima e confirmação/cancelamento: destinatários, escopo, deduplicação, navegação e transações.
-3. [ ] Reconciliar avisos antigos de gestão sem escopo confiável, sem expô-los indevidamente nem apagar o histórico.
-4. [ ] Revisar todas as mutações e completar autoria, papel, vínculo, CNES/lotação, data/hora, antes/depois e justificativa onde aplicável.
-5. [ ] Completar cobertura de pessoas/vínculos/equipes/polo, acessos/inclusões, concessões/revogações, banco de horas, alterações operacionais e administrativas.
-6. [ ] Ampliar identificação do servidor afetado em eventos ainda não cobertos; não atribuir arbitrariamente um único sujeito a eventos coletivos.
-7. [ ] Validar consulta paginada e buscas por autor, afetado, matrícula, evento e período com dados reais, isolamento de RH/Diretor e ausência de segredos nos detalhes.
-8. [ ] Formalizar desativação, eventos compensatórios e anonimização conforme política institucional, evitando exclusões físicas indevidas.
+Avisos operacionais complementados, chaves de feriado corrigidas por protocolo, paginação e marcação de leitura isoladas. Auditoria ampliada com identidade verificada, snapshots de nomes/matrícula, participantes de eventos coletivos e resumos por contexto. Histórico antigo preservado sem inferir escopo; proteção contra alteração/exclusão pela API. Ensaios locais, SQL e API real realizados; evidências e limites em [VALIDACAO_BLOCO_05.md](VALIDACAO_BLOCO_05.md).
+
+Procedimentos de desativação, compensação e anonimização condicionada formalizados em [AUDITORIA_RETENCAO.md](AUDITORIA_RETENCAO.md). Não foi realizado descarte/anonimização nem escolhido prazo legal: ratificação institucional permanece no bloco 08. Separação de ambientes e restauração integral continuam nos blocos 07/09. Contas técnicas desativadas, alertas encerrados e conta TESTE de recuperação preservada.
 
 ## 06. Recusas, regras e orientação ao usuário
 
@@ -67,6 +62,7 @@ Não há registros nas tabelas legadas de escala mínima a converter. Não criar
 4. [ ] Validar navegadores/equipamentos usados pela Prefeitura.
 5. [ ] Atualizar manual operacional, hospedagem, guia de testes e treinamento/apresentação com imagens da versão validada.
 6. [ ] Registrar evidências e aceite institucional; testes técnicos e recuperação da conta teste não encerram esse grupo.
+7. [ ] Ratificar política de retenção, responsáveis e eventual anonimização do histórico, conforme AUDITORIA_RETENCAO.md. Procedimento técnico entregue no bloco 05; nenhum prazo legal ou descarte foi definido pelo sistema.
 
 ## 09. Segurança e preparação para uso institucional
 
