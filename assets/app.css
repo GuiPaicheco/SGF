@@ -1142,6 +1142,10 @@ th {
     flex-wrap: wrap;
   }
 }
+.notification-row strong + small {
+  display: block;
+  margin-top: .35rem;
+}
 .notification-row > div {
   flex: 1;
 }
