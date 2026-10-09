@@ -1,5 +1,7 @@
 # Operação e preparação do piloto
 
+> **Orientação atual — 09/10/2026:** utilize [MANUAL_USO.md](MANUAL_USO.md) para os procedimentos atuais e [GUIA_HOMOLOGACAO.md](GUIA_HOMOLOGACAO.md) para testes e aceite. Os registros datados abaixo documentam etapas anteriores; afirmações como “local”, “não publicado” ou “integração pendente” não representam o estado atual dos blocos 01–07. Consulte [pendencias.md](pendencias.md) e as evidências de cada bloco antes de executar scripts antigos. Nunca use a versão legada contra o banco atualizado.
+
 ## Catálogo e recursos por matrícula — 08/10/2026
 
 Em **Cadastros → CNES e equipes**, o Administrador pesquisa, cadastra e edita unidades e equipes. CNES possui sete dígitos e seu código não é substituído em um cadastro existente. Equipes são identificadas pelo nome, tipo/número e unidade, como **eMulti 004 Bueno Franco** ou **eMulti 018 Vila Cristina**; não é necessário INE. Ausência de INE não é pendência nem impede seleção. Metadados históricos permanecem armazenados, sem campos visíveis ou exigência de preenchimento. Desativação preserva histórico.

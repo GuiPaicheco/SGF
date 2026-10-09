@@ -1283,7 +1283,9 @@ th {
     font-size: 1.1rem;
   }
   #home-action {
-    display: none;
+    display: inline-flex;
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
   .hero,
   .choice-grid,

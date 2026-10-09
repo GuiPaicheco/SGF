@@ -6,6 +6,8 @@
 
 Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura Municipal de Betim. O SGF permite simular períodos, registrar pedidos, acompanhar decisões da chefia e do RH, administrar cadastros e visualizar a escala. **O comprovante registra o protocolo; ele não autoriza o afastamento.**
 
+Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologação](docs/GUIA_HOMOLOGACAO.md) e [roteiro de treinamento](docs/ROTEIRO_APRESENTACAO.md). A revisão técnica não substitui o aceite do RH/Jurídico.
+
 > **Estado do projeto (02/10/2026):** piloto em desenvolvimento. Os fluxos foram implementados e verificados localmente, mas as regras de direito a férias e a política de senhas ainda exigem homologação institucional antes de uso em produção. Veja [pendências](docs/pendencias.md) e [revisão técnica](docs/REVISAO_TECNICA.md).
 
 ## Para apresentar ao TI

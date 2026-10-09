@@ -1,5 +1,7 @@
 # Validação de interface, acessibilidade e acessos
 
+> Registro histórico de 30/09. Para a revisão atual de 09/10, consultar [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md). As dimensões e resultados antigos abaixo não certificam novamente as telas atuais.
+
 Registro da validação executada em 30/09/2026 antes da homologação institucional.
 
 ## Resultado automatizado

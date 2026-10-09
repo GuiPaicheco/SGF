@@ -1,6 +1,6 @@
 # Hospedagem do SGF
 
-## Piloto atual — Vercel (07/10/2026)
+## Piloto atual — Vercel (09/10/2026)
 
 Endereço: **https://sgfbetim.vercel.app**. Projeto `sgfbetim`, conectado ao repositório `GuiPaicheco/SGF`, branch de produção `main`. O backend permanece no Supabase atual; esta mudança de hospedagem não altera o banco.
 
@@ -8,7 +8,7 @@ O arquivo `vercel.json` define build `node scripts/build-static.mjs`, sem instal
 
 Cada atualização do `main` dispara uma publicação pelo Git integrado. Verifique o estado **Ready**, o commit e o endereço de produção no painel antes de considerar uma versão publicada. Não há segredos adicionais a cadastrar no Vercel: a chave publicável do frontend não é a chave de serviço do Supabase.
 
-Para recuperação de senha por e-mail, conferir no Supabase Auth **Site URL** e **Redirect URLs**, incluindo `https://sgfbetim.vercel.app`. A publicação do frontend não configura automaticamente essa lista. O fluxo completo de recuperação permanece pendente de homologação.
+Para recuperação de senha por e-mail, conferir no Supabase Auth **Site URL** e **Redirect URLs**, incluindo `https://sgfbetim.vercel.app`. A publicação do frontend não configura automaticamente essa lista. O retorno atual foi autorizado e configurado; o usuário confirmou recuperação e login por e-mail em 08/10. Não repetir essa correção como pendência nem redefinir senhas para testes visuais. Mudança futura de domínio exige nova conferência.
 
 O Netlify anterior permanece preservado, mas com publicações pausadas por limite de créditos; não usar seu frontend legado contra o banco atualizado. Nenhum plano pago foi contratado.
 
@@ -16,7 +16,7 @@ O Netlify anterior permanece preservado, mas com publicações pausadas por limi
 
 O SGF é uma aplicação estática. O Netlify deve publicar somente a pasta `dist`, gerada pelo comando definido em `netlify.toml`. Assim, migrations, funções Supabase e documentos internos não ficam acessíveis pelo site.
 
-O repositório está conectado ao projeto Netlify `sgfbetim`. O deploy contínuo da branch `main` está ativo em `https://sgfbetim.netlify.app`; essa URL é do piloto e não substitui a definição do domínio institucional definitivo.
+O repositório foi conectado ao projeto Netlify `sgfbetim`, anteriormente publicado em `https://sgfbetim.netlify.app`. Essa configuração é histórica: publicações pausadas por créditos; o piloto vigente está no Vercel. Não usar o site antigo contra o banco atualizado.
 
 ## Publicação recomendada
 
@@ -39,7 +39,7 @@ O frontend contém somente a URL do projeto e a chave publicável do Supabase. N
 - Confirmar que `submit-request` rejeita envio sem sessão com HTTP 401.
 - Entrar como servidor, criar uma solicitação e consultar **Meus pedidos**.
 - Entrar pelo CPF com uma conta que possua Servidor, RH e Administrador; conferir a escolha do acesso, a troca entre áreas e o escopo de cada uma.
-- Entrar e recuperar a senha pelo login `admin` em uma conta sem CPF.
+- Conferir recuperação em conta de teste autorizada, sem alterar o administrador nem a conta preservada somente para repetir uma prova já concluída.
 - Confirmar no navegador que as respostas possuem CSP, `X-Content-Type-Options`, `X-Frame-Options` e `Referrer-Policy`.
 - Tentar acessar `/supabase/migrations/` e `/docs/`; esses caminhos não devem publicar arquivos internos.
 - Testar impressão e responsividade nos navegadores usados pela Prefeitura.

@@ -2,6 +2,8 @@
 
 Roteiro de apoio para uma apresentação de 35 a 45 minutos destinada à equipe de TI da Prefeitura de Betim e aos futuros usuários do sistema.
 
+Versão: 09/10/2026, modelo de múltiplos vínculos/CNES. Conteúdo e sequência para treinamento; não é um arquivo de slides já montado no Canva. Manual de consulta: [MANUAL_USO.md](MANUAL_USO.md). Exercícios e aceite: [GUIA_HOMOLOGACAO.md](GUIA_HOMOLOGACAO.md).
+
 ## Objetivo
 
 Ao final, o público deverá compreender o fluxo completo de férias e folgas, saber executar as tarefas do seu perfil e reconhecer os controles que tornam o planejamento mais visual, rastreável e seguro.
@@ -19,7 +21,7 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
    Compare o cenário atual, com mensagens, planilhas e conferências dispersas, ao fluxo centralizado: pedido autenticado, análise em etapas, calendário, escala mínima e histórico.
 
 3. **Perfis e responsabilidades**  
-   Servidor solicita e acompanha. Diretor planeja e autoriza no escopo. RH analisa, programa e mantém cadastros. Administrador configura acessos, estrutura e calendário.
+   Servidor solicita e acompanha por matrícula. Diretor consulta e analisa no contexto autorizado. RH realiza gestão operacional apenas do CNES/lotação ativos. Administrador mantém estrutura, permissões e visão global. Não demonstrar permissões de Administrador como se fossem do RH.
 
 4. **Entrada e segurança de acesso**  
    Demonstre login, recuperação de senha, primeiro acesso e troca de perfil. Destaque a espera mínima de três segundos entre tentativas e a ausência de bloqueio cumulativo por erro.
@@ -28,13 +30,13 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
    Mostre a consulta sem gravação para férias ou banco de horas, por dias úteis ou corridos. Reforce que a simulação não substitui a solicitação autenticada.
 
 6. **Nova solicitação do servidor**  
-   Percorra a conferência de dados, modalidade, período, retorno e envio. Explique que o pedido também abre a inclusão funcional quando o cadastro ainda necessita de validação.
+   Percorra matrícula, conferência funcional, modalidade, período, retorno e envio. Mostre duas unidades da mesma matrícula e a escolha de um responsável por dia. Cadastro e recursos precisam de conferência; a solicitação não concede direitos nem permissões por si só.
 
 7. **Acompanhamento e comprovante**  
    Mostre protocolo, situação, linha do tempo e comprovante. As duas assinaturas são do servidor solicitante e do RH ou chefia imediata que autorizou o período.
 
 8. **Fila de solicitações**  
-   Use filtros, ordenação, busca e arquivamento individual. Abra um pedido e apresente a aprovação sequencial da chefia imediata e do RH.
+   Use filtros, ordenação, busca e arquivamento individual. Abra um pedido moderno: cada CNES analisa seus dias. Mostre Aprovar, Recusar com justificativa e Adicionar ao Calendário como ações distintas, respeitando o perfil. Aprovação sequencial pertence à compatibilidade histórica, não ao fluxo moderno.
 
 9. **Calendário visual da escala**  
    Explique linhas por servidor, colunas por dia, legenda de início, fim, retorno, feriado, day-off e conflito. Mostre filtros por lotação, cargo, função e situação.
@@ -43,10 +45,10 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
     Apresente a organização `Cargo - Equipe e Função - Nome`, a sugestão baseada no ciclo anterior e a possibilidade de ajuste manual pelo RH.
 
 11. **Calendário dinâmico e notificações**  
-    Cadastre ou simule um novo feriado dentro de um afastamento. O sistema atualiza a visão e notifica os envolvidos para revisão, sem alterar silenciosamente um pedido protocolado.
+   Explique inclusão, alteração e desativação de feriado. Pedidos compatíveis são recalculados preservando início e quantidade; retorno e dias responsáveis podem mudar. Servidor e gestores recebem avisos internos; casos ambíguos exigem revisão. Não cadastrar feriado real durante treinamento no banco compartilhado.
 
 12. **Cadastros e acessos**  
-    Mostre servidores, lotações CNES, cargos, funções, perfis, escopos e pendências de inclusão. Explique que cada perfil enxerga somente as áreas pertinentes.
+   Mostre pessoa por CPF/e-mail, matrículas, CNES, polo opcional e equipe por unidade. Lotação interna é para subdivisões de Secretaria; equipes são identificadas pelo nome, sem INE. Inclua Não se aplica. Cada perfil enxerga apenas áreas e contextos autorizados.
 
 13. **Rastreabilidade e operação**  
     Destaque histórico de situação, decisões registradas, autoria, preservação de pedidos e trilha de auditoria. Reforce a necessidade de homologar as regras institucionais antes da produção.
@@ -58,12 +60,12 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
 
 1. Abra a página inicial e faça uma simulação rápida.
 2. Entre como servidor de demonstração, envie uma solicitação e abra o comprovante.
-3. Troque para Diretor ou RH e localize o protocolo na fila.
-4. Analise as etapas e mostre a linha do tempo.
+3. Troque para Diretor ou RH, escolha o contexto e localize o protocolo na fila.
+4. Analise a revisão daquela unidade e mostre a linha do tempo. Aprovar não adiciona ao calendário.
 5. Abra o calendário visual, filtre uma lotação de demonstração e detalhe um dia com conflito.
 6. Ajuste uma escala mínima sem salvar, a menos que a apresentação tenha sido preparada para essa alteração.
 7. Abra notificações e mostre o aviso gerado por alteração do calendário.
-8. Finalize nos cadastros e explique escopos, perfis e administração técnica.
+8. Finalize nos cadastros e explique escopos, perfis e administração técnica. Execute envios/decisões somente com contas de demonstração autorizadas e destino conferido; login de Administrador não é prova de todos os perfis.
 
 ## Recomendações ao apresentador
 
@@ -80,6 +82,16 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
 - day-off de aniversário exibido como direito, sem solicitação separada;
 - atualização e notificação quando um feriado é incluído posteriormente;
 - escala mínima sugerida pelo histórico, mas ajustável pela gestão;
-- aprovação em etapas e comprovante com responsabilidades explícitas;
+- análise independente por unidade, inclusão explícita no calendário e comprovante com responsabilidades claras;
 - acesso por perfil e lotação, com histórico auditável;
 - base única para servidor, chefia, RH e administração.
+
+## Imagens e fala do instrutor
+
+Use uma tela por slide, com título curto e no máximo três instruções de operação. Preserve verde/dourado da identidade visual e prefira texto de corpo legível na projeção; não reduza a interface inteira a uma miniatura. Recorte sem perder título, contexto e legenda. Nunca exponha CPF/e-mail de pessoas reais, token ou senha.
+
+1. Simulação: `imagens/simulacao-bloco08.png`. Fala: “Esta tela estima datas, mas não envia um pedido nem valida seu saldo.”
+2. Feriados: `imagens/feriados-bloco08.png`. Fala: “Uma mudança de calendário pode mudar o retorno; confira os avisos e os dias atribuídos.”
+3. Comprovante: `imagens/comprovante-teste-bloco08.png`. Fala: “Este exemplo cancelado mostra o formato e as duas assinaturas; não autoriza afastamento.”
+
+Demais imagens devem ser capturadas com dados fictícios representativos em destino apropriado. Não inserir imagens de outro produto ou telas inventadas. A base DEMO07 foi ensaiada com rollback, não está persistida no piloto. Material final de slides e capturas do ciclo moderno completo dependem da demonstração autorizada e permanecem no bloco 08.

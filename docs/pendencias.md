@@ -7,7 +7,7 @@ Atualização: 09/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 283 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 287 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -54,11 +54,13 @@ Sem itens técnicos ativos neste bloco. Snapshot parcial não equivale a backup 
 
 ## 08. Homologação institucional, revisão visual e documentação
 
+**Em andamento.** Revisão pública/administrativa realizada no Chrome, equipe filtrada por CNES conferida, comprovante e principais áreas carregados sem erro de console. Botão Tela inicial corrigido no celular. Manual atual, guia de 20 casos, roteiro e imagens entregues; hospedagem corrigida e instruções antigas de operação identificadas como históricas. Evidências e limites em [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md). Não há aceite institucional nem revisão integral de todos os formulários/perfis nesta rodada.
+
 1. [ ] Obter validação de RH/Jurídico para admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual; usar HOMOLOGACAO_REGRAS.md. Fornecer referências normativas aprovadas, responsável pelo aceite e vigências para o catálogo de mensagens; consolidar no servidor os cálculos normativos integralmente homologados. Conferências técnicas de datas do bloco 06 não substituem esse aceite.
 2. [ ] Homologar solicitações com múltiplos autorizadores e validar os quatro perfis com usuários responsáveis. Conferir se CNES, lotações internas, equipes, vínculos e autorizadores cadastrados correspondem à organização real; isso não bloqueia o desenvolvimento do piloto nem exige INE.
-3. [ ] Revisar todas as telas com dados representativos: codificação de texto, botões, alinhamento, navegação, responsividade e acessibilidade.
+3. [ ] Completar revisão de todas as telas/detalhes dos quatro perfis com dados representativos, incluindo pedidos ativos, correções e decisões: codificação, botões, alinhamento, navegação, responsividade e acessibilidade. Revisão inicial pública/administrativa e teste de UTF-8 ampliado entregues; completar tablet, teclado/zoom/leitor de tela e impressão.
 4. [ ] Validar navegadores/equipamentos usados pela Prefeitura.
-5. [ ] Atualizar manual operacional, hospedagem, guia de testes e treinamento/apresentação com imagens da versão validada.
+5. [ ] Montar material final de slides e completar capturas do ciclo moderno validado. Manual de uso, guia de homologação, hospedagem e roteiro/estrutura de treinamento atualizados com imagens públicas/fictícias; não há deck final no Canva nem capturas completas dos quatro perfis.
 6. [ ] Registrar evidências e aceite institucional; testes técnicos e recuperação da conta teste não encerram esse grupo.
 7. [ ] Ratificar política de retenção, responsáveis e eventual anonimização do histórico, conforme AUDITORIA_RETENCAO.md. Procedimento técnico entregue no bloco 05; nenhum prazo legal ou descarte foi definido pelo sistema.
 

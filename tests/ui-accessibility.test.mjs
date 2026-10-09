@@ -40,3 +40,9 @@ test('documentos de interface permanecem em UTF-8 e com idioma declarado', () =>
   assert.match(html, /<meta charset="utf-8">/);
   for (const source of [app, css, html]) assert.doesNotMatch(source, /Ã[\u0080-\u00bf]|Â[\u0080-\u00bf]|â€|\uFFFD/);
 });
+
+test('retorno explícito à tela inicial permanece disponível em celular', () => {
+  const mobile = css.slice(css.indexOf('@media (max-width: 420px)'));
+  assert.match(mobile, /#home-action\s*\{\s*display:\s*inline-flex/);
+  assert.match(html, /id="home-action"[^>]*data-go="home"/);
+});
