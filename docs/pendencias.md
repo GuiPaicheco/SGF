@@ -7,7 +7,7 @@ Atualização: 09/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 277 testes locais aprovados.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 281 testes locais aprovados.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -46,11 +46,11 @@ Não existe referência normativa ratificada fornecida para preencher nesta entr
 
 ## 07. Históricos, migração e testes integrados
 
-1. [ ] Reconciliar solicitações, decisões, notificações e registros legados ainda não mapeados; preservar origem e não inferir CNES/atuação sem evidência.
-2. [ ] Revisar consultas e dependências remanescentes dos campos legados; removê-los somente após validação e plano de compatibilidade.
-3. [ ] Preparar base demonstrativa controlada com múltiplos vínculos/CNES e atribuição diária, sem misturar dados fictícios não identificados com dados institucionais.
-4. [ ] Executar cenários integrados pela interface/Edge Functions, RPCs/triggers, permissões e concorrência real; repetir suíte, análise estática e verificações de segurança após alterações.
-5. [ ] Testar reconstrução integral em banco vazio e restauração de backup consistente. Snapshot parcial existente não equivale a backup integral restaurável.
+Inventário, classificação dos históricos, revisão das dependências e plano de compatibilidade registrados em [VALIDACAO_BLOCO_07.md](VALIDACAO_BLOCO_07.md). Não há pedido legado ativo a converter nem escala legada preenchida. Base demonstrativa moderna preparada e ensaiada com rollback no Supabase; não gravada no piloto. Proteção contra vínculo legado ambíguo publicada em `manage-operations` v17. Suíte local: 281/281; concorrência real por API repetida com sucesso. Estes itens foram retirados da fila ativa, sem apagar histórico ou inferir associações.
+
+1. [ ] Concluir conferência da interface/Edge publicada após a proteção de histórico ambíguo e registrar evidências. O cenário de ambiguidade passou em teste automatizado; ainda não houve exibição desse aviso com fixture pela interface hospedada.
+2. [ ] Finalizar todos os ensaios SQL integrados no banco vazio de CI. Reconstrução das migrations passou; ajustes do papel/permissões de montagem de fixtures estão em verificação.
+3. [ ] Concluir restauração de dump sintético consistente em segundo banco isolado e comparar dados, funções, permissões, RLS, constraints e triggers. Teste preparado, ainda sem execução bem-sucedida confirmada; snapshot parcial não equivale a backup integral restaurável.
 
 ## 08. Homologação institucional, revisão visual e documentação
 

@@ -12,7 +12,7 @@ Inventário do piloto em 09/10/2026: sete solicitações, seis contextuais e uma
 2. `request_approvals` permanece como histórico antigo; decisões novas usam `request_unit_reviews` e responsabilidade diária.
 3. `minimum_scale_days` e `minimum_scale_assignments` estão vazias no piloto, mas não serão removidas apenas por isso: migrations anteriores e compatibilidade ainda as referenciam.
 4. Notificações pessoais sem CNES permanecem limitadas ao destinatário; eventos globais/sem escopo não devem ser convertidos para RH com base no cadastro atual.
-5. O calendário tem uma leitura legada por pessoa/lotação. Se houver múltiplas matrículas na mesma unidade, essa associação pode ser ambígua: não usar essa leitura como prova de vínculo histórico. A restrição explícita dessa ambiguidade ainda precisa de teste e entrega antes de encerrar o bloco.
+5. O calendário tem uma leitura legada por pessoa/lotação. Se houver múltiplas atuações compatíveis, o pedido não é atribuído automaticamente nem duplicado: retorna aviso de vínculo ambíguo para conferência documental pelo RH. Testes cobrem ambiguidade, cancelamento e ausência de aviso para outra unidade. Função `manage-operations` publicada na versão 17; verificação da interface ainda em andamento.
 6. Remoção futura exige inventário de dependências, associação comprovada, ensaio em cópia, comparação de resultados e versão de compatibilidade. Não executar `DROP`, preencher CNES automaticamente ou reparar a tabela de migrations apenas para igualar quantidades de versões.
 
 ## 03. Base demonstrativa
