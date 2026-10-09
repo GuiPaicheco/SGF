@@ -20,11 +20,13 @@ Chrome no Windows, site publicado https://sgfbetim.vercel.app/, frontend base `0
 
 Console: nenhum erro registrado ao final da navegação administrativa. Cadastro, escala, avisos, histórico e catálogo de motivos não apresentaram os padrões de mojibake procurados; cadastro, escala, avisos, histórico e catálogo não apresentaram inputs sem label/aria-label na inspeção correspondente. Isso não é prova de acessibilidade integral.
 
-Responsividade: 360×800 conferido em resultado público, cadastro e escala; largura da página 345 para viewport 360, sem transbordamento horizontal global. Navegação e calendário possuem rolagem interna intencional. Evidência visual inspecionada em celular e desktop; tablet, zoom 200%, leitor de tela e equipamentos institucionais ainda precisam do roteiro completo.
+Responsividade: 360×800 conferido em resultado público, cadastro e escala; largura da página 345 para viewport 360, sem transbordamento horizontal global. Navegação e calendário possuem rolagem interna intencional. Login em 768×1024: largura da página 768, rodapé no final (1024), sem transbordamento; Tab a partir do identificador alcançou Esqueceu a senha com foco visível. Evidência visual inspecionada em celular, tablet e desktop; todas as telas em tablet, navegação completa de teclado, zoom 200%, leitor de tela e equipamentos institucionais ainda precisam do roteiro completo.
 
 ## 02. Correções e materiais
 
 1. Botão **Tela inicial** deixa de ser ocultado abaixo de 420px; logo continua funcionando. CSS versionado `20261009-block8-1`, com teste de regressão.
+
+Publicação `a5faeb9` conferida READY no Vercel. No navegador publicado, botão visível em 360×800, largura global 345, retorno de Escala para Olá, Gestão funcionando e foco devolvido ao `#app`. Sessão administrativa encerrada ao terminar; override de viewport removido. Capturas adicionais: `retorno-celular-bloco08.png` e `login-tablet-bloco08.png`.
 2. [MANUAL_USO.md](MANUAL_USO.md): procedimento atual por perfil, matrícula/contexto, responsabilidades diárias, calendário, recusas, avisos e comprovante, com imagens reais públicas/fictícias.
 3. [GUIA_HOMOLOGACAO.md](GUIA_HOMOLOGACAO.md): 20 casos com executor, resultado esperado/obtido, evidência e aceite nominal; não executados não podem ser aprovados.
 4. [ROTEIRO_APRESENTACAO.md](ROTEIRO_APRESENTACAO.md): retiradas instruções de aprovação sequencial do fluxo moderno e de feriado real durante demonstração. Material é roteiro/estrutura, não deck final no Canva.
@@ -35,4 +37,4 @@ Imagens em `docs/imagens/`: simulação pública, feriados e comprovante fictíc
 
 ## 03. O que impede encerrar o bloco
 
-Normas/interpretacões e vigências aprovadas pelo RH/Jurídico; validação nominal dos quatro perfis e organização real; roteiro completo com dados representativos; equipamentos/navegadores institucionais e impressão; material final de slides; política de retenção e aceite nominal. Foram solicitados responsáveis e equipamentos ao usuário. Nenhuma lei, prazo legal, assinatura de aceite ou aprovação foi inventada. Não consolidar regra normativa ainda não aprovada.
+Normas/interpretações e vigências aprovadas pelo RH/Jurídico; validação nominal dos quatro perfis e organização real; roteiro completo com dados representativos; equipamentos/navegadores institucionais e impressão; material final de slides; política de retenção e aceite nominal. Foram solicitados responsáveis e equipamentos ao usuário. Nenhuma lei, prazo legal, assinatura de aceite ou aprovação foi inventada. Não consolidar regra normativa ainda não aprovada.
