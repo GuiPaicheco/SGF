@@ -68,6 +68,8 @@ RH mantém os registros operacionais permitidos no contexto. Administrador mant�
 
 ## 08. Comprovante e atendimento
 
+Treinamento completo: [14 slides no Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) ou [PowerPoint editável](apresentacao/SGF_Treinamento_20261009_final.pptx). Exemplos modernos fictícios e resultados do ciclo em [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md).
+
 Abra o comprovante pelo pedido e use **Imprimir / salvar em PDF**. As assinaturas são do servidor solicitante e do RH ou Chefia Imediata que autorizou o período. Confira situação e procedimento da unidade antes de entregar. O exemplo abaixo está cancelado: serve somente para demonstrar o formato, não uma autorização válida.
 
 ![Comprovante de pedido fictício cancelado](imagens/comprovante-teste-bloco08.png)

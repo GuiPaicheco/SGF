@@ -50,3 +50,7 @@ Correções: limpeza do aviso ao trocar contexto e cancelamento do temporizador 
 Capturas reais fictícias em `docs/imagens/`: perfis, distribuição, protocolo moderno, aprovação RH, calendário moderno e histórico do Diretor (`*-bloco08.jpg`). Nenhuma lista de usuários reais, senha ou token incluída no treinamento. Histórico compartilhado do mesmo protocolo não foi alterado nesta rodada.
 
 Entrega: 14 slides editáveis, com notas do instrutor, em [PowerPoint](apresentacao/SGF_Treinamento_20261009_final.pptx) e [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi). PPTX renderizado e inspecionado página a página; importação do Canva e textos finais conferidos. A apresentação explica o piloto, sem alegar aceite jurídico ou institucional.
+
+Publicação técnica `dff66e1` confirmada READY no Vercel; navegador carregou JS/CSS `20261009-block8-2`, calendário de abril com intervalo 01–30/04/2027, duas matrículas identificadas e região de aviso vazia após troca de contexto. Nenhum erro registrado no console consultado. Suíte local completa e build estático concluídos antes da publicação; não foi afirmado resultado de CI desta publicação.
+
+Encerramento: somente o pedido novo fictício foi cancelado, ambos os saldos de ensaio retornaram a 80h e a conta TESTE08 foi desativada. Histórico preservado, sem exclusão física e sem alteração de contas antigas. Sessão de navegador encerrada e viewport restaurado. Script de ensaio possui validação de identidade/tag e restringe cancelamento aos vínculos dessa fixture.

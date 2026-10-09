@@ -58,3 +58,5 @@ Restrições/pendências e prazo: __________________.
 Aceite nominal RH: __________________. Jurídico (regras): __________________. TI (operação): __________________. Data: __________________.
 
 Não assinar automaticamente. A aprovação não substitui a preparação operacional e de segurança do bloco 09.
+
+Ensaio técnico de 09/10: quatro perfis, duas matrículas e dois CNES, com decisões independentes e débito único, registrado em [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md). Não preenche os campos de aceite institucional acima.

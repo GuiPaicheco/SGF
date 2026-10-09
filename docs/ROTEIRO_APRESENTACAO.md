@@ -2,7 +2,7 @@
 
 Roteiro de apoio para uma apresentação de 35 a 45 minutos destinada à equipe de TI da Prefeitura de Betim e aos futuros usuários do sistema.
 
-Versão: 09/10/2026, modelo de múltiplos vínculos/CNES. Conteúdo e sequência para treinamento; não é um arquivo de slides já montado no Canva. Manual de consulta: [MANUAL_USO.md](MANUAL_USO.md). Exercícios e aceite: [GUIA_HOMOLOGACAO.md](GUIA_HOMOLOGACAO.md).
+Versão: 09/10/2026, modelo de múltiplos vínculos/CNES. Deck final de 14 slides disponível no Canva e em PowerPoint, conforme links ao final. Manual de consulta: [MANUAL_USO.md](MANUAL_USO.md). Exercícios e aceite: [GUIA_HOMOLOGACAO.md](GUIA_HOMOLOGACAO.md).
 
 ## Objetivo
 
