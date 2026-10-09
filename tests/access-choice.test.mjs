@@ -14,6 +14,7 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
   const session = { user: { id: 'user-1' }, access_token: 'access', refresh_token: 'refresh' };
   const app = { innerHTML: '', focus() {} };
   const classList = { toggle() {}, add() {}, remove() {} };
+  const toast = { classList, textContent: 'Solicitação adicionada ao calendário deste CNES.' };
   const clientFor = options => {
     clientsCreated++;
     roleFetch = options.global.fetch;
@@ -36,7 +37,7 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
     window: { supabase: { createClient: (_url, _key, options) => clientFor(options) }, location: { hash: '', search: '' }, scrollTo() {} },
     sessionStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
     document: {
-      querySelector: selector => ({ '#app': app, '#progress': { style: { setProperty() {} } }, '#toast': { classList }, '#session-action': { classList, addEventListener() {} } })[selector] || null,
+      querySelector: selector => ({ '#app': app, '#progress': { style: { setProperty() {} } }, '#toast': toast, '#session-action': { classList, addEventListener() {} } })[selector] || null,
       addEventListener: (name, callback) => { listeners[name] = callback; },
     },
     setTimeout() {}, console,
@@ -54,6 +55,7 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
   await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '0' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'servidor');
+  assert.equal(toast.textContent, '', 'a troca de contexto não conserva mensagem da unidade anterior');
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'servidor');
   assert.match(app.innerHTML, /Meus pedidos/);

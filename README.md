@@ -6,7 +6,7 @@
 
 Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura Municipal de Betim. O SGF permite simular períodos, registrar pedidos, acompanhar decisões da chefia e do RH, administrar cadastros e visualizar a escala. **O comprovante registra o protocolo; ele não autoriza o afastamento.**
 
-Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologação](docs/GUIA_HOMOLOGACAO.md) e [roteiro de treinamento](docs/ROTEIRO_APRESENTACAO.md). A revisão técnica não substitui o aceite do RH/Jurídico.
+Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologação](docs/GUIA_HOMOLOGACAO.md) e [roteiro de treinamento](docs/ROTEIRO_APRESENTACAO.md). Treinamento de 14 slides: [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e [PowerPoint](docs/apresentacao/SGF_Treinamento_20261009_final.pptx). Última suíte: 288 testes aprovados. A revisão técnica não substitui o aceite do RH/Jurídico.
 
 > **Estado do projeto (02/10/2026):** piloto em desenvolvimento. Os fluxos foram implementados e verificados localmente, mas as regras de direito a férias e a política de senhas ainda exigem homologação institucional antes de uso em produção. Veja [pendências](docs/pendencias.md) e [revisão técnica](docs/REVISAO_TECNICA.md).
 
@@ -18,24 +18,24 @@ Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologaçã
 | Dados e autenticação | Supabase Auth, PostgreSQL com RLS e Edge Functions |
 | Hospedagem atual | Vercel publica somente `dist/`; o backend permanece no Supabase |
 | Acessos | Público (simulação), Servidor, Diretor, RH e Administrador; uma conta pode reunir os quatro acessos autenticados |
-| Rastreabilidade | Protocolo, duas aprovações, histórico de situação, lançamentos e eventos de auditoria |
+| Rastreabilidade | Protocolo, análise independente por CNES, inclusão explícita no calendário, autoria e histórico |
 | Administração | CNES e lotação principal, calendário institucional, escala mínima nominal, cadastro e desativação com histórico preservado |
 | Uso em produção | Condicionado à homologação do RH e às verificações descritas abaixo |
 
 ### Fluxo resumido
 
 1. Sem login, a pessoa usa **Simulação Rápida**: escolhe férias ou folga, dias úteis ou corridos e se quer calcular pela data de início ou pela data de retorno. Para férias, informa a quantidade de dias; para folga, o saldo de horas e a carga horária diária. Dias úteis desconsideram fins de semana, feriados e pontos facultativos; dias corridos contam todos os dias do intervalo. A data de retorno deve ser um dia útil. O day-off de aniversário é ignorado e nenhum pedido é registrado.
-2. Para solicitar acesso, informa dados funcionais, e-mail institucional e lotação CNES. O RH pode aprovar Servidor em sua lotação; o administrador pode conceder qualquer acesso. Se o CPF já tiver conta, os acessos são acrescentados à mesma identidade.
-3. Já autenticado, o servidor escolhe a modalidade, confere os dados funcionais e simula as datas. O envio registra protocolo, períodos e etapas de aprovação. Se o cadastro funcional ainda estiver pendente, abre também uma pendência de inclusão.
-4. O RH analisa a etapa da chefia imediata no seu escopo. Após essa aprovação, registra a segunda decisão na etapa RH. As duas decisões continuam separadas e auditáveis.
-5. O RH pode programar, reprogramar, cancelar ou concluir conforme a situação. A conclusão que consome banco de horas exige saldo validado.
-6. O servidor acompanha situação, pareceres, histórico e notificações em **Meus pedidos**. Diretor, RH e administrador consultam a escala mensal, definem a lista nominal opcional por dia e lotação e veem alertas de sobreposição. RH e administrador podem arquivar pedidos apenas em sua própria fila.
+2. Para solicitar acesso, informa nome, CPF, nascimento, e-mail e vínculos por matrícula. Cada vínculo possui unidades autorizadoras e equipe por CNES ou Não se aplica. Lotação interna se aplica às subdivisões de Secretaria. Cadastro e permissões dependem da conferência administrativa.
+3. Após login por CPF ou e-mail, escolhe perfil, matrícula e contexto. O servidor confere dados, modalidade e datas e atribui um CNES responsável a cada dia útil. O envio registra protocolo e revisões por unidade.
+4. Cada CNES analisa somente seus dias. **Aprovar**, **Recusar** com justificativa e **Adicionar ao Calendário** são ações diferentes. Aprovação não confirma automaticamente a ausência no calendário.
+5. A primeira inclusão da folga no calendário debita as horas uma única vez por matrícula. Recusa ou cancelamento estorna eventual débito, preservando o histórico. Ajustes de calendário podem gerar recálculo e pendência de responsáveis diários.
+6. O servidor acompanha situação, decisões, comprovante e notificações em **Meus pedidos**. Diretor, RH e administrador consultam a escala no contexto autorizado. RH e administrador mantêm escala mínima e conflitos justificados; Diretor não recebe esses editores. Arquivamento afeta apenas a fila de quem o realiza.
 
 Na interface, **Entrar no SGF** é a ação principal da página inicial. O login reúne acesso existente, recuperação de senha e solicitação de novo acesso em caminhos separados. Depois de entrar, a navegação superior concentra as áreas disponíveis para cada perfil; cada tela destaca sua próxima ação. Na análise de pedidos, a decisão aparece antes dos detalhes de histórico e calendário.
 
-O login usa login ou CPF e senha. A conta administrativa antiga, mesmo sem CPF, entra com o login `admin`. Quando a conta reúne mais de um acesso, a pessoa escolhe **Servidor**, **RH** ou **Administrador** após autenticar e pode trocar de área pela navegação. O administrador concede acessos em conjunto, define as lotações do RH e envia convite somente para uma conta nova. **Público** é o acesso sem login, limitado à simulação.
+O login usa CPF ou e-mail e senha. O alias legado `admin` permanece no piloto e deverá ser substituído por responsáveis identificados antes do uso institucional. Uma conta pode reunir **Servidor**, **Diretor**, **RH** e **Administrador**, com escolha e troca de contexto. Contas manuais aprovadas entram com senha provisória `123456` e exigem troca no primeiro acesso. A recuperação usa o e-mail cadastrado. **Público** permite simulação e solicitação de cadastro, sem acesso à gestão.
 
-No projeto Supabase atualmente conectado, as migrations de banco de horas, múltiplos acessos por CPF, recuperação do login antigo, lotação principal, arquivamento, escala nominal e aprovação de lotação pelo RH foram aplicadas até 30/09/2026, junto com as Edge Functions correspondentes. O login `admin` foi testado na interface local. O site publicado no Netlify ainda requer uma nova publicação e homologação. Em outros ambientes, aplique as migrations na ordem e publique as funções antes de usar este frontend.
+O piloto atual usa Vercel e Supabase compartilhado atualizado até os ensaios de 09/10/2026, descritos nos relatórios dos blocos. Netlify e aprovações sequenciais pertencem ao histórico de compatibilidade. Em outros ambientes, aplique a cadeia completa de migrations e publique as funções correspondentes antes de usar este frontend. Não conecte a versão antiga ao banco atualizado.
 
 ## Executar a interface localmente
 

@@ -1,6 +1,6 @@
 # Bloco 08 — revisão técnica e aceite institucional
 
-Data: 09/10/2026. **Em andamento; não há aceite institucional.** Orientações de Computer Use e verificação de fluxo usadas para observar o navegador e separar leitura de gravação. Não houve alteração de banco, pedidos, contas, saldo, decisões ou senha nesta revisão; login/logout administrativo e navegação foram realizados.
+Data: 09/10/2026. **Em andamento; não há aceite institucional.** A primeira rodada abaixo foi somente leitura, sem alterar banco, pedidos, contas, saldo, decisões ou senha. A segunda rodada criou exclusivamente dados fictícios novos para ensaio, conforme seção 04. A conta de recuperação existente foi preservada.
 
 ## 01. Evidências desta revisão
 
@@ -37,4 +37,16 @@ Imagens em `docs/imagens/`: simulação pública, feriados e comprovante fictíc
 
 ## 03. O que impede encerrar o bloco
 
-Normas/interpretações e vigências aprovadas pelo RH/Jurídico; validação nominal dos quatro perfis e organização real; roteiro completo com dados representativos; equipamentos/navegadores institucionais e impressão; material final de slides; política de retenção e aceite nominal. Foram solicitados responsáveis e equipamentos ao usuário. Nenhuma lei, prazo legal, assinatura de aceite ou aprovação foi inventada. Não consolidar regra normativa ainda não aprovada.
+Normas/interpretações e vigências aprovadas pelo RH/Jurídico; validação nominal dos quatro perfis e organização real; revisão integral de formulários e acessibilidade; equipamentos/navegadores institucionais e impressão; política de retenção e aceite nominal. Nenhuma lei, prazo legal, assinatura de aceite ou aprovação foi inventada. Não consolidar regra normativa ainda não aprovada.
+
+## 04. Segunda rodada — ciclo moderno e treinamento
+
+Conta nova fictícia TESTE08, sem envio de e-mail, com quatro perfis, duas matrículas e dois CNES. Pelo navegador hospedado foram realizados login, seleção de contexto, distribuição diária, envio, aprovação e inclusão explícita de cada unidade no calendário. Protocolo `SGF-2026-83415558C73E`: 32h, dias 05–08/04/2027, retorno 09/04. Alcides Braz recebeu 05/07; Alterosas recebeu 06/08. A aprovação de uma unidade não decidiu pela outra. API confirmou estado programada, débito único de 32h na matrícula M1 (80h → 48h) e 80h intactas na M2.
+
+Servidor, RH, Diretor e Administrador conferidos em seus contextos; Diretor sem editores de cadastros/acessos. Formulário administrativo em 768×1024 e Acessos em 360×800 sem transbordamento global; campos observados rotulados, sem mojibake identificado. Essas verificações não abrangem todos os formulários. Zoom 200%, leitor de tela, impressão e dispositivos institucionais **não foram executados**.
+
+Correções: limpeza do aviso ao trocar contexto e cancelamento do temporizador anterior; matrícula explícita nos candidatos da escala mínima; datas mensais coerentes com o mês escolhido; contorno de foco de teclado em inputs. JS/CSS versionados `20261009-block8-2`. Suíte ampliada para 288 testes.
+
+Capturas reais fictícias em `docs/imagens/`: perfis, distribuição, protocolo moderno, aprovação RH, calendário moderno e histórico do Diretor (`*-bloco08.jpg`). Nenhuma lista de usuários reais, senha ou token incluída no treinamento. Histórico compartilhado do mesmo protocolo não foi alterado nesta rodada.
+
+Entrega: 14 slides editáveis, com notas do instrutor, em [PowerPoint](apresentacao/SGF_Treinamento_20261009_final.pptx) e [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi). PPTX renderizado e inspecionado página a página; importação do Canva e textos finais conferidos. A apresentação explica o piloto, sem alegar aceite jurídico ou institucional.

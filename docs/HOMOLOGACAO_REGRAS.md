@@ -21,7 +21,7 @@ Roteiro para validação formal pelo RH. Registrar em cada caso a matrícula de 
 - O calendário visual deve coincidir com as datas persistidas em `request_periods`.
 - O retorno deve ocorrer no primeiro dia útil aplicável.
 - O day-off deve ser apenas contabilizado e exibido, nunca solicitado.
-- Uma folga de banco de horas só pode ser concluída com saldo validado suficiente.
+- A inclusão de folga no calendário exige saldo validado suficiente por matrícula; o débito ocorre uma única vez, mesmo quando duas unidades confirmam o pedido.
 - Divergências devem ser registradas antes da liberação em produção.
 
 ## Evidência

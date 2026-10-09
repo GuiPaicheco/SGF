@@ -298,6 +298,10 @@ textarea {
   border-color: var(--green-700);
   box-shadow: 0 0 0 3px rgba(35, 112, 87, 0.13);
 }
+.control:focus-visible {
+  outline: 3px solid var(--green-700);
+  outline-offset: 2px;
+}
 .control.valid {
   border-color: var(--ok);
   background: var(--ok-bg);

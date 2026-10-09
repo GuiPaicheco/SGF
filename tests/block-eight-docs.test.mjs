@@ -1,9 +1,32 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import test from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 const root = new URL('../', import.meta.url);
 const read = name => readFileSync(new URL(name, root), 'utf8');
+
+test('avisos substituem temporizador anterior e limpam a região acessível ao terminar', () => {
+  const app = read('assets/app.js');
+  const source = app.match(/  let toastTimer;[\s\S]*?  const showToast =[^\n]+/)[0];
+  const timers = new Map(); let next = 0;
+  const toast = { textContent: '', classList: { add() {}, remove() {} } };
+  const api = runInNewContext(`${source}\n({showToast,clearToast})`, {
+    toast, friendlyMessage: message => message,
+    setTimeout: fn => { const id = ++next; timers.set(id, fn); return id; },
+    clearTimeout: id => timers.delete(id),
+  });
+  api.showToast('Primeira unidade'); api.showToast('Segunda unidade');
+  assert.equal(timers.size, 1);
+  assert.equal(toast.textContent, 'Segunda unidade');
+  timers.get(next)(); assert.equal(toast.textContent, '');
+  api.showToast('Decisão anterior'); api.clearToast();
+  assert.equal(toast.textContent, ''); assert.equal(timers.size, 0);
+  assert.match(app, /state\.activeContext = context;\s+clearToast\(\)/);
+  assert.match(app.split('minimumCandidates.map(employee =>')[1].split('</form>')[0], /Matrícula \$\{esc\(employee\.matricula/);
+  assert.match(read('assets/app.css'), /\.control:focus-visible\s*\{\s*outline: 3px solid var\(--green-700\)/);
+  assert.match(app, /filter\.rangeMode === 'range' \? filter\.rangeStart \|\| monthStart : monthStart/);
+});
 
 test('arquivos publicados decodificam UTF-8 estrito e não contêm mojibake', () => {
   for (const name of ['index.html', ...readdirSync(new URL('assets/', root)).filter(n => /\.(css|js)$/.test(n)).map(n => `assets/${n}`)]) {
