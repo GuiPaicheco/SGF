@@ -15,6 +15,11 @@ test('eventos coletivos preservam nomes sem inventar um único servidor',()=>{
   const dto=auditDTO({affected_names:['Ana','Bruna'],affected_name:null},false);
   assert.equal(dto.affected_name,null);assert.deepEqual(dto.affected_names,['Ana','Bruna']);
 });
+test('encerramento de conflito exibe motivo do encerramento sem alterar o motivo original',()=>{
+ const row={action:'manual_conflict_resolve',reason:'Motivo original',new_value:{closure_reason:'Motivo do encerramento'}};
+ assert.equal(auditDTO(row,false).reason,'Motivo do encerramento');
+ assert.equal(row.reason,'Motivo original');
+});
 test('RH recebe diferenças operacionais, sem campos pessoais nem identidades de outros vínculos',()=>{
   const dto=auditDTO({previous_value:{weekly_hours:40,cpf:'CPF',email:'EMAIL',bond_unit_ids:['OUTRO']},new_value:{weekly_hours:32}},false);
   assert.equal(dto.before.weekly_hours,40);assert.equal(dto.after.weekly_hours,32);

@@ -26,7 +26,7 @@ export function auditDTO(row: any, global: boolean) {
     bond: row.bond_registration_at_event || row.bond?.registration || null, cnes: row.cnes?.name || null, location: row.location?.name || null,
     affected_name: row.affected_name || null, affected_source: row.affected_source || null,
     affected_names: Array.isArray(row.affected_names) ? row.affected_names.map(sanitizeAudit) : [],
-    reason: sanitizeAudit(row.reason) || null, before, after});
+    reason: sanitizeAudit(['manual_conflict_resolve','manual_conflict_cancel'].includes(row.action) ? row.new_value?.closure_reason || row.reason : row.reason) || null, before, after});
 }
 
 export function auditSearchPattern(value: unknown) {
