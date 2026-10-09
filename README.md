@@ -95,7 +95,7 @@ O frontend usa `@supabase/supabase-js` via CDN, fixado na versão `2.117.2`; as 
 - O navegador possui somente a chave publicável. As funções administrativas validam a sessão e o papel; o banco aplica RLS e escopos por lotação.
 - CPF, nascimento, matrícula, e-mail e histórico funcional são dados pessoais. Demonstrações devem usar dados fictícios; permissões, retenção, backup e tratamento institucional precisam de aceite do TI/RH.
 - O envio de solicitações exige sessão autenticada, perfil de servidor liberado e vínculo entre conta, CPF e matrícula. A área pública permite simular, entrar ou solicitar acesso, sem enviar pedidos.
-- As datas são simuladas no navegador. O endpoint confere formato, ordem, duração e saldo declarado em pedidos de banco de horas, mas a **validação normativa do direito e do cálculo ainda precisa ser homologada e consolidada no servidor** antes da produção.
+- As datas são simuladas no navegador. Endpoint e banco conferem consistência dos períodos; nos pedidos contextuais o banco também confere admissão, nascimento e início posterior ao aquisitivo. A **validação normativa integral do direito e do cálculo ainda precisa ser homologada e consolidada no servidor** antes da produção. Mensagens e referências pendentes estão em [CATALOGO_MENSAGENS.md](docs/CATALOGO_MENSAGENS.md).
 - CORS das Edge Functions permanece aberto até a definição dos domínios oficiais e previews. Restringi-lo integra a preparação para produção.
 
 ## Documentos e licença

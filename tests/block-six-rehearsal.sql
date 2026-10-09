@@ -1,0 +1,60 @@
+-- Fundação sintética do bloco 03; executar somente com BEGIN/ROLLBACK.
+do $$
+declare actor uuid:='f3000000-0000-0000-0000-000000000001'; bond uuid:='f3000000-0000-0000-0000-000000000301';
+ p jsonb:='{"type":"regulamentar","admissionDate":"2020-01-01","acquisitionEnd":"2026-10-01","periods":[{"start_date":"2026-11-03","end_date":"2026-11-04","return_date":"2026-11-05","days":2,"counting_mode":"uteis"}]}';
+ reason jsonb; review uuid; balance integer;
+begin
+ perform private.validate_submission_dates(p,bond);
+ insert into block_three_checks values('datas coerentes passam antes da gravação',true);
+ begin perform private.validate_submission_dates(p||'{"acquisitionEnd":"2026-11-03"}',bond);raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'SUBMISSION_ACQUISITION_RULE' then raise;end if;insert into block_three_checks values('início no aquisitivo é impedimento não recusa',true);end;
+ begin perform private.validate_submission_dates(p||'{"admissionDate":"1980-01-01"}',bond);raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'SUBMISSION_ADMISSION_RULE' then raise;end if;insert into block_three_checks values('admissão anterior ao nascimento bloqueada',true);end;
+ begin perform private.validate_submission_dates(p||'{"periods":[{"start_date":"2026-02-31","end_date":"2026-03-02","return_date":"2026-03-03","days":2}]}',bond);raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'SUBMISSION_PERIOD_INVALID' then raise;end if;insert into block_three_checks values('data impossível bloqueada no banco',true);end;
+ reason:=public.manage_rejection_reason(actor,'teste_bloco06','TESTE BLOCO06 — motivo','other',true,999,0,'Ensaio catálogo');
+ insert into block_three_checks values('criação de motivo guarda versão e ator',(reason->>'version')::integer=1 and reason->>'updated_by'=actor::text);
+ reason:=public.manage_rejection_reason(actor,'teste_bloco06','TESTE BLOCO06 — revisado','other',true,998,1,'Revisão justificada');
+ insert into block_three_checks values('edição incrementa versão',(reason->>'version')::integer=2);
+ begin perform public.manage_rejection_reason(actor,'teste_bloco06','Nome antigo','other',true,999,1,'Versão obsoleta');raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'REASON_VERSION_CONFLICT' then raise;end if;insert into block_three_checks values('versão obsoleta não sobrescreve catálogo',true);end;
+ begin perform public.manage_rejection_reason(actor,'teste_bloco06','Outro modo','bank',true,999,2,'Mudança indevida');raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'REASON_MODE_IMMUTABLE' then raise;end if;insert into block_three_checks values('modo histórico não é alterável',true);end;
+ perform set_config('request.headers','{"x-sgf-role":"rh","x-sgf-cnes":"f3000000-0000-0000-0000-000000000901","x-sgf-lotacao":"f3000000-0000-0000-0000-000000000101"}',true);
+ begin perform public.manage_rejection_reason(actor,'teste_bloco06','Tentativa RH','other',true,999,2,'Não permitido');raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'NOT_ALLOWED' then raise;end if;insert into block_three_checks values('RH não administra motivos globais',true);end;
+ perform set_config('request.headers','{"x-sgf-role":"administrador","x-sgf-actor":"f3000000-0000-0000-0000-000000000001"}',true);
+ select id into review from public.request_unit_reviews where request_id='f3000000-0000-0000-0000-000000000501' and cnes_unit_id='f3000000-0000-0000-0000-000000000901';
+ select validated_minutes into balance from public.bond_time_bank_accounts where bond_id=bond;
+ perform public.manage_unit_request_review(actor,review,'reject','Saldo real conferido no ensaio',1,'{"code":"insufficient_time_bank","available_hours":4,"required_hours":8}');
+ insert into block_three_checks select 'recusa banco conserva horas e rótulo histórico',rejection_data->>'available_hours'='4' and rejection_label='Banco de Horas Insuficiente' from public.request_unit_reviews where id=review;
+ insert into block_three_checks select 'recusa não corrige saldo validado',validated_minutes=balance from public.bond_time_bank_accounts where bond_id=bond;
+ insert into public.vacation_requests(id,servidor_id,type,status,start_date,end_date,return_date,context_bond_id)
+ values('f6000000-0000-0000-0000-000000000501','f3000000-0000-0000-0000-000000000201','regulamentar','enviada','2027-01-04','2027-01-05','2027-01-06',bond);
+ insert into public.request_unit_reviews(request_id,cnes_unit_id) values('f6000000-0000-0000-0000-000000000501','f3000000-0000-0000-0000-000000000901') returning id into review;
+ perform public.manage_unit_request_review(actor,review,'reject','Justificativa administrativa do ensaio',1,'{"code":"teste_bloco06"}');
+ perform public.manage_rejection_reason(actor,'teste_bloco06','TESTE BLOCO06 — novo nome','other',false,998,2,'Desativação do teste');
+ insert into block_three_checks select 'recusa Outros mantém rótulo anterior à edição',rejection_label='TESTE BLOCO06 — revisado' and notes like '%Justificativa administrativa%' from public.request_unit_reviews where id=review;
+ begin perform public.manage_rejection_reason(actor,'teste_bloco06',' ','other',true,998,3,'Campo vazio');raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'REASON_CATALOG_INVALID' then raise;end if;insert into block_three_checks values('catálogo rejeita nome vazio',true);end;
+ insert into public.servidores(id,matricula,full_name,birth_date,employment_type,active) values('f6000000-0000-0000-0000-000000000202','BLOCK6-M2','TESTE Bloco 06 colega','1990-01-01','estatutario',true);
+ insert into public.employment_bonds(id,servidor_id,registration,employment_type,valid_from) values('f6000000-0000-0000-0000-000000000302','f6000000-0000-0000-0000-000000000202','BLOCK6-M2','estatutario','2020-01-01');
+ insert into public.employment_bond_units(id,bond_id,cnes_unit_id,valid_from) values('f6000000-0000-0000-0000-000000000402','f6000000-0000-0000-0000-000000000302','f3000000-0000-0000-0000-000000000901','2020-01-01');
+ insert into public.vacation_requests(id,servidor_id,type,status,start_date,end_date,return_date,context_bond_id) values('f6000000-0000-0000-0000-000000000502','f3000000-0000-0000-0000-000000000201','regulamentar','enviada','2027-02-01','2027-02-02','2027-02-03',bond);
+ insert into public.request_unit_reviews(request_id,cnes_unit_id) values('f6000000-0000-0000-0000-000000000502','f3000000-0000-0000-0000-000000000901') returning id into review;
+ begin perform public.manage_unit_request_review(actor,review,'reject','Teste motivo desativado',1,'{"code":"teste_bloco06"}');raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'REJECTION_REASON_INACTIVE' then raise;end if;insert into block_three_checks values('motivo desativado não permite nova recusa',true);end;
+ insert into block_three_checks select 'recusa inválida não altera revisão',status='pendente' and version=1 from public.request_unit_reviews where id=review;
+ begin perform private.resolve_rejection_conflict_member(review,'f3000000-0000-0000-0000-000000000402','2027-02-01','2027-02-02');raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'REJECTION_CONFLICT_MEMBER_INVALID' then raise;end if;insert into block_three_checks values('conflito não aceita própria pessoa nem outra unidade',true);end;
+ perform public.manage_unit_request_review(actor,review,'reject','Sobreposição justificada com colega do mesmo CNES',1,'{"code":"employee_conflict","bond_unit_id":"f6000000-0000-0000-0000-000000000402","employee_name":"Nome adulterado","start_date":"2027-02-01","end_date":"2027-02-02"}');
+ insert into block_three_checks select 'recusa conflito conserva atuação e nome canônico',rejection_data->>'employee_name'='TESTE Bloco 06 colega' and rejection_data->>'bond_unit_id'='f6000000-0000-0000-0000-000000000402' from public.request_unit_reviews where id=review;
+ -- Alteração apenas na fixture transacional; todos os motivos reais voltam com ROLLBACK.
+ update public.request_rejection_reasons set active=false where code<>'other';
+ begin perform public.manage_rejection_reason(actor,'other','Outros','other',false,30,(select version from public.request_rejection_reasons where code='other'),'Último ativo');raise exception 'EXPECTED';
+ exception when others then if sqlerrm<>'REASON_LAST_ACTIVE' then raise;end if;insert into block_three_checks values('último motivo ativo não pode ser desativado',true);end;
+ insert into block_three_checks select 'catálogo e recusa têm trilha com autor',count(*)>=3 and bool_and(actor_id=actor) from public.audit_events where action='rejection_reason_save' and new_value->>'code'='teste_bloco06';
+ insert into block_three_checks values('RPC administrativo não é endpoint para navegador',not has_function_privilege('authenticated','public.manage_rejection_reason(uuid,text,text,text,boolean,integer,integer,text)','EXECUTE'));
+end $$;
+select * from block_three_checks order by name;
+do $$ begin if (select count(*) from block_three_checks)<>20 or exists(select 1 from block_three_checks where passed is distinct from true) then raise exception 'BLOCK_SIX_ASSERTIONS_FAILED';end if;end $$;

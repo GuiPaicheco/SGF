@@ -8,6 +8,7 @@ import { loadAuditHistory } from '../_shared/audit-history.ts';
 import { employeeInAccessContext } from '../_shared/employee-scope.ts';
 import { actionAllowed } from '../_shared/action-policy.ts';
 import { validateRejection, validateReasonCatalog } from '../_shared/rejection-reasons.ts';
+import { userGuidance } from '../_shared/user-guidance.ts';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role, x-sgf-bond, x-sgf-cnes, x-sgf-lotacao', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 const asciiJson = (body: unknown) => JSON.stringify(body).replace(/[\u007f-\uffff]/g, char => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`);
@@ -253,6 +254,9 @@ Deno.serve(async request => {
     console.error('manage-operations', error);
     if (error instanceof Error && error.message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o perfil e o local de atuacao.' }, 403);
     const message = error instanceof Error ? error.message : String((error as {message?:string})?.message || 'Falha operacional.');
+    const guidance=userGuidance(message);
+    if(guidance) return json(guidance,guidance.status);
+    if (/^(NOT_ALLOWED|STAFF_REQUIRED|ADMIN_REQUIRED|ACTOR_NOT_ALLOWED)$/.test(message)) return json({error:'Seu perfil atual não permite esta ação. Confira o perfil e a unidade selecionados.'},403);
     if (message === 'CALENDAR_REVIEW_REQUIRED') return json({error:'O calendário deste pedido mudou. Resolva os dias sem CNES e as pendências de revisão antes de aprovar ou adicionar ao calendário.'},409);
     const known: Record<string,string> = { TRANSITION_NOT_ALLOWED: 'Esta transicao nao e permitida.', NOTES_REQUIRED: 'Informe uma justificativa.', REJECTION_REASON_REQUIRED: 'Informe a justificativa da recusa.', APPROVAL_REQUIRED: 'A solicitacao precisa ser aprovada antes de entrar no calendario.', REVIEW_TRANSITION_INVALID: 'Esta acao nao e permitida na situacao atual.', REVIEW_VERSION_CONFLICT: 'A solicitacao foi alterada por outro gestor. Atualize a tela antes de continuar.', INSUFFICIENT_VALIDATED_BALANCE: 'Saldo validado insuficiente.', REQUEST_OUT_OF_SCOPE: 'Solicitacao fora do seu escopo.', PERIODS_INVALID: 'Periodos informados sao invalidos.' };
     if (message === 'REVISION_VERSION_CONFLICT') return json({error:'O pedido, as decisões ou o calendário mudaram. Simule novamente a reprogramação antes de confirmar.'},409);
@@ -295,6 +299,7 @@ Deno.serve(async request => {
     if (/BOND_DATA_INVALID|POLE_OUT_OF_BOND|WEEKLY_HOURS_INVALID/.test(message)) return json({error:'Confira admissão, tipo, jornada e polo pertencente à matrícula. Informe uma justificativa.'},400);
     if (/RIGHT_DUPLICATED|RIGHT_IN_USE/.test(message)) return json({error:'O período já está cadastrado ou associado a um pedido. Preserve o histórico e confira o vínculo.'},409);
     if (message.includes('RIGHT_DATA_INVALID')) return json({error:'Confira período aquisitivo, dias, referência oficial e justificativa.'},400);
-    return json({ error: known[message] || message }, status);
+    if(known[message]) return json({error:known[message]},status);
+    return json(userGuidance('TECHNICAL_ERROR'),500);
   }
 });

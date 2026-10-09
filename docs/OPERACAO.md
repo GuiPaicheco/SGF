@@ -259,7 +259,7 @@ Feriados e pontos facultativos ativos são carregados da tabela `calendar_events
 
 ## Alterações no calendário
 
-Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastamento compatível, o sistema preserva início e quantidade de dias, recalcula fim/retorno e avisa o servidor e os responsáveis envolvidos. Dias novos sem responsável inequívoco e dados históricos sem contagem confiável exigem revisão explícita. Não inferir responsáveis nem ignorar avisos de revisão. A homologação integrada dessa rotina permanece no bloco 04.
+Ao cadastrar ou alterar um feriado/ponto facultativo ativo dentro de um afastamento compatível, o sistema preserva início e quantidade de dias, recalcula fim/retorno e avisa o servidor e os responsáveis envolvidos. Dias novos sem responsável inequívoco e dados históricos sem contagem confiável exigem revisão explícita. Não inferir responsáveis nem ignorar avisos de revisão. Ensaios técnicos em VALIDACAO_BLOCO_04.md; aceite institucional permanece no bloco 08.
 
 ## 6. Revisões periódicas
 
@@ -275,6 +275,8 @@ O arquivo `supabase/seed-demo.sql` cria uma massa fictícia e idempotente para a
 
 Antes de apresentar, confira se os filtros estão limitados aos registros fictícios e se nenhuma informação pessoal aparece nas capturas de tela. A carga pode ser reaplicada para restaurar o cenário; ela não remove dados institucionais existentes.
 # Ajustes de planejamento publicados em 07/10/2026
+
+Recusas e orientação (09/10): antes de enviar, confira os impedimentos de dados e aquisição. Na análise, escolha motivo ativo e justifique; banco insuficiente exige saldo real/horas necessárias, conflito exige colega/atuação vigente e datas. Renomear o motivo não muda o rótulo histórico. Catálogo global exclusivo do Administrador, com versão e justificativa. Procedimentos, canais RH/TI e referências pendentes em [CATALOGO_MENSAGENS.md](CATALOGO_MENSAGENS.md); evidências em [VALIDACAO_BLOCO_06.md](VALIDACAO_BLOCO_06.md).
 
 Notificações/auditoria (09/10): consultar avisos no perfil e CNES ativos; usar as páginas para avisos anteriores. Histórico administrativo permite nome do autor/afetado, matrícula, evento e período; RH/Diretor recebem somente resumos do próprio contexto. Procedimento de correção, desativação, preservação e condições de anonimização em [AUDITORIA_RETENCAO.md](AUDITORIA_RETENCAO.md); evidências em [VALIDACAO_BLOCO_05.md](VALIDACAO_BLOCO_05.md). Não apagar trilhas ou redefinir senhas de contas existentes para ensaios.
 

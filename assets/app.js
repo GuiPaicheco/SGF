@@ -268,6 +268,7 @@
     const prize = r.type === 'premio' ? `<div class="field"><label for="prizeDays">Quantidade de dias</label><select class="control" id="prizeDays"><option value="30">30 dias</option><option value="60">60 dias</option><option value="90">90 dias</option></select></div>` : '';
 app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="rules-form" class="form-grid">${regularFields}${bankFields}${prize}<div class="field field-full"><div class="actions"><button type="button" class="button button-secondary" data-go="identity">Voltar</button><button class="button button-primary" type="submit">Definir datas</button></div></div></form>`, 42);
     const rights=(state.requestResources?.rights || []).filter(item=>item.type===r.type);
+    document.querySelector('#rules-form').insertAdjacentHTML('afterbegin','<div class="field field-full notice"><strong>Conferência antes do envio</strong><p>Dados ou datas incoerentes impedem o envio; isso não registra uma recusa do RH. Depois do envio, a recusa administrativa exige motivo e justificativa. Saldo declarado não é saldo autorizado.</p><p>As referências legais e suas vigências ainda dependem de aprovação institucional no piloto. Consulte a norma vigente indicada pelo RH; se continuar com dúvida, procure o RH da unidade. Problemas do sistema: Administradores ou TI da Prefeitura de Betim.</p></div>');
     if(rights.length) document.querySelector('#rules-form').insertAdjacentHTML('afterbegin',`<div class="field field-full"><label for="rightId">Período aquisitivo conferido pelo RH</label><select class="control" id="rightId"><option value="">Informar período para conferência do RH</option>${rights.map(item=>`<option value="${item.id}" ${r.rightId===item.id?'selected':''}>${formatDate(item.acquisition_start)} a ${formatDate(item.acquisition_end)} · ${item.available_days} dia(s)</option>`).join('')}</select></div>`);
   }
   function ruleSummary() {
@@ -302,12 +303,15 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   function calculatePeriods(chosen) {
     if (!state.calendarLoaded) throw new Error('O calendário oficial está indisponível. Atualize a página e tente novamente.');
     const r = state.request, rule = ruleSummary(), unit = rule.unit;
-    const splitAllowed = r.type === 'regulamentar' && r.employmentType === 'efetivo' && r.unjustifiedAbsences === 'no' && r.split !== 'none' && !rule.extra;
+    if(r.admissionDate < r.birthDate) throw new Error('A admissão não pode ser anterior ao nascimento. Confira os dados com o RH.');
+    const splitAllowed = r.type === 'regulamentar' && r.employmentType === 'efetivo' && r.unjustifiedAbsences === 'no' && rule.unit === 'uteis' && r.split !== 'none' && !rule.extra;
     let start;
     if (r.mode === 'start') start = dateFrom(chosen); else { const ret = dateFrom(chosen); start = unit === 'uteis' ? subtractBusinessForStart(ret, splitAllowed ? Number(r.split.split('-')[0]) : rule.days) : addDays(ret, -(rule.days)); }
     const firstDays = splitAllowed ? Number(r.split.split('-')[0]) : rule.days;
+    if(iso(start) < r.admissionDate) throw new Error('O início solicitado não pode ser anterior à admissão. Confira os dados com o RH.');
+    if(r.type === 'regulamentar' && (!r.acquisitionEnd || iso(start) <= r.acquisitionEnd)) throw new Error('O início das férias precisa ser posterior ao fim do período aquisitivo informado. Este impedimento não é recusa administrativa. Consulte a norma vigente indicada pelo RH e procure o RH da sua unidade.');
     const periods = [makePeriod(start, firstDays, unit, 1)];
-    if (splitAllowed) { const secondStart = dateFrom(r.secondStartDate); if (secondStart <= dateFrom(periods[0].end_date)) throw new Error('O segundo período deve começar após o término do primeiro.'); periods.push(makePeriod(secondStart, Number(r.split.split('-')[1]), unit, 2)); }
+    if (splitAllowed) { const secondStart = dateFrom(r.secondStartDate); if (secondStart < dateFrom(periods[0].return_date)) throw new Error('O segundo período não pode começar antes do retorno do primeiro. Confira as datas com o RH.'); periods.push(makePeriod(secondStart, Number(r.split.split('-')[1]), unit, 2)); }
     return periods;
   }
   function dayOffsInside(periods, birthDate = state.request.birthDate) {

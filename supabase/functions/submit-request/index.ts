@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 import { requestedBankHours, validSubmissionPeriods } from './validate.ts';
 import { contextHeaders, validateAccessContext } from '../_shared/access-context.ts';
+import { userGuidance } from '../_shared/user-guidance.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -54,7 +55,7 @@ Deno.serve(async (request) => {
     }
     if (!validSubmissionPeriods(periods, type, payload.dailyHours, payload.availableHours)
         || periods.some((period: any) => !['uteis','corridos'].includes(period.counting_mode))) {
-      return json({ error: 'Per\u00edodo solicitado inv\u00e1lido.' }, 400);
+      return json(userGuidance('SUBMISSION_PERIOD_INVALID'), 400);
     }
 
     const { data: byCpf } = await db.from('servidores').select('id,profile_id,matricula').eq('cpf', cpf).maybeSingle();
@@ -98,9 +99,11 @@ Deno.serve(async (request) => {
     if (error instanceof Error && error.message.includes('RESPONSIBILITY_DAYS_INCOMPLETE')) return json({ error: 'Defina o CNES responsável por todos os dias úteis do período.' }, 400);
     if (error instanceof Error && error.message.includes('RESPONSIBILITY_UNIT_INVALID')) return json({ error: 'Um dos CNES informados não pertence ao vínculo selecionado.' }, 403);
     const code = error instanceof Error ? error.message : String((error as any)?.message || '');
+    const guidance=userGuidance(code);
+    if(guidance) return json(guidance,guidance.status);
     if (code.includes('RESPONSIBILITY_DAY_DUPLICATED')) return json({ error: 'Cada dia deve possuir apenas um CNES responsável. Revise a distribuição.' }, 400);
     if (code.includes('RESPONSIBILITY_UNIT_INELIGIBLE')) return json({ error: 'Uma das atuações não está ativa, autorizada ou vigente para o dia escolhido. Confira o cadastro com o RH.' }, 400);
     if (code.includes('SUBMISSION_ACTOR_INVALID')) return json({ error: 'A sessão não corresponde ao titular do vínculo. Entre novamente e selecione o vínculo correto.' }, 403);
-    return json({ error: 'N\u00e3o foi poss\u00edvel registrar a solicita\u00e7\u00e3o. Tente novamente ou procure o RH.' }, 500);
+    return json(userGuidance('TECHNICAL_ERROR'), 500);
   }
 });
