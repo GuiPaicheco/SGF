@@ -12,7 +12,7 @@ Inventário do piloto em 09/10/2026: sete solicitações, seis contextuais e uma
 2. `request_approvals` permanece como histórico antigo; decisões novas usam `request_unit_reviews` e responsabilidade diária.
 3. `minimum_scale_days` e `minimum_scale_assignments` estão vazias no piloto, mas não serão removidas apenas por isso: migrations anteriores e compatibilidade ainda as referenciam.
 4. Notificações pessoais sem CNES permanecem limitadas ao destinatário; eventos globais/sem escopo não devem ser convertidos para RH com base no cadastro atual.
-5. O calendário tem uma leitura legada por pessoa/lotação. Se houver múltiplas atuações compatíveis, o pedido não é atribuído automaticamente nem duplicado: retorna aviso de vínculo ambíguo para conferência documental pelo RH. Testes cobrem ambiguidade, cancelamento e ausência de aviso para outra unidade. Função `manage-operations` publicada na versão 17; verificação da interface ainda em andamento.
+5. O calendário tem uma leitura legada por pessoa/lotação. Se houver múltiplas atuações compatíveis, o pedido não é atribuído automaticamente nem duplicado: retorna aviso de vínculo ambíguo para conferência documental pelo RH. Testes cobrem ambiguidade, cancelamento e ausência de aviso para outra unidade. Função `manage-operations` publicada na versão 17; calendário conferido no navegador com `app.js`/`scale-range.js` versão `20261009-block7-1`, sem erro de console. O aviso de ambiguidade foi validado automaticamente, não com dados persistidos no piloto.
 6. Remoção futura exige inventário de dependências, associação comprovada, ensaio em cópia, comparação de resultados e versão de compatibilidade. Não executar `DROP`, preencher CNES automaticamente ou reparar a tabela de migrations apenas para igualar quantidades de versões.
 
 ## 03. Base demonstrativa
@@ -23,7 +23,11 @@ O ensaio no Supabase compartilhado passou e foi revertido integralmente. A base 
 
 ## 04. Integração e restauração
 
-O workflow aplica toda a cadeia em banco vazio sem seed, executa ensaios SQL transacionais e prepara restauração de dump sintético em um segundo banco. `scripts/verify-database-rebuild.mjs` é restrito ao container Docker de CI; não aceita URL externa e recusa destino existente. Compara conteúdo das tabelas, políticas RLS e quantidade de funções.
+O workflow aplica toda a cadeia em banco vazio sem seed, executa ensaios SQL transacionais e prepara restauração de dump sintético em um segundo banco. `scripts/verify-database-rebuild.mjs` é restrito ao container Docker de CI; não aceita URL externa e recusa destino existente. Compara conteúdo das tabelas, políticas RLS, definições/autoria/permissões de funções, permissões e flags RLS de tabelas, constraints e triggers.
+
+282 testes locais aprovados; sintaxe JavaScript, build estático e `git diff --check` verificados. Ensaio por API repetido: criação de motivo técnico, duas gravações simultâneas com resultados 200/409, imutabilidade, campos obrigatórios, auditoria e desativação final; catálogo original preservado. Nenhuma senha alterada. Consulta de segurança: zero ERROR, 16 INFO de tabelas internas sem política de acesso direto, uma WARN preexistente de proteção contra senhas vazadas, mantida no bloco 09 ([orientação do Supabase](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)).
+
+Reconstrução expôs dependência do guard legado no proprietário `postgres`. Migration `20261009172300_legacy_guard_service_identity.sql` aplicada no piloto: reconhece JWT autenticado de serviço, sem confiar em cabeçalho de ator para bypass e preservando regras de identidade/transição. Fixtures de CI declaram o papel técnico; permissões de montagem de contas não foram ampliadas no piloto.
 
 A reconstrução vazia passou no run 37939410740. Esse primeiro run falhou na preparação de um ensaio por diferença de papel SQL; a restauração foi pulada, portanto **não está validada por esse run**. A correção está sendo verificada novamente. Não declarar backup restaurável antes da conclusão bem-sucedida.
 

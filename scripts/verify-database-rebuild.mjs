@@ -30,7 +30,8 @@ rollback;`;
 const before=sql('postgres',fingerprint);
 command(['exec',container,'pg_dump','-U','supabase_admin','-d','postgres','--format=custom','--file=/tmp/sgf-block7.dump']);
 sql('postgres',`create database ${target} template template0;`);
-command(['exec',container,'pg_restore','-U','supabase_admin','--exit-on-error','--single-transaction','--dbname='+target,'/tmp/sgf-block7.dump']);
+// --clean trata o schema public padrão do banco recém-criado; destino foi comprovado inexistente.
+command(['exec',container,'pg_restore','-U','supabase_admin','--clean','--if-exists','--exit-on-error','--single-transaction','--dbname='+target,'/tmp/sgf-block7.dump']);
 assert.equal(sql(target,fingerprint),before,'Dados, RLS ou funções divergem após restauração.');
 console.log('PASS: cadeia integral aplicada em banco vazio; demonstração restaurada em banco novo, com dados/RLS/funções iguais.');
 // O runner e seu container são descartáveis. Não exportar dump/credenciais como artifacts.
