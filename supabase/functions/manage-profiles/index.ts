@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
-import { validateAccessContext } from '../_shared/access-context.ts';
+import { contextHeaders, validateAccessContext } from '../_shared/access-context.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -27,7 +27,7 @@ Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
   try {
-    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+    let admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
@@ -36,7 +36,11 @@ Deno.serve(async request => {
     if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
     const { data: actor } = await admin.from('profiles').select('roles,must_change_password,disabled_at').eq('id', identity.user.id).single();
     if (!actor?.roles?.includes('administrador') || request.headers.get('x-sgf-role') !== 'administrador' || actor.must_change_password || actor.disabled_at) return json({ error: 'Acesso exclusivo do administrador.' }, 403);
-    await validateAccessContext(admin, request, identity.user.id, actor.roles || []);
+    const context = await validateAccessContext(admin, request, identity.user.id, actor.roles || []);
+    admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { ...contextHeaders(context), 'x-sgf-actor': identity.user.id } },
+    });
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
 
@@ -65,7 +69,6 @@ Deno.serve(async request => {
       if (!location) return json({ error: 'Selecione uma lotação ativa.' }, 400);
       const { error } = await admin.from('profiles').update({ primary_lotacao_id: location.id }).eq('id', identity.user.id);
       if (error) throw error;
-      await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'own_location_set', entity_type: 'profile', entity_id: identity.user.id, new_value: { lotacao_id: location.id } });
       return json({ ok: true });
     }
 
@@ -86,11 +89,9 @@ Deno.serve(async request => {
       if (authError || !created.user) { await admin.from('access_requests').delete().eq('id', requestId); return json({ error: authError?.message || 'Não foi possível criar a conta. Confira a política de senhas do Supabase.' }, 400); }
       const accountId = created.user.id;
       try {
-        const { error: approvalError } = await admin.rpc('approve_multi_bond_access', { actor_id: identity.user.id, target_request_id: requestId, account_id: accountId, target_roles: roles, target_scope_ids: scopeIds });
+        const { error: approvalError } = await admin.rpc('approve_admin_profile', { actor_id: identity.user.id, target_request_id: requestId, account_id: accountId, target_roles: roles, target_scope_ids: scopeIds });
         if (approvalError) throw approvalError;
-        const { error: passwordFlagError } = await admin.from('profiles').update({ must_change_password: true }).eq('id', accountId);
-        if (passwordFlagError) throw passwordFlagError;
-        await admin.from('audit_events').insert({ actor_id: identity.user.id, actor_role: 'administrador', action: 'user_created', entity_type: 'profile', entity_id: accountId, reason: 'Cadastro administrativo com múltiplos vínculos', new_value: { roles, scope_ids: scopeIds, bond_count: bonds.length } });
+        // Cadastro administrativo com múltiplos vínculos, senha obrigatória e auditoria na mesma transação.
         return json({ ok: true, id: accountId, temporary_password: initialPassword });
       } catch (error) {
         await admin.auth.admin.deleteUser(accountId);
@@ -110,7 +111,7 @@ Deno.serve(async request => {
         if (error) return json({ error: error.message }, 400);
         const { error: profileError } = await admin.from('profiles').update({ must_change_password: true }).eq('id', targetId);
         if (profileError) throw profileError;
-        await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'password_reset', entity_type: 'profile', entity_id: targetId });
+        await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'password_reset', entity_type: 'profile', entity_id: targetId }).throwOnError();
         return json({ ok: true, temporary_password: initialPassword });
       }
       if (target.roles?.includes('administrador')) {
@@ -121,8 +122,7 @@ Deno.serve(async request => {
       if (banError) throw banError;
       const { error } = await admin.from('profiles').update({ disabled_at: new Date().toISOString() }).eq('id', targetId);
       if (error) throw error;
-      await admin.from('servidores').update({ active: false }).eq('profile_id', targetId);
-      await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'user_deactivated', entity_type: 'profile', entity_id: targetId });
+      await admin.from('servidores').update({ active: false }).eq('profile_id', targetId).throwOnError();
       return json({ ok: true });
     }
 
@@ -138,12 +138,13 @@ Deno.serve(async request => {
     const scoped = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
       auth: { persistSession: false, autoRefreshToken: false }, global: { headers: { 'x-sgf-role': 'administrador' } },
     });
-    const { error } = await scoped.rpc('set_profile_access', {
+    const { error } = await scoped.rpc('update_admin_profile', {
       actor_id: identity.user.id,
       target_profile_id: targetId,
       target_roles: roles,
       target_cpf: cpf,
       target_scope_ids: scopes,
+      target_location_id: locationId,
     });
     if (error) {
       if (error.message.includes('SELF_ROLE_CHANGE_BLOCKED')) return json({ error: 'O administrador não pode alterar o próprio perfil por esta tela.' }, 409);
@@ -152,10 +153,6 @@ Deno.serve(async request => {
       if (error.message.includes('duplicate key')) return json({ error: 'Este CPF já está vinculado a outra conta.' }, 409);
       throw error;
     }
-    const { error: locationError } = await admin.from('profiles').update({ primary_lotacao_id: locationId }).eq('id', targetId);
-    if (locationError) throw locationError;
-    const { error: employeeLocationError } = await admin.from('servidores').update({ lotacao_id: locationId }).eq('profile_id', targetId);
-    if (employeeLocationError) throw employeeLocationError;
     const { data: authUser } = await admin.auth.admin.getUserById(targetId);
     if (authUser.user) {
       const current = authUser.user.app_metadata || {};

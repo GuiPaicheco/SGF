@@ -248,7 +248,7 @@ Deno.serve(async request => {
       if (updateError?.code === 'weak_password') return json({ error: 'A senha não atende aos requisitos de segurança. Use pelo menos 6 caracteres e escolha uma senha pessoal mais forte.' }, 400);
       if (updateError?.code === 'same_password') return json({ error: 'Escolha uma senha diferente da senha atual.' }, 400);
       if (updateError) throw updateError;
-      const { error: flagError } = await admin.from('profiles').update({ must_change_password: false }).eq('id', identity.user.id);
+      const { error: flagError } = await admin.rpc('complete_password_change',{actor_id:identity.user.id});
       if (flagError) throw flagError;
       return json({ ok: true });
     }

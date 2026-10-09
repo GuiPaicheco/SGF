@@ -276,6 +276,8 @@ O arquivo `supabase/seed-demo.sql` cria uma massa fictícia e idempotente para a
 Antes de apresentar, confira se os filtros estão limitados aos registros fictícios e se nenhuma informação pessoal aparece nas capturas de tela. A carga pode ser reaplicada para restaurar o cenário; ela não remove dados institucionais existentes.
 # Ajustes de planejamento publicados em 07/10/2026
 
+Notificações/auditoria (09/10): consultar avisos no perfil e CNES ativos; usar as páginas para avisos anteriores. Histórico administrativo permite nome do autor/afetado, matrícula, evento e período; RH/Diretor recebem somente resumos do próprio contexto. Procedimento de correção, desativação, preservação e condições de anonimização em [AUDITORIA_RETENCAO.md](AUDITORIA_RETENCAO.md); evidências em [VALIDACAO_BLOCO_05.md](VALIDACAO_BLOCO_05.md). Não apagar trilhas ou redefinir senhas de contas existentes para ensaios.
+
 Feriados ativos recalculam pedidos compatíveis preservando início e quantidade de dias, com aviso ao titular e aos responsáveis dos escopos envolvidos. Aprovado não significa incluído no calendário. Histórico sem contagem confiável, sobreposição e perda de escopo não são corrigidos por inferência: o pedido fica sinalizado para revisão. Dia novo com mais de uma unidade possível depende de atribuição explícita pelo RH/Administrador.
 
 Redistribuição comum exige todas as revisões pendentes; decisões existentes não são apagadas. O titular altera somente seu vínculo selecionado, e RH somente seu escopo. Cada alteração exige justificativa e versão atual. Operações compartilham uma trava transacional global no piloto; medir contenção antes de ampliar o uso.

@@ -8,7 +8,7 @@ async function runAuth(payload, { deliveryError = null, signedIn = true, passwor
   let handler;
   const updates = [];
   const admin = {
-    rpc: async () => ({ data: { allowed: true }, error: null }),
+    rpc: async action => {if(action==='complete_password_change') updates.push({must_change_password:false}); return { data: { allowed: true }, error: null };},
     from() {
       const query = {
         select() { return this; }, eq() { return this; },

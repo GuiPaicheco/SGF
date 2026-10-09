@@ -75,7 +75,7 @@ Deno.serve(async request => {
       if (locationId !== context.lotacaoId) return json({ error: 'A lotação selecionada não pertence ao contexto ativo.' }, 403);
     }
     if (action === 'approve') {
-      const { error: teamError } = await admin.from('employee_inclusion_requests').update({ requested_team: team }).eq('id', id);
+      const { error: teamError } = await scoped.from('employee_inclusion_requests').update({ requested_team: team }).eq('id', id);
       if (teamError) throw teamError;
     }
     const { error } = await scoped.rpc('review_employee_inclusion', {

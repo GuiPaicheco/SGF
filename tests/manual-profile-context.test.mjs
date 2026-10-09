@@ -14,7 +14,7 @@ test("cadastro administrativo reutiliza o fluxo atômico de múltiplos vínculos
   assert.match(app, /name="create-scope"/);
   assert.match(app, /scope_ids: scopeIds/);
   assert.match(profiles, /submit_multi_bond_access_request/);
-  assert.match(profiles, /approve_multi_bond_access/);
+  assert.match(profiles, /approve_admin_profile/);
   assert.match(profiles, /must_change_password: true/);
   assert.match(profiles, /Cadastro administrativo com múltiplos vínculos/);
 });
@@ -34,4 +34,3 @@ test("login oferece contexto ativo por perfil, vínculo e CNES", async () => {
   assert.match(app, /x-sgf-lotacao/);
   assert.match(app, /Escolha seu perfil e local de atuação/);
 });
-

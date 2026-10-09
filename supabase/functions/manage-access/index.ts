@@ -18,7 +18,7 @@ Deno.serve(async request => {
   try {
     const url = Deno.env.get('SUPABASE_URL')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    let admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
     if (!token) return json({ error: 'Sessão inválida.' }, 401);
     const { data: identity, error: identityError } = await admin.auth.getUser(token);
@@ -27,6 +27,7 @@ Deno.serve(async request => {
     const actorRole = request.headers.get('x-sgf-role') || '';
     if (!actor?.roles?.includes(actorRole) || !['administrador','rh'].includes(actorRole) || actor.must_change_password || actor.disabled_at) return json({ error: 'Acesso exclusivo do administrador e RH.' }, 403);
     const context = await validateAccessContext(admin, request, identity.user.id, actor.roles || []);
+    admin = createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{...contextHeaders(context),'x-sgf-actor':identity.user.id}}});
     const scoped = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers: { ...contextHeaders(context), 'x-sgf-actor': identity.user.id } } });
     const {data: activeLocation,error: activeLocationError} = context.global ? {data:null,error:null}
       : await admin.from('lotacoes').select('is_internal_allocation').eq('id',context.lotacaoId).single();
@@ -78,7 +79,6 @@ Deno.serve(async request => {
         const { data: rejected, error } = await admin.from('access_requests').update({ status: 'rejeitada', notes, reviewed_by: identity.user.id, reviewed_at: new Date().toISOString() }).eq('id', requestId).eq('status', 'pendente').select('id').maybeSingle();
         if (error) throw error;
         if (!rejected) return json({ error: 'Esta solicitação já foi analisada.' }, 409);
-        await admin.from('audit_events').insert({ actor_id: identity.user.id, action: 'access_request_rejected', entity_type: 'access_request', entity_id: requestId, new_value: { requested_unit: access.requested_unit } });
         return json({ ok: true });
       }
       const { error } = await scoped.rpc('reject_access_request', {

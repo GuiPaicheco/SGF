@@ -26,11 +26,10 @@ test('nome e matrícula filtram eventos no banco antes da paginação sem amplia
     range: async (...args) => {calls.push(['range',...args]); return {data:[row]};}};
   const admin = {from: table => table === 'lotacoes' ? {select: () => ({eq: () => ({single: async () => ({data:{id:'D1',is_internal_allocation:true}})})})} : q};
   await loadAuditHistory(admin,context,{start_date:'2026-10-01',end_date:'2026-10-08',actor_name:'Gestor',registration:'123'});
-  assert.match(calls[0][1],/actor:profiles!audit_events_actor_id_fkey!inner/);
-  assert.match(calls[0][1],/bond:employment_bonds!audit_events_context_bond_id_fkey!inner/);
+  assert.doesNotMatch(calls[0][1],/!inner/);
   assert.ok(calls.some(x => x.join() === 'eq,context_lotacao_id,D1'));
-  assert.ok(calls.some(x => x.join() === 'ilike,actor.full_name,%Gestor%'));
-  assert.ok(calls.some(x => x.join() === 'ilike,bond.registration,%123%'));
+  assert.ok(calls.some(x => x.join() === 'ilike,actor_search,%Gestor%'));
+  assert.ok(calls.some(x => x.join() === 'ilike,registration_search,%123%'));
   assert.equal(calls.at(-1)[0],'range');
   calls.length = 0;
   await loadAuditHistory(admin,context,{start_date:'2026-10-01',end_date:'2026-10-08'});
@@ -118,8 +117,8 @@ test('busca por servidor afetado combina com autor/escopo antes da paginação',
   const result = await loadAuditHistory(admin,context,{start_date:'2026-10-01',end_date:'2026-10-08',affected_name:'Ana',actor_name:'Gestor'});
   assert.ok(calls.some(x => x.join() === 'eq,context_cnes_unit_id,X'));
   assert.ok(calls.some(x => x.join() === 'eq,context_lotacao_id,D1'));
-  assert.ok(calls.some(x => x.join() === 'ilike,affected_name,%Ana%'));
-  assert.ok(calls.some(x => x.join() === 'ilike,actor.full_name,%Gestor%'));
+  assert.ok(calls.some(x => x.join() === 'ilike,affected_search,%Ana%'));
+  assert.ok(calls.some(x => x.join() === 'ilike,actor_search,%Gestor%'));
   assert.equal(calls.at(-1)[0],'range'); assert.equal(result.events[0].affected_name,'Ana Silva');
   await assert.rejects(loadAuditHistory(admin,context,{start_date:'2026-10-01',end_date:'2026-10-08',affected_name:{name:'Ana'}}),/AUDIT_FILTER_INVALID/);
 });

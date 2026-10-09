@@ -4,8 +4,9 @@ import { notificationInternalLocation } from './scoped-notifications.ts';
 export function sanitizeAudit(value: any): any {
   if (Array.isArray(value)) return value.map(sanitizeAudit);
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value)
-    .filter(([key]) => !/password|senha|token|secret|api.?key|authorization/i.test(key))
+    .filter(([key,item]) => (key === 'must_change_password' && typeof item === 'boolean') || !/password|senha|token|secret|api.?key|authorization|credential|cookie/i.test(key))
     .map(([key, item]) => [key, sanitizeAudit(item)]));
+  if(typeof value === 'string' && /Bearer\s|sb_secret_|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\./i.test(value)) return '[credencial removida]';
   return value;
 }
 
@@ -15,13 +16,17 @@ export function auditInScope(row: any, context: AccessContext, internal: string 
 }
 
 export function auditDTO(row: any, global: boolean) {
-  const before = global ? sanitizeAudit(row.previous_value) : {status: row.previous_value?.status ?? null};
-  const after = global ? sanitizeAudit(row.new_value) : {status: row.new_value?.status ?? null};
-  return {id: row.id, actor_id: row.actor_id, actor_name: row.actor?.full_name || null, role: row.actor_role,
+  const summary=(value:any)=>({status:value?.status??null,...Object.fromEntries(
+    ['active','weekly_hours','valid_from','valid_until','start_date','end_date','return_date','days','minutes','available_days','acquisition_start','acquisition_end','type','not_applicable','date','source_date','version']
+      .filter(key=>value&&Object.hasOwn(value,key)).map(key=>[key,value[key]]))});
+  const before = global ? sanitizeAudit(row.previous_value) : summary(row.previous_value);
+  const after = global ? sanitizeAudit(row.new_value) : summary(row.new_value);
+  return sanitizeAudit({id: row.id, actor_id: row.actor_id, actor_name: row.actor_name_at_event || row.actor?.full_name || null, role: row.actor_role,
     action: row.action, entity_type: row.entity_type, entity_id: row.entity_id, occurred_at: row.occurred_at,
-    bond: row.bond?.registration || null, cnes: row.cnes?.name || null, location: row.location?.name || null,
+    bond: row.bond_registration_at_event || row.bond?.registration || null, cnes: row.cnes?.name || null, location: row.location?.name || null,
     affected_name: row.affected_name || null, affected_source: row.affected_source || null,
-    reason: row.reason || null, before, after};
+    affected_names: Array.isArray(row.affected_names) ? row.affected_names.map(sanitizeAudit) : [],
+    reason: sanitizeAudit(row.reason) || null, before, after});
 }
 
 export function auditSearchPattern(value: unknown) {
@@ -48,8 +53,8 @@ export async function loadAuditHistory(admin: any, context: AccessContext, paylo
   const affectedPattern = auditSearchPattern(payload.affected_name);
   const internal = await notificationInternalLocation(admin, context);
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  // Inner joins are conditional: ordinary browsing preserves events whose actor/bond is missing.
-  let query = admin.from('audit_events').select(`id,actor_id,actor_role,action,entity_type,entity_id,occurred_at,reason,previous_value,new_value,affected_name,affected_source,context_cnes_unit_id,context_lotacao_id,actor:profiles!audit_events_actor_id_fkey${actorPattern ? '!inner' : ''}(full_name),bond:employment_bonds!audit_events_context_bond_id_fkey${registrationPattern ? '!inner' : ''}(registration),cnes:cnes_units!audit_events_context_cnes_unit_id_fkey(name),location:lotacoes!audit_events_context_lotacao_id_fkey(name)`)
+  // Left joins preserve historical events even when their actor or bond is unavailable.
+  let query = admin.from('audit_events').select(`id,actor_id,actor_role,actor_name_at_event,bond_registration_at_event,action,entity_type,entity_id,occurred_at,reason,previous_value,new_value,affected_name,affected_names,affected_source,context_cnes_unit_id,context_lotacao_id,actor:profiles!audit_events_actor_id_fkey(full_name),bond:employment_bonds!audit_events_context_bond_id_fkey(registration),cnes:cnes_units!audit_events_context_cnes_unit_id_fkey(name),location:lotacoes!audit_events_context_lotacao_id_fkey(name)`)
     .gte('occurred_at', `${start}T00:00:00-03:00`).lte('occurred_at', `${end}T23:59:59.999999-03:00`);
   if (!context.global) {
     if (!context.cnesUnitId) throw new Error('INVALID_ACCESS_CONTEXT');
@@ -57,9 +62,9 @@ export async function loadAuditHistory(admin: any, context: AccessContext, paylo
     query = internal ? query.eq('context_lotacao_id', internal) : query.or(`context_lotacao_id.is.null,context_lotacao_id.eq.${context.lotacaoId}`);
   }
   if (action) query = query.eq('action', action);
-  if (actorPattern) query = query.ilike('actor.full_name', actorPattern);
-  if (registrationPattern) query = query.ilike('bond.registration', registrationPattern);
-  if (affectedPattern) query = query.ilike('affected_name', affectedPattern);
+  if (actorPattern) query = query.ilike('actor_search', actorPattern);
+  if (registrationPattern) query = query.ilike('registration_search', registrationPattern);
+  if (affectedPattern) query = query.ilike('affected_search', affectedPattern);
   for (const [input, column] of [['actor_id','actor_id'],['entity_id','entity_id'],['bond_id','context_bond_id'],['cnes_id','context_cnes_unit_id'],['location_id','context_lotacao_id']] as const) {
     if (payload[input]) {
       if (!uuid.test(String(payload[input]))) throw new Error('AUDIT_FILTER_INVALID');

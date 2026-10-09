@@ -37,16 +37,21 @@ Deno.serve(async request => {
 
     if (action === 'audit-history') return json(await loadAuditHistory(admin, context, payload));
     if (action === 'notifications') {
+      const page=Number(payload.page||0);
+      if(!Number.isInteger(page)||page<0||page>10000) return json({error:'Página de avisos inválida.'},400);
       const internal = await notificationInternalLocation(admin, context);
       const query = applyNotificationContext(admin.from('notifications').select('id,request_id,title,message,read_at,created_at,recipient_role,cnes:cnes_units(name,code),location:lotacoes(name)'), profile.id, context, internal);
-      const { data, error } = await query.order('created_at', { ascending: false }).order('id', { ascending: false }).limit(30);
+      const { data, error } = await query.order('created_at', { ascending: false }).order('id', { ascending: false }).range(page*30,page*30+30);
       if (error) throw error;
-      return json({ notifications: data || [] });
+      return json({ notifications: (data || []).slice(0,30),has_more:(data||[]).length>30,page });
     }
     if (action === 'read-notifications') {
       const internal = await notificationInternalLocation(admin, context);
       const query = applyNotificationContext(admin.from('notifications').update({ read_at: new Date().toISOString() }), profile.id, context, internal).is('read_at', null);
-      if (payload.id) query.eq('id', Number(payload.id));
+      if (payload.id != null) {
+        if(!Number.isSafeInteger(Number(payload.id))||Number(payload.id)<=0) return json({error:'Aviso inválido.'},400);
+        query.eq('id', Number(payload.id));
+      }
       const { error } = await query; if (error) throw error; return json({ ok: true });
     }
     if (action === 'archives') {

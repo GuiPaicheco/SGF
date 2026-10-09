@@ -1,6 +1,9 @@
 -- Executar após fixtures iniciais de acesso e release de calendário, com rollback.
 select set_config('request.headers','{"x-sgf-role":"administrador","x-sgf-actor":"f0000000-0000-0000-0000-000000000001"}',true);
 update public.vacation_requests set status='enviada' where id::text like 'f0000000%';
+-- Vigência explícita: o ensaio precisa continuar válido depois de 08/10/2026.
+update public.employment_bonds set valid_from='2020-01-01' where id::text like 'f0000000%';
+update public.employment_bond_units set valid_from='2020-01-01' where bond_id::text like 'f0000000%';
 insert into public.request_day_responsibilities(request_id,responsibility_date,bond_unit_id,cnes_unit_id,lotacao_id,assigned_by)
 select r.id,'2026-10-08',u.id,u.cnes_unit_id,u.internal_lotacao_id,'f0000000-0000-0000-0000-000000000001'::uuid
 from public.vacation_requests r join public.employment_bond_units u on u.bond_id=r.context_bond_id
