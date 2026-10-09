@@ -12,3 +12,10 @@ test('reconciliação é somente leitura e não infere unidades',async()=>{
  const sql=await readFile(new URL('../scripts/reconcile-history.sql',import.meta.url),'utf8');
  assert.match(sql,/repeatable read read only/i);assert.doesNotMatch(sql,/\b(update|delete|insert|truncate)\b/i);assert.match(sql,/legacy_active_requires_manual_review/);
 });
+
+test('guard legado não depende do proprietário e não confia no cabeçalho de ator',async()=>{
+ const sql=await readFile(new URL('../supabase/migrations/20261009172500_legacy_guard_service_identity.sql',import.meta.url),'utf8');
+ assert.match(sql,/coalesce\(\(select auth.role\(\)\),''\)/);
+ assert.match(sql,/<>\s*'service_role'/);assert.match(sql,/Campos de identificacao/);
+ assert.doesNotMatch(sql,/headers->>|current_user.*supabase_admin/);
+});

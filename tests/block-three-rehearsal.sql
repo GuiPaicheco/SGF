@@ -1,5 +1,6 @@
 -- Fixtures exclusivamente sintéticas; executar na mesma transação com ROLLBACK.
 BEGIN;
+select set_config('request.jwt.claim.role','service_role',true);
 create temporary table block_three_checks(name text,passed boolean);
 insert into auth.users(id,email,aud,role) values
  ('f3000000-0000-0000-0000-000000000001','block3-admin@example.invalid','authenticated','authenticated'),
