@@ -15,4 +15,4 @@ if(['legacy','block4','block5','block6'].includes(scenario)){
   const end=foundation.indexOf('do $$');
   if(end<0) throw new Error('Fixtures do bloco 03 não encontradas.');
   process.stdout.write(`${foundation.slice(0,end)}\n${checks}\nrollback;\n`);
-}else process.stdout.write(`begin;\n${fixture.slice(0, boundary)}\n${checks}\nrollback;\n`);
+}else process.stdout.write(`begin;\nselect set_config('request.jwt.claim.role','service_role',true);\n${fixture.slice(0, boundary)}\n${checks}\nrollback;\n`);
