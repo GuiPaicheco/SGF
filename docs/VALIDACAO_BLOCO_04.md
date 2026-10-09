@@ -21,6 +21,8 @@ Data: 09/10/2026. Ambiente: piloto compartilhado, sem aceite institucional.
 5. Feriado sintético por API, acompanhado na interface: pedido de dez dias úteis mantém início 02/03/2027, fim muda de 15 para 16/03 e retorno de 16 para 17/03. Dia novo exige indicação explícita; RH do CNES A só pode escolher A. Atribuição pela tela elimina a pendência, sem aprovação automática.
 6. Mudança do feriado de 03 para 04/03 reavalia responsabilidades. Desativação restaura fim 15/03 e retorno 16/03. Avisos de calendário/distribuição observados no contexto RH. Nenhum pedido de outra pessoa no período, conferido antes de cada alteração.
 7. Banco legado: zero dias e zero atribuições em `minimum_scale_days`/`minimum_scale_assignments`. Não havia histórico a converter; nenhuma associação arbitrária foi criada. Dados futuros ambíguos continuam exigindo reconciliação no bloco 07.
+8. Pós-publicação: deployment Vercel READY do commit `b42d93c`; navegador recebeu app/CSS `20261009-block4-1`. Intervalo visual 15/12/2026–15/01/2027 apresentou todas as 32 datas, extremos corretos e região focável por teclado. Sem os padrões de codificação quebrada pesquisados nessa tela; não é revisão de todas as telas.
+9. Limpeza conferida no banco: conta técnica desativada; zero pedidos ativos, zero atribuições de escala e zero feriados ativos do ensaio. Histórico preservado. Advisors sem ERROR, com 16 INFO de tabelas internas sem políticas de acesso direto e WARN preexistente de [proteção contra senhas vazadas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection), mantido no bloco 09.
 
 ## 03. Reprodução e limites
 
