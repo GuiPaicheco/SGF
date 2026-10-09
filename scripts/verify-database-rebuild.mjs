@@ -31,9 +31,19 @@ select 'triggers='||md5(coalesce(string_agg(n.nspname||'.'||c.relname||t.tgname|
 rollback;`;
 const before=sql('postgres',fingerprint);
 command(['exec',container,'pg_dump','-U','supabase_admin','-d','postgres','--format=custom','--file=/tmp/sgf-block7.dump']);
-sql('postgres',`create database ${target} template template0;`);
+// Recriar também encoding/locale: TEMPLATE template0 sozinho pode escolher outra ordenação.
+const locale=JSON.parse(sql('postgres',"select jsonb_build_object('encoding',pg_encoding_to_char(encoding),'collate',datcollate,'ctype',datctype,'provider',datlocprovider) from pg_database where datname=current_database();"));
+assert.equal(locale.provider,'c','Este ensaio exige locale libc; outros provedores precisam de procedimento explícito.');
+const literal=value=>"'"+String(value).replaceAll("'","''")+"'";
+sql('postgres',`create database ${target} template template0 encoding ${literal(locale.encoding)} lc_collate ${literal(locale.collate)} lc_ctype ${literal(locale.ctype)} locale_provider libc;`);
 // --clean trata o schema public padrão do banco recém-criado; destino foi comprovado inexistente.
 command(['exec',container,'pg_restore','-U','supabase_admin','--clean','--if-exists','--exit-on-error','--single-transaction','--dbname='+target,'/tmp/sgf-block7.dump']);
-assert.equal(sql(target,fingerprint),before,'Dados, RLS ou funções divergem após restauração.');
+const after=sql(target,fingerprint);
+if(after!==before){
+ const entries=value=>new Map(value.split('\n').filter(line=>line.includes('=')).map(line=>{const at=line.indexOf('=');return [line.slice(0,at),line.slice(at+1)];}));
+ const a=entries(after),b=entries(before);
+ console.error(JSON.stringify({differences:[...new Set([...a.keys(),...b.keys()])].filter(key=>a.get(key)!==b.get(key)).map(key=>({key,before:b.get(key),after:a.get(key)}))}));
+}
+assert.equal(after,before,'Dados, RLS ou funções divergem após restauração.');
 console.log('PASS: cadeia integral aplicada em banco vazio; demonstração restaurada em banco novo, com dados/RLS/funções iguais.');
 // O runner e seu container são descartáveis. Não exportar dump/credenciais como artifacts.
