@@ -32,10 +32,13 @@ rollback;`;
 const before=sql('postgres',fingerprint);
 command(['exec',container,'pg_dump','-U','supabase_admin','-d','postgres','--format=custom','--file=/tmp/sgf-block7.dump']);
 // Recriar também encoding/locale: TEMPLATE template0 sozinho pode escolher outra ordenação.
-const locale=JSON.parse(sql('postgres',"select jsonb_build_object('encoding',pg_encoding_to_char(encoding),'collate',datcollate,'ctype',datctype,'provider',datlocprovider) from pg_database where datname=current_database();"));
-assert.equal(locale.provider,'c','Este ensaio exige locale libc; outros provedores precisam de procedimento explícito.');
+const locale=JSON.parse(sql('postgres',"select jsonb_build_object('encoding',pg_encoding_to_char(encoding),'collate',datcollate,'ctype',datctype,'provider',datlocprovider,'locale',datlocale,'rules',daticurules,'owner',pg_get_userbyid(datdba)) from pg_database where datname=current_database();"));
+const providers={c:'libc',i:'icu',b:'builtin'};
+assert.ok(Object.hasOwn(providers,locale.provider),'Provedor de locale desconhecido.');
 const literal=value=>"'"+String(value).replaceAll("'","''")+"'";
-sql('postgres',`create database ${target} template template0 encoding ${literal(locale.encoding)} lc_collate ${literal(locale.collate)} lc_ctype ${literal(locale.ctype)} locale_provider libc;`);
+const identifier=value=>'"'+String(value).replaceAll('"','""')+'"';
+const extra=locale.provider==='i'?`icu_locale ${literal(locale.locale)} ${locale.rules==null?'':`icu_rules ${literal(locale.rules)}`}`:locale.provider==='b'?`builtin_locale ${literal(locale.locale)}`:'';
+sql('postgres',`create database ${target} owner ${identifier(locale.owner)} template template0 encoding ${literal(locale.encoding)} lc_collate ${literal(locale.collate)} lc_ctype ${literal(locale.ctype)} locale_provider ${providers[locale.provider]} ${extra};`);
 // --clean trata o schema public padrão do banco recém-criado; destino foi comprovado inexistente.
 command(['exec',container,'pg_restore','-U','supabase_admin','--clean','--if-exists','--exit-on-error','--single-transaction','--dbname='+target,'/tmp/sgf-block7.dump']);
 const after=sql(target,fingerprint);
