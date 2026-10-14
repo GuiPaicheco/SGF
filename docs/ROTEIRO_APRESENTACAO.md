@@ -21,7 +21,7 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
    Compare o cenário atual, com mensagens, planilhas e conferências dispersas, ao fluxo centralizado: pedido autenticado, análise em etapas, calendário, escala mínima e histórico.
 
 3. **Perfis e responsabilidades**  
-   Servidor solicita e acompanha por matrícula. Diretor consulta e analisa no contexto autorizado. RH realiza gestão operacional apenas do CNES/lotação ativos. Administrador mantém estrutura, permissões e visão global. Não demonstrar permissões de Administrador como se fossem do RH.
+   Servidor solicita e acompanha por matrícula. RH/Diretor é um único perfil de gestão operacional apenas do CNES/lotação ativos. Administrador mantém estrutura, permissões e visão global. Não demonstrar permissões de Administrador como se fossem da gestão local.
 
 4. **Entrada e segurança de acesso**  
    Demonstre login, recuperação de senha, primeiro acesso e troca de perfil. Destaque a espera mínima de três segundos entre tentativas e a ausência de bloqueio cumulativo por erro.
@@ -60,7 +60,7 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
 
 1. Abra a página inicial e faça uma simulação rápida.
 2. Entre como servidor de demonstração, envie uma solicitação e abra o comprovante.
-3. Troque para Diretor ou RH, escolha o contexto e localize o protocolo na fila.
+3. Troque para RH/Diretor, escolha o contexto e localize o protocolo na fila.
 4. Analise a revisão daquela unidade e mostre a linha do tempo. Aprovar não adiciona ao calendário.
 5. Abra o calendário visual, filtre uma lotação de demonstração e detalhe um dia com conflito.
 6. Ajuste uma escala mínima sem salvar, a menos que a apresentação tenha sido preparada para essa alteração.

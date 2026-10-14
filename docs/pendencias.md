@@ -7,7 +7,7 @@ Atualização: 14/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 291 testes locais aprovados em 14/10/2026.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 302 testes locais aprovados em 14/10/2026.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -58,20 +58,22 @@ Sem itens técnicos ativos neste bloco. Snapshot parcial não equivale a backup 
 
 ### 08.A — Revisão técnica atual
 
+Auditoria técnica e correções de 14/10: [AUDITORIA_TECNICA_20261014.md](AUDITORIA_TECNICA_20261014.md). Achados A01–A06 corrigidos: três perfis funcionais (Servidor, RH/Diretor e Administrador), busca por vínculo, conflitos pela projeção do calendário, preservação de atribuições/observações, sincronização em lote e proteção de respostas atrasadas. Migração `20261014153031` aplicada no Supabase; escopos e contas preservados, sem trocar senhas ou apagar histórico. Papéis históricos continuam legíveis, mas novos perfis são normalizados para os três acessos. 302 testes locais e nove cenários SQL reais com rollback aprovados; não equivalem a auditoria visual.
+
 Identidade atualizada em 14/10: SGF significa **Sistema de Gestão de Funcionários**. Férias e folgas são funcionalidades atuais, não o escopo definitivo. Nome corrigido no cabeçalho, título/descrição, comprovante, README e roteiro. Slides e capturas históricos de 09/10 ainda retratam a identidade anterior; atualizar na próxima revisão do material, sem tratá-los como versão atual do nome.
 
 Rodada de 14/10: revisão estática de navegação/foco, avisos, idioma, UTF-8, movimento reduzido e estilos de impressão realizada; movimento reduzido e colunas A4 corrigidos, com duas regressões novas e 290/290 testes locais aprovados. Isso não encerra as verificações visuais abaixo. A ferramenta de navegador/Computer Use falhou ao iniciar (caminho de assets indisponível), antes de qualquer interação; não foi possível executar zoom, leitor de tela ou impressão visual nesta rodada. Arquivos continuam acessíveis pelo terminal alternativo. Não reutilizar capturas antigas como evidência destas alterações.
 
-1. [ ] Completar revisão de todas as telas/detalhes dos quatro perfis com dados representativos, incluindo pedidos ativos, correções e decisões: codificação, botões, alinhamento, navegação e responsividade.
+1. [ ] Ensaiar volume, filtros e foco assíncrono; completar revisão das telas/detalhes dos três perfis funcionais, incluindo pedidos ativos, correções e decisões.
 2. [ ] Completar navegação por teclado, tablet, zoom 200%, leitor de tela e impressão. Registrar separadamente testes executados e limitações; não declarar acessibilidade integral com base apenas nos testes automatizados.
-3. [ ] Registrar resultados, corrigir problemas encontrados e atualizar manual/treinamento se as próximas mudanças alterarem o fluxo.
+3. [ ] Atualizar treinamento, inclusive identidade nova e RH/Diretor unificado nas capturas/slides. Manual textual atualizado; material visual ainda é histórico.
 
 ### 08.B — Homologação institucional futura, após as mudanças
 
 Decisão do responsável em 14/10/2026: o sistema continuará recebendo mudanças. Quando estiver pronto, alguém do RH Central será indicado para aprovar e alguém do RH ou Diretor para testar. Estes itens não bloqueiam a revisão técnica nem o desenvolvimento atual; permanecem necessários antes do uso institucional definitivo. Não há aceite antecipado.
 
 1. [ ] Submeter regras e referências normativas ao RH Central, com apoio jurídico quando necessário: admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual. Registrar responsáveis/vigências e ajustar os cálculos conforme a decisão aprovada.
-2. [ ] Executar aceite funcional com RH ou Diretor: solicitações com múltiplos autorizadores, quatro perfis e correspondência de CNES, lotações, equipes, vínculos e autorizadores à organização real. INE não é exigido.
+2. [ ] Executar aceite funcional com RH ou Diretor: solicitações com múltiplos autorizadores, três perfis funcionais (Servidor, RH/Diretor e Administrador) e correspondência de CNES, lotações, equipes, vínculos e autorizadores à organização real. INE não é exigido.
 3. [ ] Validar navegadores/equipamentos usados pela Prefeitura na versão candidata ao aceite.
 4. [ ] Ratificar política de retenção, responsáveis e eventual anonimização, conforme AUDITORIA_RETENCAO.md. Nenhum prazo legal ou descarte foi definido pelo sistema.
 5. [ ] Registrar evidências e aceite nominal da versão final; ensaios técnicos não substituem a aprovação institucional.

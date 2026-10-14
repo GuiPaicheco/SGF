@@ -39,8 +39,9 @@ test('resposta de perfis atrasada não grava dados após troca de contexto', asy
   await pending;
   assert.equal(state.profiles.length, 0);
 });
-test('editor de acessos inclui Diretor e redistribuição não usa permissão administrativa', () => {
-  assert.match(extract('  function renderProfileDetail()', '  async function saveProfileAccess'), /\['diretor', 'Diretor'\]/);
+test('editor oferece RH/Diretor unificado e redistribuição não usa permissão administrativa', () => {
+  assert.match(extract('  function renderProfileDetail()', '  async function saveProfileAccess'), /\['rh', 'RH\/Diretor'\]/);
+  assert.doesNotMatch(extract('  function renderProfileDetail()', '  async function saveProfileAccess'), /\['diretor', 'Diretor'\]/);
   assert.match(source, /'\[data-distribution-save\]':'distribution'/);
 });
 test('escolha de contexto revalida privilégios atuais antes de ativar', () => {

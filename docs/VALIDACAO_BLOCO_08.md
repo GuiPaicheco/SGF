@@ -1,5 +1,7 @@
 # Bloco 08 — revisão técnica e aceite institucional
 
+Correções posteriores de 14/10: achados A01–A06 tratados, com 302 testes locais e 21 verificações SQL reais em rollback. RH/Diretor agora é um único perfil operacional (`rh`); enum histórico preservado, sem alterar escopos ou senhas. As menções a quatro perfis nas rodadas de 09/10 abaixo são históricas. Evidências atuais em [AUDITORIA_TECNICA_20261014.md](AUDITORIA_TECNICA_20261014.md). Revisão visual integral e aceite institucional continuam pendentes.
+
 Planejamento atualizado em 14/10/2026: por decisão do responsável, a aprovação do RH Central e os testes de aceite por RH ou Diretor ocorrerão quando as mudanças do sistema estiverem concluídas. A revisão técnica continua agora, sem depender de nomear esses responsáveis antecipadamente. Não representa dispensa nem aprovação das regras. Fila dividida em 08.A (técnica atual) e 08.B (homologação futura) em pendencias.md.
 
 ## Atualização técnica — 14/10/2026

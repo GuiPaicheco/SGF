@@ -34,7 +34,7 @@ if (mode === 'prepare') {
   for (let n=9;n<=10;n++) cpf += ([...cpf].reduce((s,d,i)=>s+Number(d)*(n+1-i),0)*10%11)%10;
   const tag = `TESTE08-${Date.now()}`, email = `sgf-${tag.toLowerCase()}@betim.mg.gov.br`;
   const created = await call('manage-profiles',{action:'create',full_name:`TESTE BLOCO 08 — Treinamento ${tag}`,email,cpf,birth_date:'1990-01-15',
-    roles:['servidor','diretor','rh','administrador'],scope_ids:locations.map(l=>l.id),
+    roles:['servidor','rh','administrador'],scope_ids:locations.map(l=>l.id),
     bonds:[{registration:`${tag}-M1`,cargo_id:position.id,employment_type:'efetivo',weekly_hours:40,
       units:units.map(u=>({cnes_unit_id:u.id,not_applicable:true,weekly_hours:20}))},
       {registration:`${tag}-M2`,cargo_id:position.id,employment_type:'efetivo',weekly_hours:20,
@@ -48,14 +48,14 @@ if (mode === 'prepare') {
   await new Promise(resolve=>setTimeout(resolve,3100));
   const fresh = await call('access-auth',{action:'login',identifier:email,password:process.env.SGF_REHEARSAL_PASSWORD});
   const contexts = (await call('access-auth',{action:'contexts'},fresh.access_token)).contexts;
-  assert.ok(['servidor','diretor','rh','administrador'].every(role=>contexts.some(c=>c.role===role)));
+  assert.ok(['servidor','rh','administrador'].every(role=>contexts.some(c=>c.role===role)));
   fixture.contexts = contexts;
   writeFileSync(fixturePath,JSON.stringify(fixture,null,2));
   for (const bond of [...new Set(contexts.filter(c=>c.role==='servidor').map(c=>c.bond_id))]) {
     const resources = await call('manage-operations',{action:'bond-resources',bond_id:bond},admin.access_token,globalContext);
     await call('manage-operations',{action:'time-bank',bond_id:bond,hours:80,description:`${tag} — crédito sintético de ensaio`,occurred_on:'2026-10-09',version:resources.account?.version||0,entry_key:crypto.randomUUID()},admin.access_token,globalContext);
   }
-  console.log(JSON.stringify({passed:'Conta nova fictícia, quatro perfis, duas matrículas e dois CNES; senha nova definida somente para a conta criada; sem e-mail',fixture:{id:fixture.id,email,tag},contexts:contexts.map(c=>({role:c.role,registration:c.registration,cnes_code:c.cnes_code}))}));
+  console.log(JSON.stringify({passed:'Conta nova fictícia, três perfis, duas matrículas e dois CNES; senha nova definida somente para a conta criada; sem e-mail',fixture:{id:fixture.id,email,tag},contexts:contexts.map(c=>({role:c.role,registration:c.registration,cnes_code:c.cnes_code}))}));
 } else if (mode === 'resume') {
   const fixture = JSON.parse(readFileSync(fixturePath,'utf8'));
   assert.match(fixture.tag,/^TESTE08-\d+$/);
@@ -64,7 +64,7 @@ if (mode === 'prepare') {
   assert.ok(profile?.full_name.includes(fixture.tag) && profile.email===fixture.email && !profile.disabled_at,'Alvo não corresponde ao ensaio ativo.');
   const fresh = await call('access-auth',{action:'login',identifier:fixture.email,password:process.env.SGF_REHEARSAL_PASSWORD});
   fixture.contexts = (await call('access-auth',{action:'contexts'},fresh.access_token)).contexts;
-  assert.ok(['servidor','diretor','rh','administrador'].every(role=>fixture.contexts.some(c=>c.role===role)));
+  assert.ok(['servidor','rh','administrador'].every(role=>fixture.contexts.some(c=>c.role===role)));
   writeFileSync(fixturePath,JSON.stringify(fixture,null,2));
   for (const bond of [...new Set(fixture.contexts.filter(c=>c.role==='servidor').map(c=>c.bond_id))]) {
     const resources = await call('manage-operations',{action:'bond-resources',bond_id:bond},admin.access_token,globalContext);

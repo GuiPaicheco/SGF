@@ -29,5 +29,13 @@
       && (row.lotacao_id || null) === (employee.internal_lotacao_id || null)
       && (!row.bond_unit_id || row.bond_unit_id === employee.row_id));
   }
-  globalThis.SGFScaleConflicts = Object.freeze({ labels, matches, conflictsFor, manualFor });
+  function overlaps(request, requests, criterion, onLeave) {
+    const days = request.assigned_dates || (request.periods || []).flatMap(period => {
+      const count = (Date.parse(period.end_date) - Date.parse(period.start_date)) / 86400000 + 1;
+      if (!Number.isInteger(count) || count < 1 || count > 3660) throw new Error('Período indisponível para conferir conflitos. Consulte o calendário.');
+      return Array.from({length:count},(_,i)=>new Date(Date.parse(period.start_date)+i*86400000).toISOString().slice(0,10));
+    });
+    return [...new Map(days.flatMap(day=>conflictsFor(request,day,requests,criterion,onLeave)).map(other=>[other.id,other])).values()];
+  }
+  globalThis.SGFScaleConflicts = Object.freeze({ labels, matches, conflictsFor, manualFor, overlaps });
 })();

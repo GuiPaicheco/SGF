@@ -1,6 +1,6 @@
 # Manual de uso do SGF
 
-Versão do piloto: 09/10/2026. Público: servidores, Diretor, RH e Administrador. Endereço atual: https://sgfbetim.vercel.app/. Não substitui as normas e o aceite da Prefeitura.
+Versão do piloto: 14/10/2026. Três perfis: Servidor, RH/Diretor e Administrador. Endereço atual: https://sgfbetim.vercel.app/. Não substitui as normas e o aceite da Prefeitura. Capturas/slides de 09/10 são históricos e ainda podem mostrar os nomes anteriores.
 
 ## 01. Acessar e escolher o contexto
 
@@ -30,12 +30,12 @@ Na tela inicial, abra **Simulação Rápida**. Escolha férias ou banco de horas
 
 Day-off de aniversário é exibido e contabilizado conforme a regra aplicável, não é uma modalidade solicitável. O comprovante registra o pedido; sozinho, não autoriza o afastamento.
 
-## 04. Analisar — RH e Diretor
+## 04. Analisar — RH/Diretor
 
 Confira primeiro o perfil e CNES/lotação ativos. Localize o protocolo por busca e filtros; abra **Ver detalhes**. Decisões pertencem à unidade responsável por aqueles dias; outra unidade não herda a autorização.
 
 - **Aprovar:** registra a decisão; não inclui automaticamente no calendário.
-- **Recusar:** use motivo ativo e justificativa. Banco insuficiente pede saldo real e quantidade necessária; conflito pede funcionário/atuação, datas e explicação; Outros pede razão objetiva. Siga as ações disponíveis ao seu perfil; Diretor não recebe os editores operacionais exclusivos do RH.
+- **Recusar:** use motivo ativo e justificativa. Banco insuficiente pede saldo real e quantidade necessária; conflito pede funcionário/atuação, datas e explicação; Outros pede razão objetiva. RH/Diretor é um único acesso de gestão, limitado ao CNES/lotação concedido.
 - **Adicionar ao calendário:** é uma ação separada, quando a revisão e os recursos permitem. Banco insuficiente pode impedir a inclusão sem criar automaticamente uma recusa.
 
 Se aparecer conflito de versão, atualize, confira a ação do outro gestor e só então decida novamente. Não repita cegamente uma gravação. Arquivar na sua fila não cancela o pedido nem apaga o histórico.
@@ -48,7 +48,7 @@ Abra **Escala**, escolha mês ou intervalo de até 93 dias, CNES/lotação e fil
 
 Leia a legenda: I início, F fim, R retorno, A aniversário, H feriado e M escala mínima. Clique na data para composição do dia ou numa faixa para abrir o pedido. No celular, percorra as datas dentro da tabela; a página e seus formulários não precisam deslizar lateralmente.
 
-RH/Administrador pode ajustar escala mínima nominal com justificativa quando exigida. A sugestão usa histórico do mesmo dia da semana, respeitando vigência e afastamentos confirmados; confira antes de salvar. Um dia explicitamente vazio também é um planejamento registrado. Diretor consulta, sem editar essa escala.
+RH/Diretor e Administrador podem ajustar escala mínima nominal com justificativa quando exigida. A sugestão usa histórico do mesmo dia da semana, respeitando vigência e afastamentos confirmados; confira antes de salvar. Um dia explicitamente vazio também é um planejamento registrado.
 
 Conflitos dependem da visão e do critério selecionados: cargo, equipe, cargo e equipe, função ou simultaneidade. São alertas de planejamento, não recusas automáticas. Conflito manual exige justificativa e deve ser resolvido/cancelado pelo fluxo próprio, preservando a autoria.
 

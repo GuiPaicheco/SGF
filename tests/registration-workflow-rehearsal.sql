@@ -30,7 +30,7 @@ begin
  insert into access_checks select 'approval creates exactly one person',count(*)=1 from public.servidores where cpf='91991991926';
  insert into access_checks select 'approval creates two bonds',count(*)=2 from public.employment_bonds where servidor_id=person_id;
  insert into access_checks select 'approval preserves three unit contexts',count(*)=3 from public.employment_bond_units u join public.employment_bonds b on b.id=u.bond_id where b.servidor_id=person_id;
- insert into access_checks select 'approval persists four roles',cardinality(roles)=4 from public.profiles where id='f0000000-0000-0000-0000-000000000004';
+ insert into access_checks select 'approval canonicalizes legacy input into three roles',cardinality(roles)=3 and not ('diretor'=any(roles)) and 'rh'=any(roles) from public.profiles where id='f0000000-0000-0000-0000-000000000004';
  insert into access_checks select 'administrative scope recorded',exists(select 1 from public.profile_scopes where profile_id='f0000000-0000-0000-0000-000000000004' and lotacao_id='f0000000-0000-0000-0000-000000000101');
  insert into access_checks select 'approval audit identifies actor',exists(select 1 from public.audit_events where entity_id=request_id and actor_id='f0000000-0000-0000-0000-000000000001' and action='multi_bond_access_approved');
  begin

@@ -6,7 +6,7 @@
 
 Aplicação de apoio aos fluxos de férias e folgas dos servidores da Prefeitura Municipal de Betim. O SGF permite simular períodos, registrar pedidos, acompanhar decisões da chefia e do RH, administrar cadastros e visualizar a escala. **O comprovante registra o protocolo; ele não autoriza o afastamento.**
 
-Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologação](docs/GUIA_HOMOLOGACAO.md) e [roteiro de treinamento](docs/ROTEIRO_APRESENTACAO.md). Treinamento de 14 slides: [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e [PowerPoint](docs/apresentacao/SGF_Treinamento_20261009_final.pptx). Última suíte: 290 testes aprovados. A revisão técnica não substitui o aceite do RH/Jurídico.
+Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologação](docs/GUIA_HOMOLOGACAO.md) e [roteiro de treinamento](docs/ROTEIRO_APRESENTACAO.md). Treinamento de 14 slides: [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e [PowerPoint](docs/apresentacao/SGF_Treinamento_20261009_final.pptx). Última suíte: 302 testes aprovados. A revisão técnica não substitui o aceite do RH/Jurídico.
 
 > **Estado do projeto (02/10/2026):** piloto em desenvolvimento. Os fluxos foram implementados e verificados localmente, mas as regras de direito a férias e a política de senhas ainda exigem homologação institucional antes de uso em produção. Veja [pendências](docs/pendencias.md) e [revisão técnica](docs/REVISAO_TECNICA.md).
 
@@ -17,7 +17,7 @@ Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologaçã
 | Interface | Site estático em HTML, CSS e JavaScript, sem compilação do frontend |
 | Dados e autenticação | Supabase Auth, PostgreSQL com RLS e Edge Functions |
 | Hospedagem atual | Vercel publica somente `dist/`; o backend permanece no Supabase |
-| Acessos | Público (simulação), Servidor, Diretor, RH e Administrador; uma conta pode reunir os quatro acessos autenticados |
+| Acessos | Público (simulação), Servidor, RH/Diretor e Administrador; uma conta pode reunir os três acessos autenticados |
 | Rastreabilidade | Protocolo, análise independente por CNES, inclusão explícita no calendário, autoria e histórico |
 | Administração | CNES e lotação principal, calendário institucional, escala mínima nominal, cadastro e desativação com histórico preservado |
 | Uso em produção | Condicionado à homologação do RH e às verificações descritas abaixo |
@@ -29,11 +29,11 @@ Procedimentos atuais: [manual de uso](docs/MANUAL_USO.md), [guia de homologaçã
 3. Após login por CPF ou e-mail, escolhe perfil, matrícula e contexto. O servidor confere dados, modalidade e datas e atribui um CNES responsável a cada dia útil. O envio registra protocolo e revisões por unidade.
 4. Cada CNES analisa somente seus dias. **Aprovar**, **Recusar** com justificativa e **Adicionar ao Calendário** são ações diferentes. Aprovação não confirma automaticamente a ausência no calendário.
 5. A primeira inclusão da folga no calendário debita as horas uma única vez por matrícula. Recusa ou cancelamento estorna eventual débito, preservando o histórico. Ajustes de calendário podem gerar recálculo e pendência de responsáveis diários.
-6. O servidor acompanha situação, decisões, comprovante e notificações em **Meus pedidos**. Diretor, RH e administrador consultam a escala no contexto autorizado. RH e administrador mantêm escala mínima e conflitos justificados; Diretor não recebe esses editores. Arquivamento afeta apenas a fila de quem o realiza.
+6. O servidor acompanha situação, decisões, comprovante e notificações em **Meus pedidos**. RH/Diretor e Administrador consultam a escala no contexto autorizado e mantêm escala mínima e conflitos justificados. Arquivamento afeta apenas a fila de quem o realiza.
 
 Na interface, **Entrar no SGF** é a ação principal da página inicial. O login reúne acesso existente, recuperação de senha e solicitação de novo acesso em caminhos separados. Depois de entrar, a navegação superior concentra as áreas disponíveis para cada perfil; cada tela destaca sua próxima ação. Na análise de pedidos, a decisão aparece antes dos detalhes de histórico e calendário.
 
-O login usa CPF ou e-mail e senha. O alias legado `admin` permanece no piloto e deverá ser substituído por responsáveis identificados antes do uso institucional. Uma conta pode reunir **Servidor**, **Diretor**, **RH** e **Administrador**, com escolha e troca de contexto. Contas manuais aprovadas entram com senha provisória `123456` e exigem troca no primeiro acesso. A recuperação usa o e-mail cadastrado. **Público** permite simulação e solicitação de cadastro, sem acesso à gestão.
+O login usa CPF ou e-mail e senha. O alias legado `admin` permanece no piloto e deverá ser substituído por responsáveis identificados antes do uso institucional. Uma conta pode reunir **Servidor**, **RH/Diretor** e **Administrador**, com escolha e troca de contexto. O código operacional da gestão unificada é `rh`; `diretor` foi normalizado nos perfis e permanece apenas na compatibilidade/histórico. Contas manuais aprovadas entram com senha provisória `123456` e exigem troca no primeiro acesso. A recuperação usa o e-mail cadastrado. **Público** permite simulação e solicitação de cadastro, sem acesso à gestão.
 
 O piloto atual usa Vercel e Supabase compartilhado atualizado até os ensaios de 09/10/2026, descritos nos relatórios dos blocos. Netlify e aprovações sequenciais pertencem ao histórico de compatibilidade. Em outros ambientes, aplique a cadeia completa de migrations e publique as funções correspondentes antes de usar este frontend. Não conecte a versão antiga ao banco atualizado.
 
@@ -60,7 +60,7 @@ Para um ambiente independente, configure a URL e a chave publicável do Supabase
 | Caminho | Responsabilidade |
 |---|---|
 | `index.html` | Estrutura inicial, metadados e carregamento de recursos |
-| `assets/app.js` | Navegação, simulação de períodos e telas dos quatro perfis |
+| `assets/app.js` | Navegação, simulação de períodos e telas dos três perfis |
 | `assets/*.css` | Estilos da interface, calendário, escala e impressão |
 | `supabase/functions/` | Login, envio, gestão de acessos, cadastros, inclusões e operações |
 | `supabase/migrations/` | Alterações versionadas do banco existente |
@@ -79,7 +79,7 @@ node --check assets/app.js
 node --test tests/*.test.mjs
 ```
 
-Esses comandos verificam a sintaxe do frontend, a simulação rápida, os quatro contextos de acesso, permissões, mudanças de situação, acessibilidade básica, responsividade estrutural e consistência dos períodos enviados. O GitHub Actions executa a mesma suíte em cada envio à `main` e em pull requests. Os resultados da revisão visual e da conferência remota estão em [VALIDACAO_UI.md](docs/VALIDACAO_UI.md). Os testes não substituem a homologação dos cálculos pelo RH nem a validação pós-publicação nos navegadores institucionais.
+Esses comandos verificam a sintaxe do frontend, a simulação rápida, os três perfis atuais e a compatibilidade dos contextos legados, permissões, mudanças de situação, acessibilidade básica, responsividade estrutural e consistência dos períodos enviados. O GitHub Actions executa a mesma suíte em cada envio à `main` e em pull requests. Os resultados da revisão visual e da conferência remota estão em [VALIDACAO_UI.md](docs/VALIDACAO_UI.md). Os testes não substituem a homologação dos cálculos pelo RH nem a validação pós-publicação nos navegadores institucionais.
 
 ## Implantação e configuração
 

@@ -20,13 +20,14 @@ insert into public.profile_scopes(profile_id,lotacao_id) values
  ('f0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000101');
 insert into public.servidores(id,profile_id,matricula,employment_type,full_name,lotacao_id) values
  ('f0000000-0000-0000-0000-000000000201','f0000000-0000-0000-0000-000000000002','RLS-TEST-01','estatutario','Teste servidor rollback','f0000000-0000-0000-0000-000000000101');
-insert into public.employment_bonds(id,servidor_id,registration,employment_type) values
- ('f0000000-0000-0000-0000-000000000301','f0000000-0000-0000-0000-000000000201','RLS-TEST-01','estatutario'),
- ('f0000000-0000-0000-0000-000000000303','f0000000-0000-0000-0000-000000000201','RLS-TEST-02','estatutario');
-insert into public.employment_bond_units(bond_id,cnes_unit_id,internal_lotacao_id) values
- ('f0000000-0000-0000-0000-000000000301','f0000000-0000-0000-0000-000000000901','f0000000-0000-0000-0000-000000000101'),
- ('f0000000-0000-0000-0000-000000000301','f0000000-0000-0000-0000-000000000901','f0000000-0000-0000-0000-000000000102'),
- ('f0000000-0000-0000-0000-000000000303','f0000000-0000-0000-0000-000000000901','f0000000-0000-0000-0000-000000000101');
+-- Vigência explícita: ensaios com datas fixas não dependem do dia de execução.
+insert into public.employment_bonds(id,servidor_id,registration,employment_type,valid_from) values
+ ('f0000000-0000-0000-0000-000000000301','f0000000-0000-0000-0000-000000000201','RLS-TEST-01','estatutario','2020-01-01'),
+ ('f0000000-0000-0000-0000-000000000303','f0000000-0000-0000-0000-000000000201','RLS-TEST-02','estatutario','2020-01-01');
+insert into public.employment_bond_units(bond_id,cnes_unit_id,internal_lotacao_id,valid_from) values
+ ('f0000000-0000-0000-0000-000000000301','f0000000-0000-0000-0000-000000000901','f0000000-0000-0000-0000-000000000101','2020-01-01'),
+ ('f0000000-0000-0000-0000-000000000301','f0000000-0000-0000-0000-000000000901','f0000000-0000-0000-0000-000000000102','2020-01-01'),
+ ('f0000000-0000-0000-0000-000000000303','f0000000-0000-0000-0000-000000000901','f0000000-0000-0000-0000-000000000101','2020-01-01');
 insert into public.vacation_requests(id,servidor_id,type,start_date,end_date,return_date,context_bond_id) values
  ('f0000000-0000-0000-0000-000000000501','f0000000-0000-0000-0000-000000000201','regulamentar','2026-10-08','2026-10-09','2026-10-13','f0000000-0000-0000-0000-000000000301'),
  ('f0000000-0000-0000-0000-000000000502','f0000000-0000-0000-0000-000000000201','regulamentar','2026-10-08','2026-10-09','2026-10-13','f0000000-0000-0000-0000-000000000301'),
@@ -42,7 +43,7 @@ insert into access_checks select 'RH only own reviews',count(*)=2 from public.va
 insert into access_checks select 'RH cannot read other directorate',count(*)=0 from public.vacation_requests where id='f0000000-0000-0000-0000-000000000502';
 insert into access_checks select 'browser cannot update requests',not has_table_privilege('authenticated','public.vacation_requests','UPDATE');
 select set_config('request.headers','{"x-sgf-role":"diretor","x-sgf-cnes":"f0000000-0000-0000-0000-000000000901","x-sgf-lotacao":"f0000000-0000-0000-0000-000000000101"}',true);
-insert into access_checks select 'director same scope isolation',count(*)=2 from public.vacation_requests where id::text like 'f0000000%';
+insert into access_checks select 'legacy director context must be reselected as management',count(*)=0 from public.vacation_requests where id::text like 'f0000000%';
 select set_config('request.headers','{"x-sgf-role":"administrador"}',true);
 insert into access_checks select 'admin consolidated',count(*)=3 from public.vacation_requests where id::text like 'f0000000%';
 select set_config('request.jwt.claim.sub','f0000000-0000-0000-0000-000000000002',true);
