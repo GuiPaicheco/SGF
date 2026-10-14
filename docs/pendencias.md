@@ -58,6 +58,8 @@ Sem itens técnicos ativos neste bloco. Snapshot parcial não equivale a backup 
 
 ### 08.A — Revisão técnica atual
 
+Contexto de unidade reafirmado em 14/10: RH/Diretor consulta somente funcionários do CNES/lotação selecionado, não a união de todos os seus escopos. Cadastro usa vínculos da unidade, com resultado vazio quando não há funcionários; diretorias com mesmo CNES continuam separadas. Aviso de contexto adicionado à tela; Administrador conserva visão global. Não alterados vínculos ou permissões nesta rodada.
+
 Auditoria técnica e correções de 14/10: [AUDITORIA_TECNICA_20261014.md](AUDITORIA_TECNICA_20261014.md). Achados A01–A06 corrigidos: três perfis funcionais (Servidor, RH/Diretor e Administrador), busca por vínculo, conflitos pela projeção do calendário, preservação de atribuições/observações, sincronização em lote e proteção de respostas atrasadas. Migração `20261014153031` aplicada no Supabase; escopos e contas preservados, sem trocar senhas ou apagar histórico. Papéis históricos continuam legíveis, mas novos perfis são normalizados para os três acessos. 302 testes locais e nove cenários SQL reais com rollback aprovados; não equivalem a auditoria visual.
 
 Identidade atualizada em 14/10: SGF significa **Sistema de Gestão de Funcionários**. Férias e folgas são funcionalidades atuais, não o escopo definitivo. Nome corrigido no cabeçalho, título/descrição, comprovante, README e roteiro. Slides e capturas históricos de 09/10 ainda retratam a identidade anterior; atualizar na próxima revisão do material, sem tratá-los como versão atual do nome.

@@ -7,6 +7,18 @@ const load=async name=>import(`data:text/javascript;base64,${Buffer.from(stripTy
 const {validateAccessContext}=await load('access-context');
 const {employeeInAccessContext,accessRequestInScope}=await load('employee-scope');
 const {actionAllowed}=await load('action-policy');
+
+test('lista cadastral usa somente o contexto escolhido e não todas as unidades autorizadas',async()=>{
+  const source=await readFile(new URL('../supabase/functions/manage-catalogs/index.ts',import.meta.url),'utf8');
+  assert.match(source,/id===context\.cnesUnitId/);
+  assert.match(source,/assignments\.eq\('internal_lotacao_id', context\.lotacaoId\)/);
+  assert.match(source,/assignments\.is\('internal_lotacao_id', null\)/);
+  assert.match(source,/employeeQuery = employeeQuery\.in\('id', employeeIds\?\.length \? employeeIds : \['00000000-0000-0000-0000-000000000000'\]\)/);
+  assert.match(source,/locationQuery = locationQuery\.eq\('id', context\.lotacaoId\)/);
+  const app=await readFile(new URL('../assets/app.js',import.meta.url),'utf8');
+  assert.match(app,/Funcionários somente da unidade selecionada:/);
+  assert.match(app,/Visão administrativa global/);
+});
 function fixtures() {return {
   profiles:[{id:'p',roles:['servidor','rh','administrador','diretor'],disabled_at:null,must_change_password:false}],
   lotacoes:[{id:'a',active:true,is_internal_allocation:true},{id:'b',active:true,is_internal_allocation:true},{id:'general',active:true,is_internal_allocation:false}],
