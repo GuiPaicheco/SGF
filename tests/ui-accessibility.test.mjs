@@ -12,6 +12,13 @@ const css = [
 ].join('\n');
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
+test('identidade SGF representa gestão de funcionários, não apenas férias e folgas', () => {
+  for (const source of [html, app, readFileSync(new URL('../README.md', import.meta.url), 'utf8'), readFileSync(new URL('./receipt-print.html', import.meta.url), 'utf8')]) {
+    assert.match(source, /Sistema de Gestão de Funcionários/);
+    assert.doesNotMatch(source, /Sistema de Gestão de Férias e Folgas/);
+  }
+});
+
 test('validação informa sucesso e erro sem depender apenas de cor', () => {
   assert.match(app, /aria-invalid/);
   assert.match(app, /Atenção: verifique este campo/);

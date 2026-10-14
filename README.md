@@ -1,4 +1,4 @@
-# SGF — Sistema de Gestão de Férias e Folgas
+# SGF — Sistema de Gestão de Funcionários
 
 **Piloto publicado:** https://sgfbetim.vercel.app — Vercel, com deploy contínuo da branch `main`. Backend Supabase preservado. Publicação não substitui a homologação funcional/institucional; consulte [hospedagem](docs/HOSPEDAGEM.md).
 

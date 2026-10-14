@@ -15,7 +15,7 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
 ## Estrutura sugerida dos slides
 
 1. **Abertura: SGF**  
-   Sistema de Gestão de Férias e Folgas. Explique o objetivo do treinamento e informe que os dados exibidos são fictícios.
+   Sistema de Gestão de Funcionários. Explique que férias e folgas são funcionalidades atuais, não o limite do sistema. Informe que os dados exibidos são fictícios.
 
 2. **O que muda na rotina**  
    Compare o cenário atual, com mensagens, planilhas e conferências dispersas, ao fluxo centralizado: pedido autenticado, análise em etapas, calendário, escala mínima e histórico.
