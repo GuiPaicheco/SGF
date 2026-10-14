@@ -46,3 +46,17 @@ test('retorno explícito à tela inicial permanece disponível em celular', () =
   assert.match(mobile, /#home-action\s*\{\s*display:\s*inline-flex/);
   assert.match(html, /id="home-action"[^>]*data-go="home"/);
 });
+
+test('movimento reduzido é respeitado na navegação e nos avisos', () => {
+  assert.match(app, /window\.matchMedia\?\.\('\(prefers-reduced-motion: reduce\)'\)\.matches \? 'auto' : 'smooth'/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.spinner \{ animation: none; \}/);
+  assert.match(css, /\.choice, \.toast \{ transition: none; \}/);
+});
+
+test('impressão restaura colunas de A4 independentemente do layout móvel', () => {
+  const print = receipt.slice(receipt.indexOf('@media print'));
+  assert.match(print, /\.signature-grid\s*\{[^}]*grid-template-columns: 1fr 1fr;/);
+  assert.match(print, /\.receipt-protocol\s*\{[^}]*grid-template-columns: 1\.25fr 1fr 1fr;/);
+  assert.match(print, /\.receipt-data-wide\s*\{[^}]*grid-column: 1 \/ -1;/);
+  assert.match(print, /\.receipt-head, \.receipt-notes, \.receipt-warning\s*\{\s*break-inside: avoid;/);
+});

@@ -2,6 +2,14 @@
 
 Planejamento atualizado em 14/10/2026: por decisão do responsável, a aprovação do RH Central e os testes de aceite por RH ou Diretor ocorrerão quando as mudanças do sistema estiverem concluídas. A revisão técnica continua agora, sem depender de nomear esses responsáveis antecipadamente. Não representa dispensa nem aprovação das regras. Fila dividida em 08.A (técnica atual) e 08.B (homologação futura) em pendencias.md.
 
+## Atualização técnica — 14/10/2026
+
+- Revisão estática de navegação/foco, região de avisos, idioma/UTF-8, animação e impressão; não equivale a inspeção de todas as telas renderizadas.
+- Movimento reduzido: navegação usa rolagem imediata quando a preferência está ativa; spinner e transições de cards/avisos deixam de animar. A escala já possui proteção própria contra movimento.
+- Impressão: colunas de protocolo, dados e assinaturas explicitamente restauradas em `@media print`; cabeçalho, observações e aviso evitam quebra interna. Documentos extensos ainda podem ocupar mais de uma página; não foi prometida uma página A4 universal.
+- JS/CSS versionados `20261014-block8-3`; duas regressões adicionadas, suíte local 290/290 aprovada. Sem alteração de banco ou dados.
+- Inicialização de Computer Use e do navegador falhou antes de qualquer ação por indisponibilidade do caminho de assets do runtime. Zoom 200%, leitor de tela, impressão visual e revisão integral dos formulários continuam não executados. O acesso a arquivos funciona pelo terminal alternativo; essa falha não demonstra defeito no SGF.
+
 Data: 09/10/2026. **Em andamento; não há aceite institucional.** A primeira rodada abaixo foi somente leitura, sem alterar banco, pedidos, contas, saldo, decisões ou senha. A segunda rodada criou exclusivamente dados fictícios novos para ensaio, conforme seção 04. A conta de recuperação existente foi preservada.
 
 ## 01. Evidências desta revisão

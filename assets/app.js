@@ -117,7 +117,7 @@
     const version = navigationVersion, route = state.route, context = state.activeContext, user = state.session?.user?.id, role = state.profile?.role;
     return () => version === navigationVersion && route === state.route && context === state.activeContext && user === state.session?.user?.id && role === state.profile?.role;
   }
-  const go = route => { navigationVersion++; state.route = SGFAccessPolicy.resolve(route,state.profile?.role,Boolean(state.session),state.profile?.must_change_password); window.scrollTo({ top: 0, behavior: 'smooth' }); if (state.route === 'stored-receipt') { renderStoredReceipt(); app.focus({ preventScroll: true }); } else render(); };
+  const go = route => { navigationVersion++; state.route = SGFAccessPolicy.resolve(route,state.profile?.role,Boolean(state.session),state.profile?.must_change_password); window.scrollTo({ top: 0, behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); if (state.route === 'stored-receipt') { renderStoredReceipt(); app.focus({ preventScroll: true }); } else render(); };
 
   async function loadCalendarEvents() {
     if (!client) return;

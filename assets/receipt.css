@@ -255,6 +255,20 @@
     break-inside: avoid;
     gap: 14mm;
     margin-top: 19mm;
+    grid-template-columns: 1fr 1fr;
+  }
+  .receipt-protocol {
+    grid-template-columns: 1.25fr 1fr 1fr;
+    break-inside: avoid;
+  }
+  .receipt-data {
+    grid-template-columns: 2fr 1fr;
+  }
+  .receipt-data-wide {
+    grid-column: 1 / -1;
+  }
+  .receipt-head, .receipt-notes, .receipt-warning {
+    break-inside: avoid;
   }
   .receipt-footer {
     margin-top: 5mm;
