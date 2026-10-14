@@ -4,6 +4,8 @@ Atualização: 14/10/2026. Esta é a lista ativa, agrupada por dependência. Con
 
 ## Situação confirmada
 
+Ponto de retomada para a próxima sessão: [RETOMADA_20261014.md](RETOMADA_20261014.md). Código funcional publicado, banco conferido e pendências restantes separadas; `logo.png` local preservado fora dos commits.
+
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
