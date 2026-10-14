@@ -9,7 +9,7 @@ Ponto de retomada para a próxima sessão: [RETOMADA_20261014.md](RETOMADA_20261
 - Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
 - Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
 - Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 306 testes locais aprovados em 14/10/2026.
+- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 309 testes locais aprovados em 14/10/2026.
 - Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
 - Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
 - Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
@@ -59,6 +59,8 @@ Sem itens técnicos ativos neste bloco. Snapshot parcial não equivale a backup 
 **Em andamento.** Revisão pública/administrativa realizada no Chrome, equipe filtrada por CNES conferida, comprovante e principais áreas carregados sem erro de console. Botão Tela inicial corrigido e testado no celular publicado; login/rodapé e foco inicial de teclado conferidos em tablet. 287 testes aprovados. Manual atual, guia de 20 casos, roteiro e imagens entregues; hospedagem corrigida e instruções antigas de operação identificadas como históricas. Evidências e limites em [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md). Não há aceite institucional nem revisão integral de todos os formulários/perfis nesta rodada.
 
 ### 08.A — Revisão técnica atual
+
+README reestruturado em 14/10 como documentação de entrada do repositório: execução, configuração, build/testes, estrutura, implantação e licença. Conteúdo de treinamento e histórico permanece em docs, sem misturá-lo às instruções atuais. Não altera funcionalidades ou banco.
 
 CNES do cadastro ordenados em 14/10: caixas de atuação e unidade polo usam ordem alfabética por nome em português, sem ordenar pelo código nem alterar o catálogo original. Componente compartilhado cobre cadastro público e administrativo.
 
