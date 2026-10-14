@@ -1,6 +1,6 @@
 # Pendências do SGF
 
-Atualização: 09/10/2026. Esta é a lista ativa, agrupada por dependência. Contém somente trabalho restante; implementação existente e validação pendente são diferenciadas. Detalhes anteriores estão em [HISTORICO_PENDENCIAS_20261008.md](HISTORICO_PENDENCIAS_20261008.md) e não formam uma segunda fila de tarefas.
+Atualização: 14/10/2026. Esta é a lista ativa, agrupada por dependência. Contém somente trabalho restante; implementação existente e validação pendente são diferenciadas. Detalhes anteriores estão em [HISTORICO_PENDENCIAS_20261008.md](HISTORICO_PENDENCIAS_20261008.md) e não formam uma segunda fila de tarefas.
 
 ## Situação confirmada
 
@@ -56,12 +56,21 @@ Sem itens técnicos ativos neste bloco. Snapshot parcial não equivale a backup 
 
 **Em andamento.** Revisão pública/administrativa realizada no Chrome, equipe filtrada por CNES conferida, comprovante e principais áreas carregados sem erro de console. Botão Tela inicial corrigido e testado no celular publicado; login/rodapé e foco inicial de teclado conferidos em tablet. 287 testes aprovados. Manual atual, guia de 20 casos, roteiro e imagens entregues; hospedagem corrigida e instruções antigas de operação identificadas como históricas. Evidências e limites em [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md). Não há aceite institucional nem revisão integral de todos os formulários/perfis nesta rodada.
 
-1. [ ] Obter validação de RH/Jurídico para admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual; usar HOMOLOGACAO_REGRAS.md. Fornecer referências normativas aprovadas, responsável pelo aceite e vigências para o catálogo de mensagens; consolidar no servidor os cálculos normativos integralmente homologados. Conferências técnicas de datas do bloco 06 não substituem esse aceite.
-2. [ ] Homologar solicitações com múltiplos autorizadores e validar os quatro perfis com usuários responsáveis. Conferir se CNES, lotações internas, equipes, vínculos e autorizadores cadastrados correspondem à organização real; isso não bloqueia o desenvolvimento do piloto nem exige INE.
-3. [ ] Completar revisão de todas as telas/detalhes dos quatro perfis com dados representativos, incluindo pedidos ativos, correções e decisões: codificação, botões, alinhamento, navegação, responsividade e acessibilidade. Revisão inicial pública/administrativa e teste de UTF-8 ampliado entregues; completar tablet, teclado/zoom/leitor de tela e impressão.
-4. [ ] Validar navegadores/equipamentos usados pela Prefeitura.
-5. [ ] Registrar evidências e aceite institucional; testes técnicos e recuperação da conta teste não encerram esse grupo.
-6. [ ] Ratificar política de retenção, responsáveis e eventual anonimização do histórico, conforme AUDITORIA_RETENCAO.md. Procedimento técnico entregue no bloco 05; nenhum prazo legal ou descarte foi definido pelo sistema.
+### 08.A — Revisão técnica atual
+
+1. [ ] Completar revisão de todas as telas/detalhes dos quatro perfis com dados representativos, incluindo pedidos ativos, correções e decisões: codificação, botões, alinhamento, navegação e responsividade.
+2. [ ] Completar navegação por teclado, tablet, zoom 200%, leitor de tela e impressão. Registrar separadamente testes executados e limitações; não declarar acessibilidade integral com base apenas nos testes automatizados.
+3. [ ] Registrar resultados, corrigir problemas encontrados e atualizar manual/treinamento se as próximas mudanças alterarem o fluxo.
+
+### 08.B — Homologação institucional futura, após as mudanças
+
+Decisão do responsável em 14/10/2026: o sistema continuará recebendo mudanças. Quando estiver pronto, alguém do RH Central será indicado para aprovar e alguém do RH ou Diretor para testar. Estes itens não bloqueiam a revisão técnica nem o desenvolvimento atual; permanecem necessários antes do uso institucional definitivo. Não há aceite antecipado.
+
+1. [ ] Submeter regras e referências normativas ao RH Central, com apoio jurídico quando necessário: admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual. Registrar responsáveis/vigências e ajustar os cálculos conforme a decisão aprovada.
+2. [ ] Executar aceite funcional com RH ou Diretor: solicitações com múltiplos autorizadores, quatro perfis e correspondência de CNES, lotações, equipes, vínculos e autorizadores à organização real. INE não é exigido.
+3. [ ] Validar navegadores/equipamentos usados pela Prefeitura na versão candidata ao aceite.
+4. [ ] Ratificar política de retenção, responsáveis e eventual anonimização, conforme AUDITORIA_RETENCAO.md. Nenhum prazo legal ou descarte foi definido pelo sistema.
+5. [ ] Registrar evidências e aceite nominal da versão final; ensaios técnicos não substituem a aprovação institucional.
 
 Entrega adicional de 09/10: ciclo moderno real com conta nova fictícia, quatro perfis, duas matrículas e dois CNES; aprovações e inclusões independentes, débito único de 32h e saldo da segunda matrícula preservado. Corrigidos aviso residual entre contextos, identificação por matrícula na escala mínima, datas exibidas nos filtros mensais e foco de teclado. Slides finais de 14 páginas entregues no [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e em [PowerPoint](apresentacao/SGF_Treinamento_20261009_final.pptx), com capturas fictícias e notas do instrutor. Material retirado da fila ativa; revisão integral de acessibilidade e aceite institucional não foram declarados concluídos.
 

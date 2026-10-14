@@ -1,5 +1,7 @@
 # Bloco 08 — revisão técnica e aceite institucional
 
+Planejamento atualizado em 14/10/2026: por decisão do responsável, a aprovação do RH Central e os testes de aceite por RH ou Diretor ocorrerão quando as mudanças do sistema estiverem concluídas. A revisão técnica continua agora, sem depender de nomear esses responsáveis antecipadamente. Não representa dispensa nem aprovação das regras. Fila dividida em 08.A (técnica atual) e 08.B (homologação futura) em pendencias.md.
+
 Data: 09/10/2026. **Em andamento; não há aceite institucional.** A primeira rodada abaixo foi somente leitura, sem alterar banco, pedidos, contas, saldo, decisões ou senha. A segunda rodada criou exclusivamente dados fictícios novos para ensaio, conforme seção 04. A conta de recuperação existente foi preservada.
 
 ## 01. Evidências desta revisão
