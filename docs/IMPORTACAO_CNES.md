@@ -1,0 +1,39 @@
+# Coleta CNES para conferência
+
+Primeira etapa da refatoração para RH, entregue em 17/10/2026. O coletor consulta as páginas oficiais do CNES de profissionais, equipes e integrantes. **Ainda não insere cadastros no Supabase** nem habilita o novo fluxo de RH; gera material para a etapa de conferência/importação.
+
+## Executar
+
+Requisito: Node.js 24. O catálogo em `config/rh-units.json` contém as 41 UBS e a Secretaria (login DAPS). Códigos são strings, preservando zeros à esquerda; não há senha nesse catálogo.
+
+```powershell
+# Uma unidade: imprime apenas contagens, sem gravar dados pessoais.
+node scripts/collect-cnes.mjs --cnes 6305245
+
+# Todas as unidades, sequencialmente; uma falha não interrompe as demais.
+node scripts/collect-cnes.mjs --all
+
+# Gerar arquivos privados de conferência, somente quando necessário.
+node scripts/collect-cnes.mjs --cnes 6305245 --save-review
+```
+
+Com `--save-review`, a saída fica em `.sgf-imports/<instante>/<cnes>.json`. A pasta é ignorada pelo Git e não é copiada pelo build estático. Os arquivos contêm nomes e identificadores profissionais usados na conciliação; restringir acesso no computador e não compartilhar/publicar como artefatos de CI. O modo de arquivo privado solicitado pelo Node não substitui configuração de permissões do Windows. Cada execução usa uma pasta própria e recusa sobrescrever o mesmo arquivo.
+
+O código de saída é 1 quando alguma unidade falha e 0 quando todas as unidades selecionadas são coletadas. `--help` mostra as opções. A saída do terminal não inclui nomes, CNS, HTML ou corpo de erro remoto.
+
+## Proteções e limites
+
+- Uma requisição por vez, intervalo mínimo de 300 ms, timeout de 15 segundos por requisição e no máximo uma retentativa para falha transitória. Não executar várias instâncias simultâneas para acelerar a coleta.
+- Limite de 2 MB por resposta, 5.000 registros profissionais e 100 equipes/10.000 integrantes por unidade. Estes são limites protetivos da ferramenta, não capacidade homologada do sistema.
+- Somente origem oficial HTTPS e caminhos previstos; sem redirecionamentos. Links de equipes devem pertencer ao CNES e município esperados.
+- Layout desconhecido, valores inválidos e total de horas inconsistente geram erro. Página de manutenção não vira cadastro vazio. Respostas explícitas de estabelecimento sem equipes/equipe sem profissionais são aceitas e continuam sujeitas à conferência.
+- Correspondência por CNS/principal e CBO, nunca só pelo nome. Mais de um vínculo candidato gera pendência, sem escolher arbitrariamente.
+- Repetição de linhas idênticas é deduplicada na coleta. `sourceKey` identifica conteúdo do registro coletado; não é matrícula municipal nem substitui a futura chave de conciliação com o cadastro existente.
+
+## Conferência e próxima etapa
+
+Toda coleta vem com `requiresReview: true`, data da consulta e competência desconhecida quando não informada pela fonte. Não inferir atualidade diária, admissão municipal, cargo municipal, matrícula ou unidade polo apenas pela ordem da listagem.
+
+Manter componentes de jornada, situação, vínculos, equipes e datas de entrada/desligamento para conferência. Contagens podem incluir registros históricos ou mais de uma ocupação da mesma pessoa: não representam automaticamente pessoas ativas distintas. Membro não conciliado fica em `pending`; profissional sem associação não deve receber equipe inventada.
+
+A etapa seguinte implementará prévia de diferenças e incorporação autorizada no cadastro, preservando correções municipais, dados anteriores e histórico. Preparação das demais unidades pode ocorrer enquanto a Diretora da Amazonas realiza o primeiro teste real; cadastro manual permanece alternativa.

@@ -4,6 +4,8 @@ Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento basea
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
+Primeiro incremento de implementação (17/10): coletor CNES e catálogo das 42 contas/unidades, com consulta sequencial, associação de equipes e exportação privada opcional para conferência. Coletas reais das 42 unidades realizadas sem gravar no banco; **324 testes locais aprovados**. Evidências e limites em [VALIDACAO_CNES_20261017.md](VALIDACAO_CNES_20261017.md). Contas, operadores e fluxo de RH ainda não implementados. A frase acima sobre ausência de importação refere-se à incorporação no banco; a coleta externa já foi ensaiada.
+
 ## 00. Diretrizes definidas pelo responsável
 
 - Ferramenta voltada ao RH das unidades e à Administração/Diretoria da DAPS. Funcionários são cadastros geridos pelo RH e não precisam de conta para ter afastamentos registrados.
@@ -101,7 +103,7 @@ Aceite: 42 logins RH mapeados aos escopos previstos, Administrador global e aces
 Pesquisa: [VIABILIDADE_CNES_SUPABASE_20261017.md](VIABILIDADE_CNES_SUPABASE_20261017.md). **Concluído no planejamento:** consultas oficiais de profissionais, equipes e composição de uma equipe da Amazonas responderam HTTP 200, além do WSDL SOAP. Equipes podem ser obtidas em outra consulta do próprio CNES; não foi demonstrada necessidade de fonte externa para esse campo. Cargo municipal e cobertura integral da API ainda exigem verificação. Nenhum dado importado.
 
 - [ ] **CN01:** ensaiar consulta SOAP de profissionais/vínculos para CNES 6305245, com paginação, estabilidade, codificação e condições de consumo. WSDL acessível não é prova de resposta funcional da operação.
-- [ ] **CN02:** integrar consultas CNES de estabelecimento/profissionais, equipes e seus integrantes; relacionar profissional, CBO, equipe e datas de entrada/desligamento sem conciliar apenas por nome. Conferir nome, jornada total/componentes, vínculo e situação. Nome de equipe basta na interface; aproveitar identificador externo disponível sem tornar INE obrigatório ao usuário.
+- [ ] **CN02:** integrar consultas CNES de estabelecimento/profissionais, equipes e seus integrantes; relacionar profissional, CBO, equipe e datas de entrada/desligamento sem conciliar apenas por nome. **Coletor implementado e ensaiado nas 42 unidades; faltam incorporação no cadastro e conferência funcional.** Nome de equipe basta na interface; aproveitar identificador externo disponível sem tornar INE obrigatório ao usuário.
 - [ ] **CN03:** distinguir competência, atualização da fonte e instante da consulta/importação. Mostrar última base disponível quando não houver atualização diária comprovada.
 - [ ] **CN04:** conferir amostra com RH Amazonas para cada vínculo/CBO/equipe, inclusive ausência de equipe e múltiplas atuações. Cargo municipal e matrícula exigem complementação municipal se ausentes.
 - [ ] **CN05:** se a API não cobrir tudo, ensaiar download por competência ou exportação autorizada do SCNES municipal. CSV/planilha pode ser entrada após layout validado, mantendo CNES como chave da unidade.
@@ -109,7 +111,7 @@ Pesquisa: [VIABILIDADE_CNES_SUPABASE_20261017.md](VIABILIDADE_CNES_SUPABASE_2026
 - [ ] **CN07:** importar para área de conferência com inclusões, alterações, ausências, origem e competência; RH revisa antes de incorporar. Repetir carga sem duplicar pessoas/vínculos.
 - [ ] **CN08:** proteger correções locais e histórico. Ausência na fonte não implica exclusão; conciliar com chaves autorizadas, nunca só por nome ou criando uma pessoa para cada CBO.
 - [ ] **CN09:** definir periodicidade, execução manual/automática, retentativas e avisos de falha. Operar com última carga aprovada e processar integração no backend.
-- [ ] **CN10:** preparar carga das 41 UBS e de toda a Secretaria, com execução por unidade e isolamento de falhas. Amazonas é primeiro teste real, não requisito de aprovação para pesquisar/carregar todas. Se necessário, permitir cadastro manual Amazonas para iniciar o teste e conciliá-lo depois sem duplicação.
+- [ ] **CN10:** preparar carga das 41 UBS e de toda a Secretaria, com execução por unidade e isolamento de falhas. **Catálogo e coleta implementados; importação/conciliação persistente ainda pendentes.** Amazonas é primeiro teste real, não requisito de aprovação para pesquisar/carregar todas. Se necessário, permitir cadastro manual Amazonas para iniciar o teste e conciliá-lo depois sem duplicação.
 
 Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, campos ausentes explícitos e nova carga sem duplicação ou perda de ajustes municipais.
 
