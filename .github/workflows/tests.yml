@@ -37,7 +37,7 @@ jobs:
       - name: Ensaiar fluxos SQL integrados sem persistir fixtures
         run: |
           set -euo pipefail
-          for scenario in access unit calendar distribution registration legacy block4 block5 block6 cnes; do
+          for scenario in access unit calendar distribution registration legacy block4 block5 block6 cnes rh; do
             node scripts/prepare-workflow-rehearsal.mjs "$scenario" | docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1
           done
           docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < tests/block-three-rehearsal.sql

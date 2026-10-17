@@ -24,8 +24,8 @@ export const validateAccessContext = async (
   if (!grantedRoles.includes(role)) throw new Error('INVALID_ACCESS_CONTEXT');
   // Revalidar no banco: sessões/contextos salvos não conservam privilégios revogados.
   const { data: account, error: accountError } = await admin.from('profiles')
-    .select('roles,disabled_at,must_change_password').eq('id',profileId).single();
-  if(accountError || !account || account.disabled_at || account.must_change_password
+    .select('roles,disabled_at,must_change_password,institutional_cnes_unit_id').eq('id',profileId).single();
+  if(accountError || !account || account.institutional_cnes_unit_id || account.disabled_at || account.must_change_password
     || !account.roles?.includes(role)) throw new Error('INVALID_ACCESS_CONTEXT');
 
   if (role === 'administrador') {

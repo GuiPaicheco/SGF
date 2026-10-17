@@ -31,6 +31,7 @@ async function runAuth(payload, { deliveryError = null, signedIn = true, passwor
   const source = redirectSource + '\n' + readFileSync(new URL('../supabase/functions/access-auth/index.ts', import.meta.url), 'utf8').replace(/^import .*;\r?\n/gm, '');
   let clients = 0;
   runInNewContext(stripTypeScriptTypes(source), {
+    catalog: [], normalizeUnitLogin: value=>value,
     createClient: () => clients++ === 0 ? admin : { auth: { resetPasswordForEmail: async () => ({ error: deliveryError }) } },
     Deno: { env: { get: () => 'configured' }, serve: fn => { handler = fn; } },
     Request, Response, URL, crypto: globalThis.crypto, TextEncoder, console: { error() {} },

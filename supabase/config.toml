@@ -30,3 +30,6 @@ verify_jwt = false
 # Verifica a identidade com getUser e revalida Administrador/contexto no corpo.
 [functions.manage-cnes]
 verify_jwt = false
+
+[functions.manage-rh]
+verify_jwt = false

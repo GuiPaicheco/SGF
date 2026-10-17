@@ -1,0 +1,40 @@
+(function(root){
+ 'use strict';
+ async function mount({app,esc,request,isCurrent}){
+  let units=[],unit='',page=0,list={entries:[],total:0},busy=false,error='',notice='';
+  const load=async()=>{({units}=await request({action:'directory'}));unit=unit||units[0]?.cnes||'';list=await request({action:'candidates',cnes:unit,page});};
+  const run=async task=>{if(busy||!isCurrent())return;busy=true;error='';draw();try{await task();}catch(e){error=e.message;}finally{busy=false;if(isCurrent())draw();}};
+  function draw(){
+   if(!isCurrent())return;
+   const selected=units.find(row=>row.cnes===unit),account=selected?.account;
+   app.innerHTML=`<section class="card"><h2>Contas RH e operadores</h2><p>Uma conta por unidade. O operador seleciona seu nome entre os autorizados; essa seleção é uma identificação declarada.</p><p>${units.filter(row=>row.account?.profile_id).length} de ${units.length} contas provisionadas.</p>${error?`<p role="alert">${esc(error)}</p>`:''}${notice?`<p role="status">${esc(notice)}</p>`:''}<div class="field"><label for="rh-unit">Unidade</label><select class="control" id="rh-unit" ${busy?'disabled':''}>${units.map(row=>`<option value="${esc(row.cnes)}" ${row.cnes===unit?'selected':''}>${esc(row.login)} · ${row.account?.profile_id?'Criada':'Pendente'}</option>`).join('')}</select></div><p>CNES ${esc(unit)} · ${account?.profile_id?(account.enabled?'Conta ativa':'Conta bloqueada'):'Conta ainda não criada'}</p><form id="rh-password-form"><div class="field"><label for="rh-password">Senha institucional (8 a 72 caracteres)</label><input id="rh-password" class="control" type="password" minlength="8" maxlength="72" autocomplete="new-password" required ${busy?'disabled':''}></div><div class="actions"><button class="button button-primary" name="mode" value="one" ${busy?'disabled':''}>Criar conta desta unidade</button><button class="button button-secondary" name="mode" value="all" ${busy?'disabled':''}>Criar todas as pendentes</button>${account?.profile_id?`<button class="button button-secondary" name="mode" value="reset" ${busy?'disabled':''}>Redefinir senha desta unidade</button>`:''}</div><small>Criar novamente preserva a senha de contas existentes. A redefinição encerra as sessões da unidade.</small></form>${account?.profile_id?`<button id="rh-status" class="button button-secondary" ${busy?'disabled':''}>${account.enabled?'Bloquear':'Reativar'} conta</button>`:''}<h3>Funcionários autorizados a operar</h3><p>Somente funcionários ativos incorporados do CNES desta unidade aparecem aqui.</p><div class="table-wrap"><table><thead><tr><th>Funcionário</th><th>CBO</th><th>Acesso</th></tr></thead><tbody>${list.entries.map(row=>`<tr><td>${esc(row.full_name)}</td><td>${esc(row.cbo)}</td><td><button class="button button-secondary" data-rh-grant="${esc(row.id)}" ${busy?'disabled':''}>${row.authorized?'Revogar':'Autorizar'}</button></td></tr>`).join('')||'<tr><td colspan="3">Nenhum funcionário ativo incorporado. Use a Conferência CNES antes de autorizar operadores.</td></tr>'}</tbody></table></div><div class="actions"><button id="rh-prev" class="button button-secondary" ${busy||!page?'disabled':''}>Anterior</button><span>Página ${page+1}</span><button id="rh-next" class="button button-secondary" ${busy||(page+1)*50>=list.total?'disabled':''}>Próxima</button><button data-go="cnes-import" class="button button-secondary">Conferência CNES</button></div></section>`;
+   app.querySelector('#rh-unit').onchange=e=>{unit=e.target.value;page=0;run(load);};
+   app.querySelector('#rh-prev').onclick=()=>{page--;run(load);};app.querySelector('#rh-next').onclick=()=>{page++;run(load);};
+   app.querySelector('#rh-password-form').onsubmit=e=>{e.preventDefault();const password=app.querySelector('#rh-password').value,mode=e.submitter.value;app.querySelector('#rh-password').value='';run(async()=>{
+    if(mode==='reset'){await request({action:'reset-password',cnes:unit,password});notice='Senha redefinida e sessões encerradas.';}
+    else {const pending=mode==='all'?units.filter(row=>!row.account?.profile_id):[selected];let count=0;for(const row of pending){if(!isCurrent())break;await request({action:'provision',cnes:row.cnes,password});count++;notice=`${count} conta(s) processada(s).`;draw();} }
+    await load();
+   });};
+   const status=app.querySelector('#rh-status');if(status)status.onclick=()=>run(async()=>{await request({action:'account-status',cnes:unit,enabled:!account.enabled,version:account.version});await load();});
+   for(const button of app.querySelectorAll('[data-rh-grant]'))button.onclick=()=>run(async()=>{const row=list.entries.find(item=>item.id===button.dataset.rhGrant);await request({action:'grant',cnes:unit,entryId:row.id,active:!row.authorized,version:row.version});await load();});
+  }
+  await run(load);
+ }
+ async function workspace({app,esc,request,isCurrent,onState,go}){
+  let page=0;
+  async function load(){
+   try{
+    const state=await request({action:'session'});if(!isCurrent())return;onState(state);
+    if(!state.operator){app.innerHTML=`<section class="card"><h2>Identifique o operador</h2><p>${esc(state.context.login_name)}</p><p>Selecione seu nome. Esta identificação é declarada e ficará registrada nas ações.</p><form id="rh-operator-form"><div class="field"><label for="rh-operator">Operador autorizado</label><select id="rh-operator" class="control" required><option value="">Selecione</option>${state.operators.map(row=>`<option value="${esc(row.id)}">${esc(row.name)} · ${esc(row.cbo)}</option>`).join('')}</select></div><button class="button button-primary" ${state.operators.length?'':'disabled'}>Continuar</button></form>${state.operators.length?'':'<p>Nenhum operador autorizado. O Administrador deve incorporar os funcionários do CNES e autorizar quem utilizará esta conta.</p>'}<p id="rh-error" role="alert"></p></section>`;
+     app.querySelector('#rh-operator-form').onsubmit=async e=>{e.preventDefault();const button=e.submitter;button.disabled=true;try{const next=await request({action:'select-operator',grantId:app.querySelector('#rh-operator').value});if(isCurrent()){onState(next);go('rh-workspace');}}catch(error){if(isCurrent()){app.querySelector('#rh-error').textContent=error.message;button.disabled=false;}}};return;
+    }
+    const data=await request({action:'registry',page});if(!isCurrent())return;
+    app.innerHTML=`<section class="card"><h2>${esc(data.context.login_name)}</h2><p>Operador declarado: <strong>${esc(data.operator.name)}</strong></p><button id="rh-switch" class="button button-secondary">Trocar operador</button><h3>Funcionários da unidade</h3><p>O lançamento direto no calendário será disponibilizado no próximo bloco.</p><div class="table-wrap"><table><thead><tr><th>Nome do funcionário</th><th>Cargo</th><th>CBO</th><th>Equipe</th><th>Carga horária</th></tr></thead><tbody>${data.entries.map(row=>`<tr><td>${esc(row.full_name)}</td><td>${esc(row.position||'Pendente de conferência')}</td><td>${esc(row.cbo)}</td><td>${esc(row.team_label||row.teams?.map(team=>team.name).join(', ')||'Pendente de conferência')}</td><td>${esc(row.weekly_hours??'Pendente')}</td></tr>`).join('')||'<tr><td colspan="5">Nenhum funcionário incorporado.</td></tr>'}</tbody></table></div><div class="actions"><button id="rh-prev" class="button button-secondary" ${page?'':'disabled'}>Anterior</button><span>Página ${page+1}</span><button id="rh-next" class="button button-secondary" ${(page+1)*50<data.total?'':'disabled'}>Próxima</button></div></section>`;
+    app.querySelector('#rh-switch').onclick=async()=>{try{const cleared=await request({action:'clear-operator'});if(isCurrent()){onState(cleared);go('choose-operator');}}catch(error){if(isCurrent())app.textContent=error.message;}};
+    app.querySelector('#rh-prev').onclick=()=>{page--;load();};app.querySelector('#rh-next').onclick=()=>{page++;load();};
+   }catch(error){if(isCurrent()){app.textContent=error.message;if(error.code==='RH_OPERATOR_REQUIRED'){onState(null);go('choose-operator');}}}
+  }
+  app.innerHTML='<section class="card"><p>Carregando unidade…</p></section>';await load();
+ }
+ root.SGFRhAccounts={mount,workspace};
+})(globalThis);

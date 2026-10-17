@@ -1,12 +1,14 @@
 # Pendências do SGF — gestão pelo RH e DAPS
 
-Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH, operadores e fluxo de lançamentos ainda serão entregues.
+Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores estão em publicação e ensaio autenticado; o fluxo de lançamentos ainda será entregue.
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
 Primeiro incremento (17/10): coletor CNES e catálogo das 42 unidades; coletas reais ensaiadas, 324 testes aprovados. Evidências em [VALIDACAO_CNES_20261017.md](VALIDACAO_CNES_20261017.md).
 
 Segundo bloco (17/10): prévia/incorporação administrativa, conferência municipal, associação explícita ao legado, proteção de versões e repetição de carga; **335 testes aprovados**, SQL real com rollback e navegador com API simulada. Migração e função aplicadas no piloto; nenhuma carga real incorporada. Evidências e limites em [VALIDACAO_IMPORTACAO_CNES_20261017.md](VALIDACAO_IMPORTACAO_CNES_20261017.md). Próximo bloco: contas e operadores (grupo 02 e DB11), incluindo validação com sessão administrativa real.
+
+Terceiro bloco (17/10), em validação: contas institucionais, provisionamento idempotente, autorização por CNES e seleção vinculada à sessão. **342 testes locais aprovados**, ensaio SQL com rollback aprovado e migração `20261017201513` aplicada. Provisionamento real e validação visual serão registrados ao concluir o bloco.
 
 ## 00. Diretrizes definidas pelo responsável
 

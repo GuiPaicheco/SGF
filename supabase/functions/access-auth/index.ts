@@ -1,4 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
+import catalog from '../../../config/rh-units.json' with {type:'json'};
+import {normalizeUnitLogin} from '../_shared/rh-accounts.mjs';
 import { recoveryRedirect } from '../_shared/recovery-redirect.ts';
 
 const cors = {
@@ -93,9 +95,14 @@ Deno.serve(async request => {
       const { data: identity, error: identityError } = await admin.auth.getUser(token);
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
       const { data: contextProfile, error: profileError } = await admin.from('profiles')
-        .select('id,roles,disabled_at,servidor:servidores(id,active)')
+        .select('id,roles,disabled_at,institutional_cnes_unit_id,servidor:servidores(id,active)')
         .eq('id', identity.user.id).single();
       if (profileError || !contextProfile || contextProfile.disabled_at) return json({ error: 'Conta indisponível.' }, 403);
+      if(contextProfile.institutional_cnes_unit_id) {
+        const {data: context,error}=await admin.rpc('rh_account_context',{target_profile:identity.user.id});
+        if(error||!context)return json({error:'Conta institucional indisponível.'},403);
+        return json({contexts:[context]});
+      }
       const employee = Array.isArray(contextProfile.servidor) ? contextProfile.servidor[0] : contextProfile.servidor;
       const contexts: Record<string, unknown>[] = [];
       if (contextProfile.roles?.includes('servidor') && employee?.id && employee.active) {
@@ -130,7 +137,9 @@ Deno.serve(async request => {
       if (contextProfile.roles?.includes('administrador')) contexts.push({ role: 'administrador', global: true });
       return json({ contexts });
     }
-    const identifier = String(payload.identifier ?? payload.cpf ?? '').trim().toLowerCase();
+    const rawIdentifier=String(payload.identifier ?? payload.cpf ?? '');
+    const configuredUnit=catalog.find(unit=>normalizeUnitLogin(unit.login)===normalizeUnitLogin(rawIdentifier));
+    const identifier = configuredUnit ? 'rh-'+configuredUnit.cnes : rawIdentifier.trim().toLowerCase();
     const cpf = digits(identifier);
     const cpfInput = /^[\d.\-\s]+$/.test(identifier) && validCpf(cpf);
     const emailInput = /^[^\s@]+@[^\s@]+$/.test(identifier);
@@ -212,6 +221,7 @@ Deno.serve(async request => {
     }
 
     if (action === 'recover') {
+      if(configuredUnit || /^rh-\d{7}$/.test(identifier)) return json({ok:true,message:'Para recuperar o acesso institucional, procure o Administrador.'});
       let redirectTo: string;
       try { redirectTo = recoveryRedirect(payload.redirectTo, Deno.env.get('SGF_RECOVERY_URLS') || ''); }
       catch { return json({ error: 'Endereço de recuperação inválido. Abra o SGF no endereço oficial e tente novamente.' }, 400); }
@@ -240,8 +250,9 @@ Deno.serve(async request => {
       if (password.length < 6 || password.length > 72) return json({ error: 'A senha deve ter entre 6 e 72 caracteres.' }, 400);
       const { data: identity, error: identityError } = await admin.auth.getUser(token);
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
-      const { data: passwordProfile } = await admin.from('profiles').select('roles,disabled_at').eq('id', identity.user.id).single();
+      const { data: passwordProfile } = await admin.from('profiles').select('roles,disabled_at,institutional_cnes_unit_id').eq('id', identity.user.id).single();
       if (!passwordProfile || passwordProfile.disabled_at) return json({ error: 'Conta indisponível.' }, 403);
+      if(passwordProfile.institutional_cnes_unit_id)return json({error:'A senha institucional é gerenciada pelo Administrador.'},403);
       const min = passwordProfile.roles?.includes('administrador') ? 8 : 6;
       if (password.length < min) return json({ error: `Esta conta exige pelo menos ${min} caracteres.` }, 400);
       const { error: updateError } = await admin.auth.admin.updateUserById(identity.user.id, { password });

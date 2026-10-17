@@ -103,7 +103,8 @@ Deno.serve(async request => {
     if (action === 'reset-password' || action === 'deactivate') {
       const targetId = String(payload.profile_id || '');
       if (!targetId || targetId === identity.user.id) return json({ error: 'Não é possível executar esta ação na própria conta.' }, 400);
-      const { data: target } = await admin.from('profiles').select('id,roles,disabled_at').eq('id', targetId).maybeSingle();
+      const { data: target } = await admin.from('profiles').select('id,roles,disabled_at,institutional_cnes_unit_id').eq('id', targetId).maybeSingle();
+      if(target?.institutional_cnes_unit_id)return json({error:'Gerencie esta conta pela área de contas RH.'},403);
       if (!target || target.disabled_at) return json({ error: 'Conta indisponível.' }, 404);
       if (action === 'reset-password') {
         const initialPassword = temporaryPassword();

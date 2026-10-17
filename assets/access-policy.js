@@ -12,6 +12,9 @@
   routes.administrador.add('bond-resources');
   routes.administrador.add('organization');
   routes.administrador.add('cnes-import');
+  routes.administrador.add('rh-accounts');
+  routes.rh.add('choose-operator');
+  routes.rh.add('rh-workspace');
   function allowed(route,role,session) {
     return publicRoutes.has(route) || Boolean(session && (sessionRoutes.has(route) || (Object.hasOwn(routes,role) && routes[role].has(route))));
   }
