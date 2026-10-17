@@ -1,0 +1,36 @@
+(function(root){
+ 'use strict';
+ const localMonth=()=>{const date=new Date();return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;};
+ function daysInMonth(month){const [year,number]=month.split('-').map(Number);return new Date(Date.UTC(year,number,0)).getUTCDate();}
+ function visibleAbsences(row,date,absences){return absences.filter(item=>item.bond_id===row.bond_id&&date>=item.start_date&&date<=item.end_date
+  &&(!item.distributed||item.assigned_dates?.includes(date)));}
+ const typeLabel=type=>({regulamentar:'Férias',premio:'Férias-prêmio',banco_horas:'Folga'})[type]||type;
+ async function mount({app,esc,request,isCurrent,admin=false,context,onSwitch}){
+  let month=localMonth(),search='',page=0,units=[],unit='',data=null,busy=false,error='',sequence=0;
+  async function load(){
+   const turn=++sequence;busy=true;error='';draw();
+   try{
+    if(admin&&!units.length){const directory=await request({action:'directory'});if(!isCurrent()||turn!==sequence)return;units=directory.units;unit=unit||units.find(item=>item.cnes==='6305245')?.cnes||units[0]?.cnes||'';}
+    const result=await request({action:'calendar',month,page,search,...(admin?{cnes:unit}:{})});
+    if(!isCurrent()||turn!==sequence)return;data=result;
+   }catch(e){if(turn===sequence)error=e.message;}
+   finally{if(isCurrent()&&turn===sequence){busy=false;draw();}}
+  }
+  function draw(){
+   if(!isCurrent())return;
+   const rows=data?.employees||[],absences=data?.absences||[],days=Array.from({length:daysInMonth(month)},(_,index)=>index+1);
+   const label=data?.context?.cnes_name||context?.login_name||'Calendário RH';
+   app.innerHTML=`<section class="card"><h2>Calendário da unidade</h2><p>${esc(label)}${data?.operator?.name?` · Operador declarado: ${esc(data.operator.name)}`:''}</p>${onSwitch?`<button id="rh-calendar-switch" class="button button-secondary" ${busy?'disabled':''}>Trocar operador</button>`:''}<form id="rh-calendar-filter" class="form-grid">${admin?`<div class="field field-full"><label for="rh-calendar-unit">Unidade</label><select id="rh-calendar-unit" class="control" ${busy?'disabled':''}>${units.map(item=>`<option value="${esc(item.cnes)}" ${item.cnes===unit?'selected':''}>${esc(item.login)}</option>`).join('')}</select></div>`:''}<div class="field"><label for="rh-calendar-month">Mês</label><input id="rh-calendar-month" class="control" type="month" min="1900-01" max="2100-12" required value="${esc(month)}" ${busy?'disabled':''}></div><div class="field"><label for="rh-calendar-search">Funcionário, matrícula, cargo, CBO ou equipe</label><input id="rh-calendar-search" class="control" maxlength="120" value="${esc(search)}" ${busy?'disabled':''}></div><div class="actions"><button class="button button-primary" ${busy?'disabled':''}>Consultar</button></div></form>${error?`<p role="alert">${esc(error)}</p>`:''}${busy?'<p role="status">Carregando calendário…</p>':''}${data&&!busy&&!error?`<p>${data.total} atuação(ões) · Página ${page+1}. Consulta dos afastamentos programados. F = férias · P = férias-prêmio · B = folga.</p><p>Dados não conferidos e registros antigos estão identificados na lista. Um mesmo vínculo pode ter mais de uma atuação/CBO.</p><div class="table-wrap rh-calendar-wrap" role="region" aria-label="Calendário mensal; role horizontalmente para ver todos os dias" tabindex="0"><table class="rh-calendar"><caption>${esc(month)} · ${esc(label)}</caption><thead><tr><th scope="col">Nome do funcionário</th><th scope="col">Cargo</th><th scope="col">CBO</th><th scope="col">Equipe</th>${days.map(day=>`<th scope="col" class="rh-day" title="${month}-${String(day).padStart(2,'0')}">${day}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr><th scope="row"><strong>${esc(row.full_name||'Nome pendente')}</strong><br><small>${esc(row.registration||'Matrícula pendente')} · ${row.origin==='legado'?'Legado':row.binding_confirmed?'Vínculo conferido':'Conferência pendente'}${row.weekly_hours!=null?` · ${esc(row.weekly_hours)} h/semana`:''}</small></th><td>${esc(row.position||'Pendente')}</td><td>${esc(row.cbo||'Pendente')}</td><td>${esc(row.team||'Pendente')}</td>${days.map(day=>{
+    const date=month+'-'+String(day).padStart(2,'0'),matches=visibleAbsences(row,date,absences),holiday=data.holidays?.find(item=>item.date===date);
+    const weekend=[0,6].includes(new Date(date+'T12:00:00Z').getUTCDay());
+    const labels=matches.map(item=>`${typeLabel(item.type)} · ${item.protocol||item.id} · ${item.origin==='legado'?'Legado':'RH'}`);
+    return `<td class="rh-day ${matches.length?'rh-absent':holiday||weekend?'rh-nonworking':''}" title="${esc([date,holiday?.name,...labels].filter(Boolean).join(' · '))}">${matches.length?`<span aria-label="${esc(labels.join('; '))}">${[...new Set(matches.map(item=>item.type==='regulamentar'?'F':item.type==='premio'?'P':'B'))].join('/')}</span>`:'—'}</td>`;
+   }).join('')}</tr>`).join('')||`<tr><td colspan="${days.length+4}">Nenhum funcionário corresponde à consulta. Selecione outra unidade ou confira a carga CNES.</td></tr>`}</tbody></table></div><div class="actions"><button id="rh-calendar-prev" class="button button-secondary" ${page?'':'disabled'}>Anterior</button><span>Página ${page+1}</span><button id="rh-calendar-next" class="button button-secondary" ${(page+1)*50<data.total?'':'disabled'}>Próxima</button></div><details><summary>Afastamentos exibidos neste mês</summary><ul>${[...new Map(absences.map(item=>[item.id+':'+item.sequence,item])).values()].map(item=>`<li>${esc(item.protocol||item.id)} · ${esc(typeLabel(item.type))} · ${esc(item.start_date)} a ${esc(item.end_date)} · retorno ${esc(item.return_date||'Pendente')} · Legado</li>`).join('')||'<li>Nenhum afastamento programado nesta consulta.</li>'}</ul></details><p>Registros antigos sem vínculo identificado continuam disponíveis no calendário legado.</p>`:''}</section>`;
+   app.querySelector('#rh-calendar-filter').onsubmit=e=>{e.preventDefault();if(busy)return;month=app.querySelector('#rh-calendar-month').value;search=app.querySelector('#rh-calendar-search').value;if(admin)unit=app.querySelector('#rh-calendar-unit').value;page=0;load();};
+   const prev=app.querySelector('#rh-calendar-prev'),next=app.querySelector('#rh-calendar-next');if(prev)prev.onclick=()=>{if(!busy&&page){page--;load();}};if(next)next.onclick=()=>{if(!busy){page++;load();}};
+   const change=app.querySelector('#rh-calendar-switch');if(change)change.onclick=async()=>{change.disabled=true;try{const selection=await request({action:'clear-operator'});if(isCurrent())onSwitch(selection);}catch(e){if(isCurrent()){error=e.message;draw();}}};
+  }
+  await load();
+ }
+ root.SGFRhCalendar={mount,daysInMonth,visibleAbsences};
+})(globalThis);

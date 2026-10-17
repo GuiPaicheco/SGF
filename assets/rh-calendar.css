@@ -1,0 +1,15 @@
+.rh-calendar-wrap { max-height: 70vh; margin-block: 1rem; }
+.rh-calendar { border-collapse: separate; border-spacing: 0; font-size: .82rem; }
+.rh-calendar caption { text-align: left; padding: .75rem; font-weight: 700; }
+.rh-calendar th, .rh-calendar td { border-right: 1px solid #dce5e0; border-bottom: 1px solid #dce5e0; }
+.rh-calendar thead th { position: sticky; top: 0; z-index: 3; background: #eaf3ee; }
+.rh-calendar th:first-child { min-width: 220px; max-width: 220px; white-space: normal; }
+.rh-calendar th:nth-child(2), .rh-calendar td:nth-child(2) { min-width: 160px; max-width: 160px; white-space: normal; }
+.rh-calendar th:nth-child(3), .rh-calendar td:nth-child(3) { min-width: 80px; white-space: normal; }
+.rh-calendar th:nth-child(4), .rh-calendar td:nth-child(4) { min-width: 160px; max-width: 220px; white-space: normal; }
+.rh-calendar tbody th { background: white; text-align: left; position: sticky; left: 0; z-index: 2; }
+.rh-calendar thead th:first-child { left: 0; z-index: 4; }
+.rh-calendar .rh-day { min-width: 32px; padding: .5rem .25rem; text-align: center; }
+.rh-calendar .rh-nonworking { background: #f1f3f2; color: #52635b; }
+.rh-calendar .rh-absent { background: #cbe9dc; color: #123e2d; font-weight: 800; }
+.rh-calendar-wrap:focus-visible { outline: 3px solid #247451; outline-offset: 3px; }

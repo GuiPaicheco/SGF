@@ -2,11 +2,19 @@ import {createClient} from 'npm:@supabase/supabase-js@2.117.2';
 import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts';
 import {verifiedSessionId,provisionRhAccount} from '../_shared/rh-accounts.mjs';
 import {limitedJson} from '../_shared/limited-json.mjs';
+import {calendarQuery,bindingInput} from '../_shared/rh-calendar.mjs';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-sgf-role,x-sgf-cnes,x-sgf-lotacao','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const messages:Record<string,string>={
+ RH_BINDING_INPUT_INVALID:'Selecione o vínculo, confirme a unidade polo e informe a justificativa.',
+ RH_ENTRY_INVALID:'Cadastro CNES não encontrado.',RH_ENTRY_REVIEW_REQUIRED:'Confira nome, matrícula, cargo, admissão e vínculo municipal antes de integrar o cadastro ativo.',
+ RH_BINDING_IMMUTABLE:'Este cadastro já está associado a outro vínculo. Preserve a associação e solicite revisão administrativa.',
+ RH_EXISTING_BOND_REQUIRED:'Já existe cadastro com esta matrícula. Confira e associe o vínculo existente.',
+ RH_BOND_OUT_OF_UNIT:'O vínculo não pertence à unidade ou não corresponde ao cadastro conferido.',
+ RH_POLE_CONFLICT:'O vínculo já tem outra unidade polo. Confira a responsabilidade antes de associar.',
+ RH_CALENDAR_LIMIT:'Há muitos afastamentos nesta página. Refine a busca por funcionário para consultar o mês.',
  RH_INPUT_INVALID:'Confira os campos e limites da operação.',RH_PASSWORD_INVALID:'Informe uma senha de 8 a 72 caracteres para as contas novas.',
  RH_ACCOUNT_CONFLICT:'Há conflito com uma conta existente. Nenhuma senha existente foi redefinida.',RH_AUTH_UNAVAILABLE:'Não foi possível consultar o serviço de contas. Tente novamente.',
  RH_UNIT_INVALID:'Unidade fora do catálogo de RH.',RH_LOCATION_REVIEW_REQUIRED:'Confira o vínculo CNES/lotação principal da unidade antes de criar a conta.',
@@ -35,6 +43,7 @@ Deno.serve(async request=>{
    if(payload.action==='select-operator'){if(!uuid.test(payload.grantId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_select_operator',{target_grant:payload.grantId}));}
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
+   if(payload.action==='calendar')return json(await rpc('rh_calendar_month',{target_cnes:null,...calendarQuery(payload)}));
    throw Error('RH_NOT_ALLOWED');
   }
   const context=await validateAccessContext(auth,request,actor,profile.roles);
@@ -49,6 +58,15 @@ Deno.serve(async request=>{
   const configured=catalog.find(unit=>unit.cnes===payload.cnes);if(!configured)throw Error('RH_UNIT_INVALID');
   const {data:unit,error:unitError}=await db.from('cnes_units').select('id').eq('code',configured.cnes).eq('active',true).single();
   if(unitError||!unit)throw Error('RH_UNIT_INVALID');
+  if(payload.action==='calendar') {
+   const {data,error}=await db.rpc('rh_calendar_month',{target_profile:actor,target_session:null,target_cnes:unit.id,...calendarQuery(payload)});
+   if(error)throw error;return json(data);
+  }
+  if(payload.action==='binding-options') {
+   if(!uuid.test(payload.entryId||''))throw Error('RH_INPUT_INVALID');
+   return json(await rpc('rh_registry_bond_options',{target_entry:payload.entryId}));
+  }
+  if(payload.action==='bind-registry')return json(await rpc('rh_bind_registry_bond',bindingInput(payload)));
   if(payload.action==='provision') {
    const slot=await rpc('prepare_rh_unit',{target_cnes:unit.id,unit_login:configured.login});
    return json(await provisionRhAccount(slot,payload.password,{

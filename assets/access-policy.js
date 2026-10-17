@@ -13,6 +13,7 @@
   routes.administrador.add('organization');
   routes.administrador.add('cnes-import');
   routes.administrador.add('rh-accounts');
+  routes.administrador.add('rh-calendar');
   routes.rh.add('choose-operator');
   routes.rh.add('rh-workspace');
   function allowed(route,role,session) {
