@@ -1,6 +1,6 @@
 # Pendências do SGF — gestão pelo RH e DAPS
 
-Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores estão em publicação e ensaio autenticado; o fluxo de lançamentos ainda será entregue.
+Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; o fluxo de lançamentos ainda será entregue.
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
@@ -8,7 +8,7 @@ Primeiro incremento (17/10): coletor CNES e catálogo das 42 unidades; coletas r
 
 Segundo bloco (17/10): prévia/incorporação administrativa, conferência municipal, associação explícita ao legado, proteção de versões e repetição de carga; **335 testes aprovados**, SQL real com rollback e navegador com API simulada. Migração e função aplicadas no piloto; nenhuma carga real incorporada. Evidências e limites em [VALIDACAO_IMPORTACAO_CNES_20261017.md](VALIDACAO_IMPORTACAO_CNES_20261017.md). Próximo bloco: contas e operadores (grupo 02 e DB11), incluindo validação com sessão administrativa real.
 
-Terceiro bloco (17/10), em validação: contas institucionais, provisionamento idempotente, autorização por CNES e seleção vinculada à sessão. **342 testes locais aprovados**, ensaio SQL com rollback aprovado e migração `20261017201513` aplicada. Provisionamento real e validação visual serão registrados ao concluir o bloco.
+Terceiro bloco (17/10): **42 contas RH criadas**, login institucional, painel administrativo de operadores, seleção por sessão e revogação publicados. **345 testes locais aprovados**, ensaio SQL com rollback e login administrativo/UBS Amazonas no Chrome conferidos. [Evidências e limites](VALIDACAO_CONTAS_RH_20261017.md). Sem carga CNES incorporada nem funcionário real autorizado automaticamente. Próximo bloco: integrar cadastro/vínculos e lançamento direto no calendário; manter validação de operador em cada futura gravação.
 
 ## 00. Diretrizes definidas pelo responsável
 
@@ -90,15 +90,15 @@ CNES obtidos do catálogo existente, sujeitos à conferência da fonte. Logins p
 | 41 | UBS VILA RECREIO | 9814809 |
 | 42 | DAPS | 2126486 — toda a Secretaria nesta etapa |
 
-- [ ] **AC01:** adaptar login de unidade com espaços, normalização e unicidade; não exigir CPF pessoal nem criar CPF fictício para conta institucional.
-- [ ] **AC02:** separar conta da unidade e cadastro de funcionário; manter Administrador global, definir seu login e preservar recuperação durante a transição.
-- [ ] **AC03:** provisionar 42 contas de forma idempotente, verificando conflitos com usuários existentes; não duplicar usuários nem redefinir senhas existentes silenciosamente. Aplicar senha definida aos novos acessos conforme plano de transição.
-- [ ] **AC04:** manter autenticação segura pelo Supabase Auth; senha comum não pode virar bypass. Registrar limitação da autoria compartilhada e possibilidade de acesso a outra unidade por quem conhece seu login e a senha comum.
-- [ ] **AC05:** aplicar isolamento por unidade/lotação no banco e nas funções, inclusive leitura direta, busca, calendário e comprovante. DAPS RH não é global; Administrador é global.
-- [ ] **AC06:** adaptar recuperação, bloqueio, sessões, limitação de tentativas e política de senha ao modelo definido. Não alterar conta TESTE ou senhas antigas para ensaios.
+- [x] **AC01:** adaptar login de unidade com espaços, normalização e unicidade; não exigir CPF pessoal nem criar CPF fictício para conta institucional.
+- [x] **AC02:** separar conta da unidade e cadastro de funcionário; manter Administrador global, definir seu login e preservar recuperação durante a transição.
+- [x] **AC03:** provisionar 42 contas de forma idempotente, verificando conflitos com usuários existentes; não duplicar usuários nem redefinir senhas existentes silenciosamente. Aplicar senha definida aos novos acessos conforme plano de transição.
+- [x] **AC04:** implementado com Auth real e limitação documentada na validação do bloco. Manter autenticação segura pelo Supabase Auth; senha comum não pode virar bypass. Registrar limitação da autoria compartilhada e possibilidade de acesso a outra unidade por quem conhece seu login e a senha comum.
+- [ ] **AC05 (parcial):** isolamento implementado no novo acesso e consultas; calendário e comprovante novos ainda dependem do fluxo de lançamentos. Aplicar isolamento por unidade/lotação no banco e nas funções, inclusive leitura direta, busca, calendário e comprovante. DAPS RH não é global; Administrador é global.
+- [x] **AC06:** adaptar recuperação, bloqueio, sessões, limitação de tentativas e política de senha ao modelo definido. Não alterar conta TESTE ou senhas antigas para ensaios.
 - [ ] **AC07:** após migração validada, retirar da interface cadastro/autosserviço que não pertence mais ao fluxo e decidir destino de acessos Servidor existentes sem apagar histórico.
-- [ ] **AC08:** tela exclusiva do Administrador para autorizar/revogar operadores entre funcionários do CNES; seleção obrigatória após login RH, sem lista livre ou operador de outra unidade. Definir cadastro inicial pelo Administrador quando a carga CNES ainda não existir.
-- [ ] **AC09:** vincular operador escolhido à sessão/contexto no servidor, conferir autorização vigente em cada gravação e invalidar seleção revogada. Registrar conta Auth, operador, CNES e instante nos eventos; não confiar em ID enviado sem validação nem criar novas contas Auth para cada operador nesta etapa.
+- [ ] **AC08 (parcial):** tela e seleção obrigatória implementadas para funcionários ativos já incorporados. Cadastro manual inicial e autorização nominal real continuam pendentes. Tela exclusiva do Administrador para autorizar/revogar operadores entre funcionários do CNES; seleção obrigatória após login RH, sem lista livre ou operador de outra unidade. Definir cadastro inicial pelo Administrador quando a carga CNES ainda não existir.
+- [ ] **AC09 (parcial):** sessão, revogação e auditoria da seleção implementadas; exigir a mesma validação e autoria nas futuras gravações de afastamentos. Vincular operador escolhido à sessão/contexto no servidor, conferir autorização vigente em cada gravação e invalidar seleção revogada. Registrar conta Auth, operador, CNES e instante nos eventos; não confiar em ID enviado sem validação nem criar novas contas Auth para cada operador nesta etapa.
 
 Aceite: 42 logins RH mapeados aos escopos previstos, Administrador global e acesso cruzado negado por alteração de parâmetros. Isolamento técnico de sessão não corrige o risco de uma senha conhecida entre contas.
 
@@ -131,7 +131,7 @@ Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, camp
 - [ ] **DB08:** revisar RLS, funções, constraints, versões e idempotência para lançamentos, alterações, cancelamentos e saldo.
 - [ ] **DB09:** ensaiar migration em base isolada, reconciliar contagens/saldos e definir retorno compatível com dados novos; não apagar tabelas antigas antes de remover dependências.
 - [ ] **DB10:** definir CNES responsável/polo por vínculo a partir do cadastro validado; não atribuir o polo por ordem da importação. Aplicar regra do polo na autorização de lançamento/alteração e manter o registro único.
-- [ ] **DB11:** modelar autorizações de operadores por CNES e seleção por sessão/contexto; separar autor técnico autenticado de operador declarado, preservando nome histórico após revogação ou alteração cadastral.
+- [x] **DB11:** modelar autorizações de operadores por CNES e seleção por sessão/contexto; separar autor técnico autenticado de operador declarado, preservando nome histórico após revogação ou alteração cadastral.
 
 Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e ausência de duplicação em gravações concorrentes.
 

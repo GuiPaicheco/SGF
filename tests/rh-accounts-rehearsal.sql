@@ -15,6 +15,10 @@ set local role service_role;
 select public.finish_rh_unit('f6000000-0000-0000-0000-000000000001','f6000000-0000-0000-0000-000000000100',(select auth_user_id from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100'));
 reset role;
 insert into auth.sessions(id,user_id) select 'f6000000-0000-0000-0000-000000000200',profile_id from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100';
+insert into auth.sessions(id,user_id) select 'f6000000-0000-0000-0000-000000000201',profile_id from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100';
+insert into public.cnes_units(id,code,name) values('f6000000-0000-0000-0000-000000000102','9999993','OUTRO CNES TESTE');
+insert into private.cnes_registry_entries(id,cnes_unit_id,source_id,source_hash,source_data)
+values('f6000000-0000-0000-0000-000000000301','f6000000-0000-0000-0000-000000000102',repeat('c',64),repeat('d',64),'{"fullName":"OUTRO OPERADOR FICTÍCIO","status":"ativo"}');
 insert into private.cnes_registry_entries(id,cnes_unit_id,source_id,source_hash,source_data)
 values('f6000000-0000-0000-0000-000000000300','f6000000-0000-0000-0000-000000000100',repeat('a',64),repeat('b',64),'{"fullName":"OPERADOR FICTÍCIO","status":"ativo","cbo":"123456","teams":[]}');
 set local role service_role;
@@ -28,7 +32,10 @@ begin
  if result->'operator'<>'null'::jsonb then raise exception 'AUTOMATIC_OPERATOR';end if;
  begin perform public.rh_unit_registry(profile,session,0);raise exception 'UNSELECTED_ALLOWED';exception when others then if sqlerrm<>'RH_OPERATOR_REQUIRED' then raise;end if;end;
  result:=public.rh_grant_operator(actor,unit_id,'f6000000-0000-0000-0000-000000000300',true,0);grant_id:=(result->>'id')::uuid;
+ begin perform public.rh_grant_operator(actor,unit_id,'f6000000-0000-0000-0000-000000000301',true,0);raise exception 'OTHER_UNIT_ALLOWED';exception when others then if sqlerrm<>'RH_OPERATOR_OUT_OF_UNIT' then raise;end if;end;
  perform public.rh_select_operator(profile,session,grant_id);
+ if public.rh_session_state(profile,'f6000000-0000-0000-0000-000000000201')->'operator'<>'null'::jsonb then raise exception 'SESSION_SELECTION_LEAKED';end if;
+ if not exists(select 1 from public.audit_events where actor_id=profile and action='rh_operator_selected' and new_value->>'operator_name'='OPERADOR FICTÍCIO' and new_value->>'declared_identity'='true') then raise exception 'AUDIT_SNAPSHOT_MISSING';end if;
  if jsonb_array_length(public.rh_unit_registry(profile,session,0)->'entries')<>1 then raise exception 'REGISTRY_FAILED';end if;
  perform public.rh_grant_operator(actor,unit_id,'f6000000-0000-0000-0000-000000000300',false,1);
  if public.rh_session_state(profile,session)->'operator'<>'null'::jsonb then raise exception 'REVOKED_ALLOWED';end if;
@@ -38,6 +45,10 @@ begin
  if public.rh_session_state(profile,session)->'operator'<>'null'::jsonb then raise exception 'CLEAR_FAILED';end if;
  perform public.rh_invalidate_sessions(actor,unit_id);
  begin perform public.rh_session_state(profile,session);raise exception 'REVOKED_SESSION_ALLOWED';exception when others then if sqlerrm<>'RH_SESSION_INVALID' then raise;end if;end;
+ perform public.rh_set_account_status(actor,unit_id,false,2);
+ if public.rh_account_context(profile) is not null then raise exception 'DISABLED_ACCOUNT_ALLOWED';end if;
+ perform public.rh_set_account_status(actor,unit_id,true,3);
+ if public.rh_account_context(profile) is null then raise exception 'REENABLE_FAILED';end if;
  if has_function_privilege('authenticated','public.rh_session_state(uuid,uuid)','execute') or has_table_privilege('authenticated','private.rh_operator_grants','select') then raise exception 'DIRECT_API_ALLOWED';end if;
 end $$;
 reset role;
