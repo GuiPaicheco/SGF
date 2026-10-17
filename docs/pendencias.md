@@ -1,105 +1,218 @@
-# Pendências do SGF
+# Pendências do SGF — gestão pelo RH e DAPS
 
-Atualização: 14/10/2026. Esta é a lista ativa, agrupada por dependência. Contém somente trabalho restante; implementação existente e validação pendente são diferenciadas. Detalhes anteriores estão em [HISTORICO_PENDENCIAS_20261008.md](HISTORICO_PENDENCIAS_20261008.md) e não formam uma segunda fila de tarefas.
+Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. As alterações funcionais abaixo estão **planejadas**, não implementadas. Nesta entrega foram alterados documentos e pesquisadas fontes; não foram criadas contas, alteradas senhas, importados profissionais ou publicadas mudanças.
 
-## Situação confirmada
+Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
-Ponto de retomada para a próxima sessão: [RETOMADA_20261014.md](RETOMADA_20261014.md). Código funcional publicado, banco conferido e pendências restantes separadas; `logo.png` local preservado fora dos commits.
+## 00. Diretrizes definidas pelo responsável
 
-- Piloto hospedado em https://sgfbetim.vercel.app/, com GitHub e Supabase compartilhado autorizados para homologação. Não é aceite institucional de produção.
-- Fundação de pessoa, múltiplos vínculos/CNES, equipes, seleção de contexto, distribuição diária e gestão por unidade já implementadas; falta completar e homologar os fluxos abaixo.
-- Recuperação de senha da conta teste concluída: o usuário confirmou salvar a nova senha e realizar login por e-mail em 08/10. Não repetir essa tarefa como pendência.
-- Correções de recuperação publicadas: sessão de callback explícita, mínimo de seis caracteres (oito para Administrador) e mensagens de recusa específicas. Última suíte executada: 309 testes locais aprovados em 14/10/2026.
-- Ensaios SQL reais já realizados: cadastro/aprovação, isolamento RLS, gestão por unidade, ajustes de feriado e redistribuição pendente. Não substituem testes completos de interface, concorrência entre sessões ou homologação institucional.
-- Preservar a conta TESTE até decisão explícita sobre limpeza. Não apagar dados nem modificar sua senha para ensaios.
-- Plano de três ambientes independentes suspenso. Não publicar novamente a versão legada contra o banco atualizado; separação definitiva fica no grupo 09.
+- Ferramenta voltada ao RH das unidades e à Administração/Diretoria da DAPS. Funcionários são cadastros geridos pelo RH e não precisam de conta para ter afastamentos registrados.
+- Substituir o fluxo central de solicitações pelo servidor por registro e controle realizados pelo RH.
+- **41 contas RH de UBS + 1 conta RH DAPS = 42 contas RH**, além do Administrador. RH DAPS é um acesso distinto da Administração global.
+- Logins conforme tabela abaixo. Senha comum definida pelo responsável na conversa de 17/10, a fornecer no provisionamento seguro, fora do frontend, migrations, logs e documentos versionados. Não impor troca obrigatória nem mudar a senha definida sem consolidar essa decisão.
+- Administrador utilizado pelo operador do sistema e pela Diretora, com visão geral das unidades. Relatórios e estatísticas ficam para etapa futura.
+- Fonte de profissionais baseada no CNES para **todas as 41 UBS e Secretaria**. UBS Amazonas — 6305245 fará o primeiro teste real; cadastro manual nela é alternativa se a integração não estiver disponível, não limitação do escopo nem bloqueio para carregar as outras unidades.
+- Lançamento validado pelo RH entra **diretamente no calendário**, sem fila de solicitação ou aprovações intermediárias.
+- Funcionários eMulti ficam sob controle do RH da **unidade polo registrada no CNES**. Articulação com outros RH ocorre entre as unidades; não criar aprovação compartilhada ou distribuição diária para isso.
+- RH DAPS abrange inicialmente **todos os funcionários da Secretaria Municipal de Saúde — CNES 2126486**. Separação por diretoria fica para depois; esse RH não recebe visão global das UBS.
+- Administrador autoriza funcionários de cada CNES a operar o RH. Após login institucional, a pessoa seleciona seu nome entre os autorizados. Validar a seleção no servidor e registrá-la nas ações; é identificação declarada, não autenticação individual.
+- Comprovante: retirar distribuição de datas/unidades responsáveis; adicionar **CBO, Carga Horária e Equipe**. Preservar datas de afastamento e retorno.
+- Calendário com colunas independentes: **Nome do funcionário | Cargo | CBO | Equipe**, além da grade de datas.
+- Preservar cadastros, múltiplos vínculos, saldos, protocolos, autoria e histórico durante a transição.
 
-## 01. Cadastro, primeiro acesso e perfis — concluído tecnicamente
+## 01. Decisões operacionais e detalhamento restante
 
-Itens ativos retirados após os ensaios de cadastro/identidade, equipes, primeiro acesso, quatro perfis, revogação/desativação e intervalo de login. Evidências e limites em [VALIDACAO_BLOCO_01.md](VALIDACAO_BLOCO_01.md). Contas técnicas deste bloco desativadas, sem exclusão do histórico; conta TESTE de recuperação preservada. Direitos/saldos por vínculo continuam no bloco 02; aceite institucional continua no bloco 08.
+Fluxo definido: **login RH → seleção do operador autorizado → funcionários sob responsabilidade do CNES/polo → lançamento → calendário imediato → comprovante**. Administrador acompanha todas as unidades. Decisões marcadas abaixo estão concluídas como requisitos; a implementação continua nos grupos seguintes.
 
-## 02. Catálogo organizacional, direitos e saldos por vínculo — concluído tecnicamente no escopo atual
+- [x] **FL01 — Entrada no calendário:** decisão do responsável em 17/10: gravação válida do RH já programa no calendário. Sem confirmação posterior, fila de solicitações ou duas aprovações antigas; permanece validação técnica de datas, escopo e saldo quando aplicável.
+- [ ] **FL02 — Modalidades:** confirmar permanência de férias regulamentares, férias-prêmio, banco de horas/folgas e day-off; decidir destino da simulação rápida. Até a decisão, preservar funcionalidades sem excluir modalidades por suposição.
+- [ ] **FL03 — Ciclo do registro:** definir rascunho, programação, alteração, cancelamento, conclusão e correção de erro, justificativas e momento de consumo/devolução de saldo.
+- [x] **FL04 — Múltiplas unidades:** decisão do responsável em 17/10: controle de funcionário eMulti pelo RH da unidade polo no CNES, com articulação humana entre RH. Implementar responsabilidade do polo sem duplicar registro/débito. Casos sem polo identificável exigem conferência cadastral, sem inferência automática.
+- [ ] **FL05 — Cadastro e direitos:** definir quais dados o RH pode complementar/corrigir e quais ações exigem Administrador, inclusive matrícula, jornada, equipe, CBO, cargo, direitos e saldos.
+- [x] **FL06 — RH DAPS:** decisão do responsável em 17/10: incluir inicialmente todo o quadro da Secretaria Municipal de Saúde, CNES 2126486. Separar diretorias futuramente, preservando vínculos/histórico.
+- [ ] **FL07 — Comprovante:** confirmar título, orientação sobre autorização externa, assinaturas e responsável pela emissão. Retirar distribuição diária por unidade mantendo período e retorno.
+- [x] **FL08 — Operador:** decisão do responsável em 17/10: Administrador define funcionários autorizados por CNES; após login RH, selecionar um deles antes de operar. Registrar conta institucional e operador selecionado separadamente. Recuperação e revogação serão implementadas em AC06/AC08; seleção de nome não equivale a prova de identidade individual.
 
-Administração organizacional e recursos por matrícula implementados e ensaiados. Itens técnicos retirados da fila ativa; evidências, limitações e procedimentos em [VALIDACAO_BLOCO_02.md](VALIDACAO_BLOCO_02.md). INE dispensado pelo responsável em 08/10: equipes são identificadas pelo nome, tipo/número e CNES, sem avisos de código pendente. Dados históricos existentes foram preservados.
+Aceite: percurso e matriz de permissões documentados com decisões explícitas para lançamento, edição, cancelamento, cadastro e funcionário multiunidade.
 
-O fluxo atual mantém um responsável por dia, escolhido entre as unidades cadastradas; divisão de horas entre unidades no mesmo dia não foi solicitada nem implementada. A hipótese foi retirada da fila deste bloco, sem alterar a regra diária. Conferência cadastral pelo RH continua no bloco 08, como parte do aceite antes do uso institucional; não é funcionalidade faltante. O ciclo completo de interface continua no bloco 03.
+## 02. Contas e unidades — prioridade alta
 
-## 03. Solicitações, gestão por unidade e redistribuição — concluído tecnicamente
+CNES obtidos do catálogo existente, sujeitos à conferência da fonte. Logins preservam exatamente os nomes solicitados, mesmo quando o nome oficial é mais longo. UPA, hospital e demais órgãos antigos não entram automaticamente no provisionamento.
 
-Fluxo integrado, redistribuição pendente, nova análise com protocolo vinculado, decisões independentes e inclusão explícita no calendário implementados e ensaiados. Conferência de interface, concorrência real entre sessões, compatibilidade legada e isolamento de conta com múltiplos perfis realizados. Evidências e limites em [VALIDACAO_BLOCO_03.md](VALIDACAO_BLOCO_03.md). Desativação entre simulação e confirmação validada em SQL; não representa ensaio de carga nem aceite institucional. Calendário amplo e aceite por responsáveis continuam nos grupos 04 e 08.
+| Nº | Login RH | CNES de referência |
+|---|---|---|
+| 01 | UBS ALCIDES BRAZ | 2126028 |
+| 02 | UBS ALTEROSAS | 2126060 |
+| 03 | UBS ALVORADA | 2126427 |
+| 04 | UBS AMAZONAS | 6305245 |
+| 05 | UBS ANGOLA | 2125919 |
+| 06 | UBS BANDEIRINHAS | 3419371 |
+| 07 | UBS BUENO FRANCO | 2125935 |
+| 08 | UBS CACHOEIRA | 2125994 |
+| 09 | UBS CAIC CAPELINHA | 5320348 |
+| 10 | UBS CAMPOS ELISEOS | 6213618 |
+| 11 | UBS CELSO ALVES PEDROSA | 0856762 |
+| 12 | UBS CIDADE VERDE | 2125951 |
+| 13 | UBS CITROLANDIA | 2125978 |
+| 14 | UBS COLONIA | 5128218 |
+| 15 | UBS CRUZEIRO DO SUL | 3419363 |
+| 16 | UBS DOM BOSCO | 2126087 |
+| 17 | UBS DUQUE DE CAXIAS | 7924097 |
+| 18 | UBS GUANABARA | 5139074 |
+| 19 | UBS HOMERO GIL | 2125927 |
+| 20 | UBS ICAIVERA | 2126192 |
+| 21 | UBS IMBIRUCU | 2126141 |
+| 22 | UBS LARANJEIRAS | 2126176 |
+| 23 | UBS MARIMBA | 2125900 |
+| 24 | UBS NITEROI | 4659031 |
+| 25 | UBS NOSSA SENHORA DE FATIMA | 6935699 |
+| 26 | UBS NOVA BADEN | 5896002 |
+| 27 | UBS PARQUE DO CEDRO | 3910865 |
+| 28 | UBS PAULO CAMILO | 6409296 |
+| 29 | UBS PETROPOLIS | 2125986 |
+| 30 | UBS PETROVALE | 2126095 |
+| 31 | UBS PTB | 2126109 |
+| 32 | UBS SAO JOAO | 4702301 |
+| 33 | UBS SAO LUIZ | 4796020 |
+| 34 | UBS SITIO POCOES | 2894912 |
+| 35 | UBS TERESOPOLIS | 9860673 |
+| 36 | UBS TRINCHEIRA | 5307767 |
+| 37 | UBS UNIVERSAL | 5505844 |
+| 38 | UBS VIANOPOLIS | 2126435 |
+| 39 | UBS VILA BEMGE | 2126117 |
+| 40 | UBS VILA CRISTINA | 2126168 |
+| 41 | UBS VILA RECREIO | 9814809 |
+| 42 | DAPS | 2126486 — toda a Secretaria nesta etapa |
 
-## 04. Calendário, feriados, escala mínima e conflitos — concluído tecnicamente no piloto
+- [ ] **AC01:** adaptar login de unidade com espaços, normalização e unicidade; não exigir CPF pessoal nem criar CPF fictício para conta institucional.
+- [ ] **AC02:** separar conta da unidade e cadastro de funcionário; manter Administrador global, definir seu login e preservar recuperação durante a transição.
+- [ ] **AC03:** provisionar 42 contas de forma idempotente, verificando conflitos com usuários existentes; não duplicar usuários nem redefinir senhas existentes silenciosamente. Aplicar senha definida aos novos acessos conforme plano de transição.
+- [ ] **AC04:** manter autenticação segura pelo Supabase Auth; senha comum não pode virar bypass. Registrar limitação da autoria compartilhada e possibilidade de acesso a outra unidade por quem conhece seu login e a senha comum.
+- [ ] **AC05:** aplicar isolamento por unidade/lotação no banco e nas funções, inclusive leitura direta, busca, calendário e comprovante. DAPS RH não é global; Administrador é global.
+- [ ] **AC06:** adaptar recuperação, bloqueio, sessões, limitação de tentativas e política de senha ao modelo definido. Não alterar conta TESTE ou senhas antigas para ensaios.
+- [ ] **AC07:** após migração validada, retirar da interface cadastro/autosserviço que não pertence mais ao fluxo e decidir destino de acessos Servidor existentes sem apagar histórico.
+- [ ] **AC08:** tela exclusiva do Administrador para autorizar/revogar operadores entre funcionários do CNES; seleção obrigatória após login RH, sem lista livre ou operador de outra unidade. Definir cadastro inicial pelo Administrador quando a carga CNES ainda não existir.
+- [ ] **AC09:** vincular operador escolhido à sessão/contexto no servidor, conferir autorização vigente em cada gravação e invalidar seleção revogada. Registrar conta Auth, operador, CNES e instante nos eventos; não confiar em ID enviado sem validação nem criar novas contas Auth para cada operador nesta etapa.
 
-Calendário por atuação/contexto, planejamento separado da confirmação, filtros e marcadores cobertos pelos testes. Feriado incluído, movido e desativado por API com conferência de recálculo, pendência, atribuição diária e avisos na interface. Escala cíclica nominal, dia explicitamente vazio e conflito justificado criados/encerrados pela tela; concorrência real de gravação validada. Correções de integridade e histórico publicadas. Evidências e limites em [VALIDACAO_BLOCO_04.md](VALIDACAO_BLOCO_04.md).
+Aceite: 42 logins RH mapeados aos escopos previstos, Administrador global e acesso cruzado negado por alteração de parâmetros. Isolamento técnico de sessão não corrige o risco de uma senha conhecida entre contas.
 
-Não há registros nas tabelas legadas de escala mínima a converter. Não criar associações sem evidência; reconciliação de futuros registros ambíguos permanece no bloco 07. Desempenho nos equipamentos institucionais, revisão completa de acessibilidade e aceite do RH continuam no bloco 08; não foram considerados concluídos pelos testes técnicos.
+## 03. CNES de todas as unidades e primeiro uso Amazonas — prioridade alta
 
-## 05. Notificações e auditoria — concluído tecnicamente no piloto
+Pesquisa: [VIABILIDADE_CNES_SUPABASE_20261017.md](VIABILIDADE_CNES_SUPABASE_20261017.md). **Concluído no planejamento:** consultas oficiais de profissionais, equipes e composição de uma equipe da Amazonas responderam HTTP 200, além do WSDL SOAP. Equipes podem ser obtidas em outra consulta do próprio CNES; não foi demonstrada necessidade de fonte externa para esse campo. Cargo municipal e cobertura integral da API ainda exigem verificação. Nenhum dado importado.
 
-Avisos operacionais complementados, chaves de feriado corrigidas por protocolo, paginação e marcação de leitura isoladas. Auditoria ampliada com identidade verificada, snapshots de nomes/matrícula, participantes de eventos coletivos e resumos por contexto. Histórico antigo preservado sem inferir escopo; proteção contra alteração/exclusão pela API. Ensaios locais, SQL e API real realizados; evidências e limites em [VALIDACAO_BLOCO_05.md](VALIDACAO_BLOCO_05.md).
+- [ ] **CN01:** ensaiar consulta SOAP de profissionais/vínculos para CNES 6305245, com paginação, estabilidade, codificação e condições de consumo. WSDL acessível não é prova de resposta funcional da operação.
+- [ ] **CN02:** integrar consultas CNES de estabelecimento/profissionais, equipes e seus integrantes; relacionar profissional, CBO, equipe e datas de entrada/desligamento sem conciliar apenas por nome. Conferir nome, jornada total/componentes, vínculo e situação. Nome de equipe basta na interface; aproveitar identificador externo disponível sem tornar INE obrigatório ao usuário.
+- [ ] **CN03:** distinguir competência, atualização da fonte e instante da consulta/importação. Mostrar última base disponível quando não houver atualização diária comprovada.
+- [ ] **CN04:** conferir amostra com RH Amazonas para cada vínculo/CBO/equipe, inclusive ausência de equipe e múltiplas atuações. Cargo municipal e matrícula exigem complementação municipal se ausentes.
+- [ ] **CN05:** se a API não cobrir tudo, ensaiar download por competência ou exportação autorizada do SCNES municipal. CSV/planilha pode ser entrada após layout validado, mantendo CNES como chave da unidade.
+- [ ] **CN06:** escolher fonte principal e alternativa por cobertura, atualidade e manutenção; evitar dependência exclusiva de extração HTML.
+- [ ] **CN07:** importar para área de conferência com inclusões, alterações, ausências, origem e competência; RH revisa antes de incorporar. Repetir carga sem duplicar pessoas/vínculos.
+- [ ] **CN08:** proteger correções locais e histórico. Ausência na fonte não implica exclusão; conciliar com chaves autorizadas, nunca só por nome ou criando uma pessoa para cada CBO.
+- [ ] **CN09:** definir periodicidade, execução manual/automática, retentativas e avisos de falha. Operar com última carga aprovada e processar integração no backend.
+- [ ] **CN10:** preparar carga das 41 UBS e de toda a Secretaria, com execução por unidade e isolamento de falhas. Amazonas é primeiro teste real, não requisito de aprovação para pesquisar/carregar todas. Se necessário, permitir cadastro manual Amazonas para iniciar o teste e conciliá-lo depois sem duplicação.
 
-Procedimentos de desativação, compensação e anonimização condicionada formalizados em [AUDITORIA_RETENCAO.md](AUDITORIA_RETENCAO.md). Não foi realizado descarte/anonimização nem escolhido prazo legal: ratificação institucional permanece no bloco 08. Separação de ambientes e restauração integral continuam nos blocos 07/09. Contas técnicas desativadas, alertas encerrados e conta TESTE de recuperação preservada.
+Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, campos ausentes explícitos e nova carga sem duplicação ou perda de ajustes municipais.
 
-## 06. Recusas, regras e orientação ao usuário — concluído tecnicamente no piloto
+## 04. Dados e migração — prioridade alta
 
-Catálogo de motivos ensaiado com permissões, auditoria, campos obrigatórios e concorrência real; três recusas estruturadas conferidas no banco, com saldo, atuação e rótulo histórico preservados. Impedimentos de datas/admissão/aquisição separados da recusa administrativa e repetidos no banco. Orientação versionada e canais RH/TI entregues. Procedimentos em [CATALOGO_MENSAGENS.md](CATALOGO_MENSAGENS.md); evidências e limites em [VALIDACAO_BLOCO_06.md](VALIDACAO_BLOCO_06.md).
+- [ ] **DB01:** reaproveitar pessoas, vínculos, atuações, equipes, direitos, saldos e eventos atuais; planejar mudanças incrementais sem recriar banco.
+- [ ] **DB02:** modelar CBO e vigência no vínculo/atuação correto, separado do cargo municipal; não reduzir ocupações simultâneas a um campo único da pessoa.
+- [ ] **DB03:** separar carga semanal total, carga na unidade e jornada diária usada em cálculos; tratar horas fracionadas se necessário. Não dividir jornada semanal por cinco automaticamente; equipes podem variar por atuação/período.
+- [ ] **DB04:** suportar funcionário sem conta e cadastro pendente de matrícula com identificador interno, sem matrícula fictícia; definir validações necessárias antes de consumir saldo/direito.
+- [ ] **DB05:** criar contrato de lançamento pelo RH distinguindo autor autenticado e beneficiário. Endpoint atual exige titular Servidor; não basta remover verificação de papel.
+- [ ] **DB06:** manter pedidos antigos identificados como legado e decidir destino de pendentes/aprovados/programados; não converter estados nem repetir débito automaticamente.
+- [ ] **DB07:** preservar snapshots funcionais em registros/comprovantes; alteração cadastral não reescreve documentos históricos.
+- [ ] **DB08:** revisar RLS, funções, constraints, versões e idempotência para lançamentos, alterações, cancelamentos e saldo.
+- [ ] **DB09:** ensaiar migration em base isolada, reconciliar contagens/saldos e definir retorno compatível com dados novos; não apagar tabelas antigas antes de remover dependências.
+- [ ] **DB10:** definir CNES responsável/polo por vínculo a partir do cadastro validado; não atribuir o polo por ordem da importação. Aplicar regra do polo na autorização de lançamento/alteração e manter o registro único.
+- [ ] **DB11:** modelar autorizações de operadores por CNES e seleção por sessão/contexto; separar autor técnico autenticado de operador declarado, preservando nome histórico após revogação ou alteração cadastral.
 
-Não existe referência normativa ratificada fornecida para preencher nesta entrega. Campos de aprovação/vigência permanecem explicitamente pendentes; aprovação pelo RH/Jurídico e consolidação normativa integral dos cálculos continuam no bloco 08, não foram eliminadas nem consideradas concluídas. Catálogo versionado no código, sem editor livre de legislação no painel.
+Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e ausência de duplicação em gravações concorrentes.
 
-## 07. Históricos, migração e testes integrados — concluído tecnicamente no piloto
+## 05. Trabalho do RH e Administrador — prioridade alta
 
-Inventário, classificação dos históricos, revisão das dependências e plano de compatibilidade registrados em [VALIDACAO_BLOCO_07.md](VALIDACAO_BLOCO_07.md). Não há pedido legado ativo a converter nem escala legada preenchida. Base demonstrativa moderna preparada e ensaiada com rollback no Supabase; não gravada no piloto. Proteção contra vínculo legado ambíguo publicada em `manage-operations` v17. Suíte local: 283/283; concorrência real por API repetida com sucesso. Migrations de identidade de serviço e estabilidade da constraint de perfis aplicadas, sem ampliar permissões. Calendário hospedado conferido sem erros no console. Estes itens foram retirados da fila ativa, sem apagar histórico ou inferir associações.
+- [ ] **UI01:** entrada com duas áreas operacionais: RH da unidade e Administrador; RH seleciona operador autorizado após login, sem autenticação própria do funcionário beneficiário. Sem operadores autorizados, orientar contato com Administrador e impedir operação.
+- [ ] **UI02:** tela principal do RH com funcionários da unidade, busca, matrícula, cargo, CBO, carga, equipe e pendências cadastrais.
+- [ ] **UI03:** lançamento por seleção de funcionário/vínculo sob responsabilidade da unidade/polo, modalidade, direito/saldo, datas e conferência; gravar e refletir diretamente no calendário, sem etapa de aprovação. Dados vêm do cadastro e correção respeita permissões.
+- [ ] **UI04:** revisar linguagem de solicitações, meus pedidos, acessos, aprovações, notificações e orientações conforme fluxo consolidado.
+- [ ] **UI05:** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.
+- [ ] **UI06:** Administrador consulta todas as unidades com filtro/contexto explícito; relatórios e estatísticas futuras não aparecem como disponíveis.
+- [ ] **UI07:** preservar rascunhos e proteger respostas tardias em troca de tela/unidade; padronizar foco, carregamento, confirmação e erros persistentes.
 
-Reconstrução completa em banco vazio, todos os ensaios SQL integrados e restauração de dump sintético em segundo banco isolado passaram no [run 37968449955](https://github.com/GuiPaicheco/SGF/actions/runs/37968449955). Dados, funções, autoria/permissões, RLS, constraints e triggers comparados sem divergências. O banco compartilhado não foi zerado nem restaurado. Interface/Edge publicada conferida, com evidência local sem dados pessoais; testes de ambiguidade são automatizados, não uma fixture persistida na interface hospedada. Revisão visual completa com dados representativos permanece no bloco 08.
+Aceite: RH Amazonas completa ciclo para funcionário sem login; Administrador encontra o registro e histórico identifica conta autora de cada ação.
 
-Sem itens técnicos ativos neste bloco. Snapshot parcial não equivale a backup integral restaurável; este ensaio de PostgreSQL não copia configurações de Auth/SMTP, arquivos do Storage, segredos ou hospedagem. Backup operacional e recuperação institucional permanecem no bloco 09.
+## 06. Comprovante — prioridade alta
 
-## 08. Homologação institucional, revisão visual e documentação
+- [ ] **CP01:** retirar seção de distribuição de datas/unidades responsáveis da tela, impressão e texto copiado/compartilhado.
+- [ ] **CP02:** acrescentar CBO, Carga Horária e Equipe, com unidade de medida da carga e snapshot do vínculo/atuação.
+- [ ] **CP03:** preservar nome, matrícula disponível, cargo, unidade, modalidade, período(s), retorno, protocolo, emissão, observações e assinaturas conforme FL07.
+- [ ] **CP04:** indicar informação ausente sem inventar valor; definir se ausência bloqueia emissão final ou exige conferência.
+- [ ] **CP05:** adaptar título/orientação à nova operação, distinguindo registro e autorização institucional quando aplicável.
+- [ ] **CP06:** garantir leitura/reimpressão de legado e validar A4/PDF, nomes/equipes longos e quantidade de páginas sem prejudicar legibilidade.
 
-**Em andamento.** Revisão pública/administrativa realizada no Chrome, equipe filtrada por CNES conferida, comprovante e principais áreas carregados sem erro de console. Botão Tela inicial corrigido e testado no celular publicado; login/rodapé e foco inicial de teclado conferidos em tablet. 287 testes aprovados. Manual atual, guia de 20 casos, roteiro e imagens entregues; hospedagem corrigida e instruções antigas de operação identificadas como históricas. Evidências e limites em [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md). Não há aceite institucional nem revisão integral de todos os formulários/perfis nesta rodada.
+Aceite: novos comprovantes contêm três campos adicionais, preservam datas de afastamento/retorno e não mostram distribuição por unidade em nenhuma saída.
 
-### 08.A — Revisão técnica atual
+## 07. Calendário e escala — prioridade alta
 
-README reestruturado em 14/10 como documentação de entrada do repositório: execução, configuração, build/testes, estrutura, implantação e licença. Conteúdo de treinamento e histórico permanece em docs, sem misturá-lo às instruções atuais. Não altera funcionalidades ou banco.
+- [ ] **CA01:** colunas independentes de Nome do funcionário, Cargo, CBO e Equipe antes da grade; identificar matrícula quando necessário.
+- [ ] **CA02:** RH limitado à unidade; Administrador com seleção de unidade e visão geral, identificando unidade de cada linha.
+- [ ] **CA03:** calendário projetado pelos lançamentos novos e legado sem duplicação; marcadores conforme estados definidos em FL01/FL03.
+- [ ] **CA04:** filtros por funcionário, cargo, CBO, equipe, período e situação, com consulta por período e paginação no servidor.
+- [ ] **CA05:** adaptar conflitos, escala mínima, feriados e day-off às modalidades mantidas; separar alerta operacional de impedimento normativo.
+- [ ] **CA06:** tratar várias equipes/atuações e afastamento multiunidade segundo FL04, sem esconder vínculos ou contar pessoas indevidamente.
+- [ ] **CA07:** validar muitas linhas, cabeçalhos/colunas fixos quando úteis, teclado e leitura em computador/tablet/telas menores.
 
-CNES do cadastro ordenados em 14/10: caixas de atuação e unidade polo usam ordem alfabética por nome em português, sem ordenar pelo código nem alterar o catálogo original. Componente compartilhado cobre cadastro público e administrativo.
+Aceite: colunas legíveis, filtros correspondentes aos registros e alteração/cancelamento refletidos sem resíduos no calendário.
 
-Contexto de unidade reafirmado em 14/10: RH/Diretor consulta somente funcionários do CNES/lotação selecionado, não a união de todos os seus escopos. Cadastro usa vínculos da unidade, com resultado vazio quando não há funcionários; diretorias com mesmo CNES continuam separadas. Aviso de contexto adicionado à tela; Administrador conserva visão global. Não alterados vínculos ou permissões nesta rodada.
+## 08. Estrutura técnica, capacidade e operação — antes da expansão
 
-Auditoria técnica e correções de 14/10: [AUDITORIA_TECNICA_20261014.md](AUDITORIA_TECNICA_20261014.md). Achados A01–A06 corrigidos: três perfis funcionais (Servidor, RH/Diretor e Administrador), busca por vínculo, conflitos pela projeção do calendário, preservação de atribuições/observações, sincronização em lote e proteção de respostas atrasadas. Migração `20261014153031` aplicada no Supabase; escopos e contas preservados, sem trocar senhas ou apagar histórico. Papéis históricos continuam legíveis, mas novos perfis são normalizados para os três acessos. 302 testes locais e nove cenários SQL reais com rollback aprovados; não equivalem a auditoria visual.
+Medição de 17/10: Supabase saudável, plano Free, banco de aproximadamente **17 MB**. Plataforma adequada ao escopo; permanência no gratuito depende de volume e requisitos. Fontes/limites em [VIABILIDADE_CNES_SUPABASE_20261017.md](VIABILIDADE_CNES_SUPABASE_20261017.md).
 
-Identidade atualizada em 14/10: SGF significa **Sistema de Gestão de Funcionários**. Férias e folgas são funcionalidades atuais, não o escopo definitivo. Nome corrigido no cabeçalho, título/descrição, comprovante, README e roteiro. Slides e capturas históricos de 09/10 ainda retratam a identidade anterior; atualizar na próxima revisão do material, sem tratá-los como versão atual do nome.
+- [ ] **TE01:** extrair gradualmente de app.js API/contexto, navegação/estado, cadastros, lançamentos, comprovante e calendário, preservando contratos; evitar reescrita integral sem necessidade.
+- [ ] **TE02:** substituir carga completa de pedidos/relações por listas paginadas, totais no servidor e detalhe sob demanda; revisar índices por unidade/vínculo/período.
+- [ ] **TE03:** padronizar contexto/autenticação/erros e respostas assíncronas; corrigir estilos inline incompatíveis com CSP.
+- [ ] **TE04:** build reproduzível, saída limpa e versões automáticas de assets; não publicar SQL, dados de importação ou credenciais.
+- [ ] **TE05:** dimensionar profissionais, vínculos, registros anuais, dias, auditoria, anexos e simultaneidade; ensaiar volume sintético de vários anos.
+- [ ] **TE06:** acompanhar quotas, crescimento, latência, falhas e concorrência; definir critérios de upgrade sem contratar ou mudar plano automaticamente.
+- [ ] **TE07:** definir teste sem e-mails reais e separação piloto/produção; testar backup/restauração completos, incluindo itens externos ao PostgreSQL.
+- [ ] **TE08:** revisar domínio, CORS, retorno de login, recuperação, privacidade, retenção e acesso administrativo; explicitar limitação de autoria compartilhada.
+- [ ] **TE09:** limitar no servidor quantidade de itens por página, intervalo consultado, tamanho dos pedidos e frequência de gravações/importações; estabelecer limites por tipo de operação após medição, com mensagens claras e sem bloquear uso normal de unidades no mesmo IP.
+- [ ] **TE10:** impedir gravação duplicada por clique/reenvio com chave de idempotência e transações; validar permissões, operador, datas e versão no servidor. Proteger também endpoints diretamente, independentemente da interface.
+- [ ] **TE11:** buscar enquanto digita com atraso controlado, cancelar/ignorar respostas antigas, reutilizar dados do mesmo contexto e carregar calendário por intervalo. Não fazer consulta CNES externa a cada login, renderização ou célula.
+- [ ] **TE12:** executar importação em lotes limitados, sem paralelismo irrestrito nas 42 unidades, com progresso, retomada e retentativas limitadas; registrar só o necessário e não duplicar snapshots sem mudança. Aplicar prazo de execução e monitorar consultas lentas.
 
-Rodada de 14/10: revisão estática de navegação/foco, avisos, idioma, UTF-8, movimento reduzido e estilos de impressão realizada; movimento reduzido e colunas A4 corrigidos, com duas regressões novas e 290/290 testes locais aprovados. Isso não encerra as verificações visuais abaixo. A ferramenta de navegador/Computer Use falhou ao iniciar (caminho de assets indisponível), antes de qualquer interação; não foi possível executar zoom, leitor de tela ou impressão visual nesta rodada. Arquivos continuam acessíveis pelo terminal alternativo. Não reutilizar capturas antigas como evidência destas alterações.
+## 09. Testes, homologação e implantação — fechamento
 
-1. [ ] Ensaiar volume, filtros e foco assíncrono; completar revisão das telas/detalhes dos três perfis funcionais, incluindo pedidos ativos, correções e decisões.
-2. [ ] Completar navegação por teclado, tablet, zoom 200%, leitor de tela e impressão. Registrar separadamente testes executados e limitações; não declarar acessibilidade integral com base apenas nos testes automatizados.
-3. [ ] Atualizar treinamento, inclusive identidade nova e RH/Diretor unificado nas capturas/slides. Manual textual atualizado; material visual ainda é histórico.
+Base anterior: 309 testes locais aprovados e build concluído em 17/10; não validam funcionalidades novas ainda não implementadas.
 
-### 08.B — Homologação institucional futura, após as mudanças
+- [ ] **QA01:** testar funcionário sem conta, mesma pessoa com duas matrículas/unidades/equipes, CBO/jornada distintos e saldo isolado.
+- [ ] **QA02:** validar 42 logins/escopos e Administrador; negar acesso cruzado em API/RLS, busca, detalhe, calendário e comprovante.
+- [ ] **QA03:** testar repetição de carga, falha da fonte, divergência/ausência cadastral, equipe/CBO ausentes, mudança de jornada/equipe e preservação de ajustes locais.
+- [ ] **QA04:** testar concorrência, repetição, rede lenta, navegação durante gravação, reprogramação, cancelamento e consumo/devolução única de saldo.
+- [ ] **QA05:** ensaiar migração, leitura de legado e preservação de autoria, saldos e comprovantes sem duplicação no calendário.
+- [ ] **QA06:** primeiro teste real pela Diretora da UBS Amazonas, com cadastro manual se necessário; validar também Administração global e segunda UBS. Preparação/importação das demais unidades pode avançar antes desse aceite, sem declarar homologação concluída.
+- [ ] **QA07:** validar teclado, foco, zoom 200%, leitor de tela, tablet, equipamentos institucionais e impressão.
+- [ ] **QA08:** atualizar README, arquitetura, manual e treinamento para operação pelo RH, contas de unidade e importação; identificar documentos antigos como históricos.
+- [ ] **QA09:** homologar normas de direito, jornada, fracionamento, aquisição/admissão, feriados e banco de horas pelo RH Central, com referências/responsáveis/vigência.
+- [ ] **QA10:** registrar aceite funcional/cadastral da Diretoria/RH, plano de implantação/retorno e publicação candidata; diferenciar publicação técnica de aceite institucional.
+- [ ] **QA11:** testar operador não autorizado, de outro CNES, revogado durante sessão, troca de operador e tentativa de forjar ID; conferir histórico de conta/operador e ausência de dados de outras unidades.
+- [ ] **QA12:** ensaiar limites com buscas rápidas, intervalos exagerados, payload grande, cliques repetidos, importações simultâneas e falha/repetição de rede; demonstrar resposta controlada sem duplicação e sem sobrecarga. Testes de volume somente em ambiente isolado.
 
-Decisão do responsável em 14/10/2026: o sistema continuará recebendo mudanças. Quando estiver pronto, alguém do RH Central será indicado para aprovar e alguém do RH ou Diretor para testar. Estes itens não bloqueiam a revisão técnica nem o desenvolvimento atual; permanecem necessários antes do uso institucional definitivo. Não há aceite antecipado.
+## 10. Evolução futura — fora da implementação atual
 
-1. [ ] Submeter regras e referências normativas ao RH Central, com apoio jurídico quando necessário: admissão, aquisição, faltas, fracionamento, feriados, banco de horas, day-off e jornada individual. Registrar responsáveis/vigências e ajustar os cálculos conforme a decisão aprovada.
-2. [ ] Executar aceite funcional com RH ou Diretor: solicitações com múltiplos autorizadores, três perfis funcionais (Servidor, RH/Diretor e Administrador) e correspondência de CNES, lotações, equipes, vínculos e autorizadores à organização real. INE não é exigido.
-3. [ ] Validar navegadores/equipamentos usados pela Prefeitura na versão candidata ao aceite.
-4. [ ] Ratificar política de retenção, responsáveis e eventual anonimização, conforme AUDITORIA_RETENCAO.md. Nenhum prazo legal ou descarte foi definido pelo sistema.
-5. [ ] Registrar evidências e aceite nominal da versão final; ensaios técnicos não substituem a aprovação institucional.
+- [ ] **FU01 — Relatórios:** emissão por unidade, funcionário, período e situação; definir formatos e permissões posteriormente.
+- [ ] **FU02 — Estatísticas:** indicadores e comparações entre unidades para a Diretora; definir métricas antes dos painéis.
+- [ ] **FU03 — Autoria individual:** avaliar usuários pessoais vinculados ao RH institucional se for necessário identificar nominalmente cada operador.
+- [ ] **FU04 — Separar Secretaria:** refinar futuramente o escopo do RH DAPS por diretoria, mantendo inicialmente toda a Secretaria e sem perder histórico.
 
-Entrega adicional de 09/10: ciclo moderno real com conta nova fictícia, quatro perfis, duas matrículas e dois CNES; aprovações e inclusões independentes, débito único de 32h e saldo da segunda matrícula preservado. Corrigidos aviso residual entre contextos, identificação por matrícula na escala mínima, datas exibidas nos filtros mensais e foco de teclado. Slides finais de 14 páginas entregues no [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e em [PowerPoint](apresentacao/SGF_Treinamento_20261009_final.pptx), com capturas fictícias e notas do instrutor. Material retirado da fila ativa; revisão integral de acessibilidade e aceite institucional não foram declarados concluídos.
+Relatórios/estatísticas são pendências futuras registradas a pedido do responsável. Visão global operacional do Administrador pertence à refatoração atual e não depende deles.
 
-## 09. Segurança e preparação para uso institucional
+## Ordem e acompanhamento
 
-1. [ ] Definir separação futura de desenvolvimento, homologação e produção, recursos/custos e bloqueio de e-mails reais em ambientes de teste. Não contratar planos sem autorização.
-2. [ ] Definir domínio institucional, restringir CORS e revisar URLs de retorno quando o destino mudar. Retorno atual do Vercel já configurado e testado.
-3. [ ] Substituir acesso administrativo legado genérico por responsáveis identificados e revisar concessões.
-4. [ ] Homologar política de senha e decidir proteção contra senhas vazadas conforme plano disponível, sem reduzir requisitos atuais.
-5. [ ] Concluir revisão de integridade, segurança, privacidade, backup/restauração e observabilidade.
-6. [ ] Após aceite, publicar a versão institucional aprovada. GitHub e publicação técnica do piloto já estão autorizados; não constituem pendências de autorização nem aceite de produção.
+1. Implementar contratos a partir das decisões FL01/FL04/FL06/FL08; detalhar modalidades/operações restantes sem reabrir decisões tomadas. Ensaiar profissionais/equipes CNES.
+2. Validar dados, contas/escopos e migração; implementar importação com conferência.
+3. Entregar ciclo RH Amazonas → lançamento → calendário → comprovante → visão global.
+4. Preparar todas as UBS e Secretaria; realizar primeiro teste real Amazonas, com alternativa manual. Validar legado, concorrência, operadores e isolamento antes da liberação geral.
+5. Concluir documentação, uso, capacidade, recuperação e homologação; grupo 10 permanece futuro.
 
-## Regra de acompanhamento
-
-- Executar grupos nesta ordem, trazendo decisões institucionais necessárias antes de implementar a regra dependente.
-- Retirar desta lista somente o que tiver evidência suficiente; registrar se foi teste local, SQL real, interface ou confirmação do usuário.
-- Não tratar migrations/funções já publicadas como ainda aguardando aplicação.
-- Atualizar esta lista a cada entrega; preservar o histórico sem reutilizar seus checkboxes como tarefas ativas.
+Concluir itens somente com evidência apropriada: código, teste local, SQL/API, interface ou aceite do responsável. Pesquisa de fonte não equivale a importação; teste estático não equivale a revisão visual; publicação técnica não equivale a aceite institucional. Preservar conta TESTE, senhas e histórico existentes até plano explícito de transição.
