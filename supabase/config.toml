@@ -26,3 +26,7 @@ minimum_password_length = 8
 # Login e cadastro públicos; operações privadas verificam JWT e getUser.
 [functions.access-auth]
 verify_jwt = false
+
+# Verifica a identidade com getUser e revalida Administrador/contexto no corpo.
+[functions.manage-cnes]
+verify_jwt = false

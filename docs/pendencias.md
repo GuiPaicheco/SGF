@@ -1,10 +1,12 @@
 # Pendências do SGF — gestão pelo RH e DAPS
 
-Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. As alterações funcionais abaixo estão **planejadas**, não implementadas. Nesta entrega foram alterados documentos e pesquisadas fontes; não foram criadas contas, alteradas senhas, importados profissionais ou publicadas mudanças.
+Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH, operadores e fluxo de lançamentos ainda serão entregues.
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
-Primeiro incremento de implementação (17/10): coletor CNES e catálogo das 42 contas/unidades, com consulta sequencial, associação de equipes e exportação privada opcional para conferência. Coletas reais das 42 unidades realizadas sem gravar no banco; **324 testes locais aprovados**. Evidências e limites em [VALIDACAO_CNES_20261017.md](VALIDACAO_CNES_20261017.md). Contas, operadores e fluxo de RH ainda não implementados. A frase acima sobre ausência de importação refere-se à incorporação no banco; a coleta externa já foi ensaiada.
+Primeiro incremento (17/10): coletor CNES e catálogo das 42 unidades; coletas reais ensaiadas, 324 testes aprovados. Evidências em [VALIDACAO_CNES_20261017.md](VALIDACAO_CNES_20261017.md).
+
+Segundo bloco (17/10): prévia/incorporação administrativa, conferência municipal, associação explícita ao legado, proteção de versões e repetição de carga; **335 testes aprovados**, SQL real com rollback e navegador com API simulada. Migração e função aplicadas no piloto; nenhuma carga real incorporada. Evidências e limites em [VALIDACAO_IMPORTACAO_CNES_20261017.md](VALIDACAO_IMPORTACAO_CNES_20261017.md). Próximo bloco: contas e operadores (grupo 02 e DB11), incluindo validação com sessão administrativa real.
 
 ## 00. Diretrizes definidas pelo responsável
 
@@ -103,24 +105,24 @@ Aceite: 42 logins RH mapeados aos escopos previstos, Administrador global e aces
 Pesquisa: [VIABILIDADE_CNES_SUPABASE_20261017.md](VIABILIDADE_CNES_SUPABASE_20261017.md). **Concluído no planejamento:** consultas oficiais de profissionais, equipes e composição de uma equipe da Amazonas responderam HTTP 200, além do WSDL SOAP. Equipes podem ser obtidas em outra consulta do próprio CNES; não foi demonstrada necessidade de fonte externa para esse campo. Cargo municipal e cobertura integral da API ainda exigem verificação. Nenhum dado importado.
 
 - [ ] **CN01:** ensaiar consulta SOAP de profissionais/vínculos para CNES 6305245, com paginação, estabilidade, codificação e condições de consumo. WSDL acessível não é prova de resposta funcional da operação.
-- [ ] **CN02:** integrar consultas CNES de estabelecimento/profissionais, equipes e seus integrantes; relacionar profissional, CBO, equipe e datas de entrada/desligamento sem conciliar apenas por nome. **Coletor implementado e ensaiado nas 42 unidades; faltam incorporação no cadastro e conferência funcional.** Nome de equipe basta na interface; aproveitar identificador externo disponível sem tornar INE obrigatório ao usuário.
+- [ ] **CN02:** coletor ensaiado nas 42 unidades e incorporação no cadastro CNES de conferência implementados. Falta conferência funcional dos dados e integração aos vínculos operacionais. Relação por CNS/CBO e vigência, sem conciliação por nome; INE não é obrigatório ao usuário.
 - [ ] **CN03:** distinguir competência, atualização da fonte e instante da consulta/importação. Mostrar última base disponível quando não houver atualização diária comprovada.
 - [ ] **CN04:** conferir amostra com RH Amazonas para cada vínculo/CBO/equipe, inclusive ausência de equipe e múltiplas atuações. Cargo municipal e matrícula exigem complementação municipal se ausentes.
 - [ ] **CN05:** se a API não cobrir tudo, ensaiar download por competência ou exportação autorizada do SCNES municipal. CSV/planilha pode ser entrada após layout validado, mantendo CNES como chave da unidade.
 - [ ] **CN06:** escolher fonte principal e alternativa por cobertura, atualidade e manutenção; evitar dependência exclusiva de extração HTML.
-- [ ] **CN07:** importar para área de conferência com inclusões, alterações, ausências, origem e competência; RH revisa antes de incorporar. Repetir carga sem duplicar pessoas/vínculos.
-- [ ] **CN08:** proteger correções locais e histórico. Ausência na fonte não implica exclusão; conciliar com chaves autorizadas, nunca só por nome ou criando uma pessoa para cada CBO.
+- [x] **CN07 — Entrega técnica:** prévia, incorporação e cadastro de conferência implementados com origem/competência e proteção contra duplicação. Disponível ao Administrador até entregar acessos RH. Revisão da carga real e interface autenticada permanecem CN04/QA06.
+- [x] **CN08 — Entrega técnica:** fonte e campos municipais separados; reimportação preserva correções, associação legada e ausentes. Identificação por chaves e associação explícita por matrícula/unidade, sem união por nome. Testes locais e SQL com rollback; conferência real permanece CN04.
 - [ ] **CN09:** definir periodicidade, execução manual/automática, retentativas e avisos de falha. Operar com última carga aprovada e processar integração no backend.
-- [ ] **CN10:** preparar carga das 41 UBS e de toda a Secretaria, com execução por unidade e isolamento de falhas. **Catálogo e coleta implementados; importação/conciliação persistente ainda pendentes.** Amazonas é primeiro teste real, não requisito de aprovação para pesquisar/carregar todas. Se necessário, permitir cadastro manual Amazonas para iniciar o teste e conciliá-lo depois sem duplicação.
+- [ ] **CN10:** catálogo, coleta e importação persistente para conferência implementados. Falta incorporar/conferir as cargas reais das 41 UBS e Secretaria e disponibilizar alternativa manual. Amazonas é primeiro teste real, sem bloquear preparação das demais.
 
 Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, campos ausentes explícitos e nova carga sem duplicação ou perda de ajustes municipais.
 
 ## 04. Dados e migração — prioridade alta
 
-- [ ] **DB01:** reaproveitar pessoas, vínculos, atuações, equipes, direitos, saldos e eventos atuais; planejar mudanças incrementais sem recriar banco.
-- [ ] **DB02:** modelar CBO e vigência no vínculo/atuação correto, separado do cargo municipal; não reduzir ocupações simultâneas a um campo único da pessoa.
-- [ ] **DB03:** separar carga semanal total, carga na unidade e jornada diária usada em cálculos; tratar horas fracionadas se necessário. Não dividir jornada semanal por cinco automaticamente; equipes podem variar por atuação/período.
-- [ ] **DB04:** suportar funcionário sem conta e cadastro pendente de matrícula com identificador interno, sem matrícula fictícia; definir validações necessárias antes de consumir saldo/direito.
+- [x] **DB01 — Fundação compatível:** cadastro CNES privado adicionado sem recriar banco nem alterar pessoas, vínculos, saldos ou histórico antigos; associação explícita ao legado implementada. Integração dos lançamentos com esse cadastro continua DB05/DB06.
+- [ ] **DB02:** CBO separado do cargo municipal e equipes com vigência já preservados no cadastro CNES de conferência. Falta integrar esse modelo aos vínculos operacionais e ao histórico de afastamentos, sem reduzir ocupações simultâneas a um campo da pessoa.
+- [ ] **DB03:** componentes de jornada e horas fracionadas preservados na importação; ajustes municipais separados. Falta integrar jornada diária e regra de cálculo ao novo lançamento RH, sem divisão automática por cinco.
+- [ ] **DB04:** cadastro CNES sem conta/matrícula implementado com UUID interno, sem dados fictícios. Falta aplicar validações obrigatórias no novo lançamento antes de consumir saldo/direito.
 - [ ] **DB05:** criar contrato de lançamento pelo RH distinguindo autor autenticado e beneficiário. Endpoint atual exige titular Servidor; não basta remover verificação de papel.
 - [ ] **DB06:** manter pedidos antigos identificados como legado e decidir destino de pendentes/aprovados/programados; não converter estados nem repetir débito automaticamente.
 - [ ] **DB07:** preservar snapshots funcionais em registros/comprovantes; alteração cadastral não reescreve documentos históricos.

@@ -1,6 +1,6 @@
 # Coleta CNES para conferência
 
-Primeira etapa da refatoração para RH, entregue em 17/10/2026. O coletor consulta as páginas oficiais do CNES de profissionais, equipes e integrantes. **Ainda não insere cadastros no Supabase** nem habilita o novo fluxo de RH; gera material para a etapa de conferência/importação.
+O coletor consulta as páginas oficiais do CNES de profissionais, equipes e integrantes. Ele não grava no banco. A segunda etapa, também implementada em 17/10, permite ao Administrador incorporar seu arquivo no **cadastro CNES em conferência** pelo painel. O novo fluxo de lançamentos RH ainda está em implementação.
 
 ## Executar
 
@@ -36,4 +36,15 @@ Toda coleta vem com `requiresReview: true`, data da consulta e competência desc
 
 Manter componentes de jornada, situação, vínculos, equipes e datas de entrada/desligamento para conferência. Contagens podem incluir registros históricos ou mais de uma ocupação da mesma pessoa: não representam automaticamente pessoas ativas distintas. Membro não conciliado fica em `pending`; profissional sem associação não deve receber equipe inventada.
 
-A etapa seguinte implementará prévia de diferenças e incorporação autorizada no cadastro, preservando correções municipais, dados anteriores e histórico. Preparação das demais unidades pode ocorrer enquanto a Diretora da Amazonas realiza o primeiro teste real; cadastro manual permanece alternativa.
+### Incorporar e conferir pelo painel
+
+1. Entrar como Administrador e abrir **Cadastros → Conferência CNES**.
+2. Selecionar unidade e enviar seu arquivo JSON de coleta (máximo 4 MB).
+3. Conferir totais e diferenças. A tela mostra até 50 detalhes de mudança e preserva ausentes/ajustes municipais.
+4. Confirmar a incorporação. Uma carga repetida não duplica registros; cadastro alterado desde a prévia exige nova conferência.
+5. Usar **Conferir** para preencher somente dados municipais conhecidos. Campo vazio permanece sem valor municipal; não inventar matrícula, cargo, admissão ou equipe.
+6. Quando houver cadastro anterior, buscar pela matrícula e selecionar explicitamente a associação. Somente registros da mesma unidade são oferecidos; o legado não é sobrescrito.
+
+Fonte CNES e campos municipais ficam separados, com conferência pendente após mudança da fonte. Não são criados conta, direito ou saldo automaticamente. O vínculo com o cadastro anterior não equivale a autorização para afastamento.
+
+Evidências, publicação e limitações: [VALIDACAO_IMPORTACAO_CNES_20261017.md](VALIDACAO_IMPORTACAO_CNES_20261017.md). Preparação das demais unidades pode ocorrer enquanto a Diretora da Amazonas realiza o primeiro teste real; cadastro manual permanece alternativa a implementar no novo cadastro.
