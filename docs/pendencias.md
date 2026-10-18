@@ -1,6 +1,6 @@
 # Pendências do SGF — gestão pelo RH e DAPS
 
-Atualização: **17/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; o fluxo de lançamentos ainda será entregue.
+Atualização: **18/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; lançamentos diretos, horas declaradas e encerramento estão publicados tecnicamente; comprovante e reprogramação seguem pendentes.
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
@@ -12,7 +12,7 @@ Terceiro bloco (17/10): **42 contas RH criadas**, login institucional, painel ad
 
 Quarto bloco (17/10): integração administrativa do cadastro CNES a vínculo funcional sem conta do funcionário, polo confirmado explicitamente e calendário mensal paginado com colunas funcionais. **353 testes locais aprovados**, ensaio SQL com rollback e CI do código principal aprovado. Migração `20261017222951` e `manage-rh` v2 publicadas. **40 registros reais da UBS Amazonas incorporados, todos pendentes de conferência**; nenhum operador real autorizado. [Evidências e limites](VALIDACAO_CALENDARIO_RH_20261017.md). Próximo bloco: gravação direta de afastamentos e banco de horas por lançamento, conforme BH01–BH05.
 
-Quinto bloco (18/10), em implementação: backend de prévia/programação direta, horas declaradas por lançamento e exceção justificada do RH, idempotência, snapshots e encerramento com versão. **359 testes locais aprovados** e ensaio SQL com rollback. Interface e publicação ainda em andamento; não considerar homologação concluída.
+Quinto bloco (18/10): programação direta de férias e folgas, prévia do servidor, banco de horas declarado por lançamento e exceção justificada, idempotência, snapshots, histórico, cancelamento e conclusão publicados. **362 testes aprovados**, build/Deno e CI aprovados, SQL com rollback, interface com API simulada e bloqueios da API publicada com sessões reais validados. [Evidências e limites](VALIDACAO_LANCAMENTOS_RH_20261018.md). Próximo bloco: comprovante atualizado e edição/reprogramação. Não equivale à homologação institucional.
 
 ## 00. Diretrizes definidas pelo responsável
 
@@ -125,27 +125,27 @@ Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, camp
 
 ## 04. Dados e migração — prioridade alta
 
-- [x] **DB01 — Fundação compatível:** cadastro CNES privado adicionado sem recriar banco nem alterar pessoas, vínculos, saldos ou histórico antigos; associação explícita ao legado implementada. Integração dos lançamentos com esse cadastro continua DB05/DB06.
+- [x] **DB01 — Fundação compatível:** cadastro CNES privado adicionado sem recriar banco nem alterar pessoas, vínculos, saldos ou histórico antigos; associação explícita ao legado implementada. Contrato de lançamento entregue em DB05; reconciliação do legado continua DB06.
 - [ ] **DB02:** CBO separado do cargo municipal e equipes com vigência já preservados no cadastro CNES de conferência. Falta integrar esse modelo aos vínculos operacionais e ao histórico de afastamentos, sem reduzir ocupações simultâneas a um campo da pessoa.
-- [ ] **DB03:** componentes de jornada e horas fracionadas preservados na importação; ajustes municipais separados. Falta integrar jornada diária e regra de cálculo ao novo lançamento RH, sem divisão automática por cinco.
-- [ ] **DB04:** cadastro CNES sem conta/matrícula implementado com UUID interno, sem dados fictícios. Falta aplicar validações obrigatórias no novo lançamento antes de consumir saldo/direito.
-- [ ] **DB05:** criar contrato de lançamento pelo RH distinguindo autor autenticado e beneficiário. Endpoint atual exige titular Servidor; não basta remover verificação de papel.
+- [x] **DB03 — Novo lançamento:** jornada diária explícita e horas fracionadas integradas ao cálculo do servidor, sem divisão da carga semanal.
+- [x] **DB04 — Validação cadastral:** lançamento exige cadastro conferido, matrícula/vínculo ativo e polo confirmado; funcionário sem conta própria.
+- [x] **DB05 — Contrato RH:** endpoint próprio distingue conta autora, operador declarado e beneficiário, com sessão e escopo validados no servidor.
 - [ ] **DB06:** manter pedidos antigos identificados como legado e decidir destino de pendentes/aprovados/programados; não converter estados nem repetir débito automaticamente.
-- [ ] **DB07:** preservar snapshots funcionais em registros/comprovantes; alteração cadastral não reescreve documentos históricos.
-- [ ] **DB08:** revisar RLS, funções, constraints, versões e idempotência para lançamentos, alterações, cancelamentos e saldo.
+- [ ] **DB07 (parcial — snapshots dos registros entregues; comprovante pendente):** preservar snapshots funcionais em registros/comprovantes; alteração cadastral não reescreve documentos históricos.
+- [ ] **DB08 (parcial — programação/encerramento protegidos; alteração pendente):** revisar RLS, funções, constraints, versões e idempotência para lançamentos, alterações, cancelamentos e saldo.
 - [ ] **DB09:** ensaiar migration em base isolada, reconciliar contagens/saldos e definir retorno compatível com dados novos; não apagar tabelas antigas antes de remover dependências.
-- [ ] **DB10 (parcial):** integração exige confirmação administrativa explícita do polo e recusa substituir outro polo existente. Falta aplicar o polo na autorização de lançamento/alteração e manter o registro único; não atribuir responsabilidade por ordem da importação.
+- [ ] **DB10 (parcial):** integração exige confirmação administrativa explícita do polo e recusa substituir outro polo existente. Polo validado na programação e encerramento; falta aplicar à edição/reprogramação e completar reconciliação histórica; não atribuir responsabilidade por ordem da importação.
 - [x] **DB11:** modelar autorizações de operadores por CNES e seleção por sessão/contexto; separar autor técnico autenticado de operador declarado, preservando nome histórico após revogação ou alteração cadastral.
 
 Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e ausência de duplicação em gravações concorrentes.
 
 ## 05. Trabalho do RH e Administrador — prioridade alta
 
-- [ ] **UI01 (parcial):** após selecionar o operador, RH agora entra no calendário mensal; Administrador tem consulta por unidade. Sem operador autorizado, orientar contato com Administrador e impedir consulta. Gravação direta ainda pendente, sem autenticação própria do funcionário beneficiário.
+- [x] **UI01 — Entrada operacional:** após escolher operador, RH entra no calendário e lança afastamentos diretamente; ausência de operador bloqueia operação.
 - [ ] **UI02:** tela principal do RH com funcionários da unidade, busca, matrícula, cargo, CBO, carga, equipe e pendências cadastrais.
-- [ ] **UI03:** lançamento por seleção de funcionário/vínculo sob responsabilidade da unidade/polo, modalidade, direito/saldo, datas e conferência; gravar e refletir diretamente no calendário, sem etapa de aprovação. Dados vêm do cadastro e correção respeita permissões.
+- [ ] **UI03 (parcial — programação entregue; cálculo por retorno e revisão final pendentes):** lançamento por seleção de funcionário/vínculo sob responsabilidade da unidade/polo, modalidade, direito/saldo, datas e conferência; gravar e refletir diretamente no calendário, sem etapa de aprovação. Dados vêm do cadastro e correção respeita permissões.
 - [ ] **UI04:** revisar linguagem de solicitações, meus pedidos, acessos, aprovações, notificações e orientações conforme fluxo consolidado.
-- [ ] **UI05:** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.
+- [ ] **UI05 (parcial — cancelamento/conclusão entregues; edição/reprogramação pendentes):** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.
 - [ ] **UI06:** Administrador consulta todas as unidades com filtro/contexto explícito; relatórios e estatísticas futuras não aparecem como disponíveis.
 - [ ] **UI07:** preservar rascunhos e proteger respostas tardias em troca de tela/unidade; padronizar foco, carregamento, confirmação e erros persistentes.
 
@@ -153,11 +153,11 @@ Aceite: RH Amazonas completa ciclo para funcionário sem login; Administrador en
 
 ### 05.1. Folgas e horas declaradas — decisão de 17/10
 
-- [ ] **BH01:** perguntar “Banco de horas do funcionário”, jornada diária efetiva e folgas desejadas no lançamento. Não salvar/atualizar esse valor como saldo acumulado em usuário, funcionário ou conta de banco de horas.
-- [ ] **BH02:** calcular no servidor horas necessárias, dias possíveis e diferença de horas; não deduzir jornada diária dividindo a carga semanal. Se insuficientes, orientar a realização das horas faltantes e apresentar opção explícita de aprovação pelo RH.
-- [ ] **BH03:** exigir confirmação específica e justificativa quando o RH aprovar folgas sem horas suficientes; registrar conta, operador, instante, horas declaradas, horas necessárias e diferença. Sem checkbox preselecionado e sem aprovação silenciosa.
-- [ ] **BH04:** guardar valores da conferência como snapshot do lançamento para consulta/auditoria/comprovante. Alterar/cancelar lançamento novo não altera saldo persistente do funcionário nem cria dívida automática. Valores de outro lançamento não são reutilizados como saldo atual por suposição.
-- [ ] **BH05:** preservar histórico e saldos antigos, retirar sua utilização obrigatória do fluxo novo e manter esquemas de férias/fracionamento/complemento já existentes. Testar horas fracionadas, insuficiência, exceção, repetição e mudança de operador antes de publicar a gravação direta.
+- [x] **BH01:** perguntar “Banco de horas do funcionário”, jornada diária efetiva e folgas desejadas no lançamento. Não salvar/atualizar esse valor como saldo acumulado em usuário, funcionário ou conta de banco de horas.
+- [x] **BH02:** calcular no servidor horas necessárias, dias possíveis e diferença de horas; não deduzir jornada diária dividindo a carga semanal. Se insuficientes, orientar a realização das horas faltantes e apresentar opção explícita de aprovação pelo RH.
+- [x] **BH03:** exigir confirmação específica e justificativa quando o RH aprovar folgas sem horas suficientes; registrar conta, operador, instante, horas declaradas, horas necessárias e diferença. Sem checkbox preselecionado e sem aprovação silenciosa.
+- [ ] **BH04 (parcial — snapshot e cancelamento entregues; edição e comprovante pendentes):** guardar valores da conferência como snapshot do lançamento para consulta/auditoria/comprovante. Alterar/cancelar lançamento novo não altera saldo persistente do funcionário nem cria dívida automática. Valores de outro lançamento não são reutilizados como saldo atual por suposição.
+- [x] **BH05:** preservar histórico e saldos antigos, retirar sua utilização obrigatória do fluxo novo e manter esquemas de férias/fracionamento/complemento já existentes. Testar horas fracionadas, insuficiência, exceção, repetição e mudança de operador antes de publicar a gravação direta.
 
 ## 06. Comprovante — prioridade alta
 
@@ -173,8 +173,8 @@ Aceite: novos comprovantes contêm três campos adicionais, preservam datas de a
 ## 07. Calendário e escala — prioridade alta
 
 - [x] **CA01 — Entrega de visualização:** colunas independentes de Nome do funcionário, Cargo, CBO e Equipe antes da grade; matrícula, carga semanal e pendência de conferência identificadas.
-- [ ] **CA02 (parcial):** novo calendário mensal limitado ao CNES do RH, Administrador com seleção explícita; SQL, API autenticada e navegador administrativo validados. Calendário de lançamentos novos e comprovante ainda dependem da gravação direta.
-- [ ] **CA03 (parcial):** projeção paginada dos programados legados implementada, respeitando atribuição diária antiga quando existir; novos lançamentos ainda pendentes. Evitar duplicação e manter marcadores conforme FL01/FL03.
+- [ ] **CA02 (parcial):** novo calendário mensal limitado ao CNES do RH, Administrador com seleção explícita; SQL, API autenticada e navegador administrativo validados. Novos lançamentos integrados, com consulta e encerramento; comprovante e homologação institucional pendentes.
+- [ ] **CA03 (parcial):** projeção paginada dos programados legados implementada, respeitando atribuição diária antiga quando existir; novos lançamentos integrados com origem identificada e cancelados preservados na consulta. Evitar duplicação e manter marcadores conforme FL01/FL03.
 - [ ] **CA04 (parcial):** mês, paginação de 50 linhas e busca literal por nome/matrícula/cargo/CBO/equipe implementados; filtros individuais e situação ainda pendentes.
 - [ ] **CA05:** adaptar conflitos, escala mínima, feriados e day-off às modalidades mantidas; separar alerta operacional de impedimento normativo.
 - [ ] **CA06:** tratar várias equipes/atuações e afastamento multiunidade segundo FL04, sem esconder vínculos ou contar pessoas indevidamente.
@@ -206,7 +206,7 @@ Base anterior: 309 testes locais aprovados e build concluído em 17/10; não val
 - [ ] **QA01:** testar funcionário sem conta, mesma pessoa com duas matrículas/unidades/equipes, CBO/jornada distintos e saldo isolado.
 - [ ] **QA02:** validar 42 logins/escopos e Administrador; negar acesso cruzado em API/RLS, busca, detalhe, calendário e comprovante.
 - [ ] **QA03:** testar repetição de carga, falha da fonte, divergência/ausência cadastral, equipe/CBO ausentes, mudança de jornada/equipe e preservação de ajustes locais.
-- [ ] **QA04:** testar concorrência, repetição, rede lenta, navegação durante gravação, reprogramação, cancelamento e consumo/devolução única de saldo.
+- [ ] **QA04:** testar concorrência, repetição, rede lenta, navegação durante gravação, reprogramação, cancelamento e ausência de débito/estorno de banco de horas no fluxo novo e preservação do saldo legado.
 - [ ] **QA05:** ensaiar migração, leitura de legado e preservação de autoria, saldos e comprovantes sem duplicação no calendário.
 - [ ] **QA06:** primeiro teste real pela Diretora da UBS Amazonas, com cadastro manual se necessário; validar também Administração global e segunda UBS. Preparação/importação das demais unidades pode avançar antes desse aceite, sem declarar homologação concluída.
 - [ ] **QA07:** validar teclado, foco, zoom 200%, leitor de tela, tablet, equipamentos institucionais e impressão.
