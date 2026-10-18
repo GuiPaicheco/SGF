@@ -96,3 +96,5 @@ test('retorno envia apenas a data ativa e preserva o modo ao reprogramar',async(
  ui.set('#rh-leave-returnDate','2027-03-16');ui.set('#rh-leave-availableHours','16');ui.set('#rh-leave-reason','Novo retorno fictício');ui.app.querySelector('#rh-leave-form').querySelectorAll('[name]').find(n=>n.name==='eligibilityConfirmed').checked=true;
  await ui.submit('#rh-leave-form');assert.equal(received.item.returnDate,'2027-03-16');assert.equal(received.item.dateMode,'return');assert.equal(received.item.startDate,undefined);assert.equal(received.version,3);assert.match(ui.app.innerHTML,/Calculado pelo retorno/);
 });
+
+test('erro no detalhe permite voltar sem reabrir a tela antiga',async()=>{const ui=harness();let back=0;await ui.api.detail({app:ui.app,esc,request:async()=>{throw Error('Falha fictícia');},isCurrent:()=>true,leaveId:id,onBack:()=>{back++;ui.app.innerHTML='CALENDÁRIO';}});ui.app.querySelector('#rh-detail-back').onclick();assert.equal(back,1);assert.equal(ui.app.innerHTML,'CALENDÁRIO');});

@@ -185,12 +185,15 @@
 
 @media print {
   @page {
-    margin: 8mm;
+    margin: 10mm;
     size: A4 portrait;
+    @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #52625a; }
   }
   html,
   body {
     background: #fff !important;
+    display: block;
+    min-height: 0;
     height: auto;
   }
   .site-header,
@@ -218,8 +221,10 @@
     border-radius: 0;
     box-sizing: border-box;
     max-width: none;
-    min-height: 275mm;
-    padding: 7mm 9mm;
+    min-height: 0;
+    padding: 0;
+    font-size: 9.5pt;
+    line-height: 1.35;
     print-color-adjust: exact;
     width: 100%;
     -webkit-print-color-adjust: exact;
@@ -255,22 +260,39 @@
   .signature-grid {
     break-inside: avoid;
     gap: 14mm;
-    margin-top: 19mm;
+    margin-top: 12mm;
     grid-template-columns: 1fr 1fr;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
   }
+  .signature-grid > .signature { display: table-cell; width: 50%; padding: 2mm 4mm 0; }
+  .signature strong, .signature span, .signature small { display: block; }
   .receipt-protocol {
     grid-template-columns: 1.25fr 1fr 1fr;
     break-inside: avoid;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
   }
+  .receipt-protocol > div { display: table-cell; width: 33.33%; vertical-align: top; }
   .receipt-data {
     grid-template-columns: 2fr 1fr;
+    display: block;
+    width: 100%;
   }
+  .receipt-data > div { display: block; margin-bottom: 1mm; padding: 1.5mm 2mm; break-inside: avoid; }
+  .receipt-data span, .receipt-protocol span { display: block; font-size: 8pt; }
+  .receipt-data strong, .receipt-protocol strong { font-size: 9.5pt; }
   .receipt-data-wide {
     grid-column: 1 / -1;
   }
   .receipt-head, .receipt-notes, .receipt-warning {
     break-inside: avoid;
   }
+  .receipt-notes { break-inside: auto; }
+  .receipt-notes > span { display: block; break-after: avoid; }
+  .receipt-notes p { orphans: 3; widows: 3; }
   .receipt-footer {
     margin-top: 5mm;
   }

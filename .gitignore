@@ -8,3 +8,5 @@ supabase/.temp/
 .sgf-backups/
 .tools/
 .sgf-imports/
+tmp/pdfs/
+output/pdf/

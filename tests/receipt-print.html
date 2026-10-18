@@ -9,7 +9,7 @@
 </head>
 <body>
   <main class="app"><p>Ensaio fictício — Sistema de Gestão de Funcionários — sem gravação no banco.</p></main>
-<script src="../assets/rh-receipt.js"></script><script>
+<script src="../assets/rh-focus.js"></script><script src="../assets/rh-receipt.js"></script><script>
 const sample={id:'f7000000-0000-0000-0000-000000000001',status:'programada',version:1,created_at:'2026-10-18T12:00:00Z',snapshot:{full_name:'FUNCIONÁRIO FICTÍCIO COM NOME COMPLETO EXTENSO PARA CONFERÊNCIA',registration:'TESTE-001',unit:'UNIDADE FICTÍCIA — POLO DO ENSAIO',position:'CARGO FICTÍCIO PARA VERIFICAÇÃO',cbo:'123456',weekly_hours:32.5,team:'EQUIPE FICTÍCIA COM NOME EXTENSO PARA CONFERÊNCIA DE QUEBRA DE LINHA'},operator_name:'OPERADOR FICTÍCIO',operator_declared:true,plan:{type:'regulamentar',birth_date:'1990-10-08',periods:[{start_date:'2026-10-01',end_date:'2026-10-15',return_date:'2026-10-16'},{start_date:'2026-12-01',end_date:'2026-12-15',return_date:'2026-12-16'}],bank:{required_minutes:0},notes:'Documento fictício para conferência visual e impressão. Sem gravação no banco.'}};
 SGFRhReceipt.show({app:document.querySelector('main'),data:SGFRhReceipt.fromLeave(sample),onBack:()=>location.reload()});
 </script></body>

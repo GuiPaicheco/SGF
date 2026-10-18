@@ -29,6 +29,10 @@
 .app:focus {
   outline: none;
 }
+.card [tabindex="-1"]:focus-visible {
+  outline: 3px solid #247451;
+  outline-offset: 4px;
+}
 .hero [data-resume] {
   grid-column: 1/-1;
   min-height: 100px;

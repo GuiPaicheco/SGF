@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {runInNewContext} from 'node:vm';
+const root={};runInNewContext(readFileSync(new URL('../assets/rh-focus.js',import.meta.url),'utf8'),{globalThis:root});
+test('erro recebe foco antes do título, sem inserir o texto no percurso de Tab',()=>{let focused;const node={setAttribute:(k,v)=>{assert.equal(k,'tabindex');assert.equal(v,'-1');},focus:()=>{focused='erro';}};root.SGFRhFocus.message({querySelector:s=>s==='[role="alert"]'?node:null});assert.equal(focused,'erro');});
+test('restauração de seletor não altera sua participação na navegação por teclado',()=>{let called=false;root.SGFRhFocus.control({querySelector:()=>({focus:()=>{called=true;}})},'#modo');assert.ok(called);root.SGFRhFocus.message({querySelector:()=>null});});
