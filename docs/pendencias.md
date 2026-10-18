@@ -20,6 +20,8 @@ Sétimo bloco (18/10): edição/reprogramação dos registros RH programados, co
 
 Oitavo bloco (18/10): filtros individuais e de situação/modalidade aplicados antes da paginação, limpeza de critérios, sinalização operacional de sobreposição e ajustes de rolagem/foco em telas estreitas. **373 testes aprovados**, build/Deno e ensaio SQL com 66 cadastros fictícios e rollback aprovados; navegador e API administrativa publicados conferidos. [Evidências e limites](VALIDACAO_FILTROS_CALENDARIO_20261018.md). Próximo bloco: cálculo pela data de retorno na prévia RH (UI03). Escala mínima e homologação permanecem abertas.
 
+Nono bloco (18/10): prévia pelo início ou retorno exato, cálculo inverso no servidor, modos preservados na edição, feriados/day-off e fracionamento do primeiro período conferidos. **375 testes aprovados**, build/Deno e ensaios SQL com rollback aprovados; interface com API simulada e bloqueios da API publicada validados. [Evidências e limites](VALIDACAO_RETORNO_RH_20261018.md). Próximo bloco: revisão de impressão/PDF e acessibilidade para o piloto.
+
 ## 00. Diretrizes definidas pelo responsável
 
 - Ferramenta voltada ao RH das unidades e à Administração/Diretoria da DAPS. Funcionários são cadastros geridos pelo RH e não precisam de conta para ter afastamentos registrados.
@@ -149,7 +151,7 @@ Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e a
 
 - [x] **UI01 — Entrada operacional:** após escolher operador, RH entra no calendário e lança afastamentos diretamente; ausência de operador bloqueia operação.
 - [ ] **UI02:** tela principal do RH com funcionários da unidade, busca, matrícula, cargo, CBO, carga, equipe e pendências cadastrais.
-- [ ] **UI03 (parcial — programação entregue; cálculo por retorno e revisão final pendentes):** lançamento por seleção de funcionário/vínculo sob responsabilidade da unidade/polo, modalidade, direito/saldo, datas e conferência; gravar e refletir diretamente no calendário, sem etapa de aprovação. Dados vêm do cadastro e correção respeita permissões.
+- [ ] **UI03 (parcial — programação, edição e cálculo por início/retorno entregues; revisão final e homologação pendentes):** lançamento por seleção de funcionário/vínculo sob responsabilidade da unidade/polo, modalidade, direito/saldo, datas e conferência; gravar e refletir diretamente no calendário, sem etapa de aprovação. Dados vêm do cadastro e correção respeita permissões.
 - [ ] **UI04:** revisar linguagem de solicitações, meus pedidos, acessos, aprovações, notificações e orientações conforme fluxo consolidado.
 - [x] **UI05 — Ciclo técnico dos registros RH:** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.
 - [ ] **UI06:** Administrador consulta todas as unidades com filtro/contexto explícito; relatórios e estatísticas futuras não aparecem como disponíveis.
