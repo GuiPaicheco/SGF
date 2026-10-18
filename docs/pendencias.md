@@ -1,6 +1,6 @@
 # Pendências do SGF — gestão pelo RH e DAPS
 
-Atualização: **18/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; lançamentos diretos, horas declaradas e encerramento estão publicados tecnicamente; comprovante e reprogramação seguem pendentes.
+Atualização: **18/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; lançamentos diretos, horas declaradas e encerramento estão publicados tecnicamente; comprovante RH entregue tecnicamente; reprogramação, conferência de PDF e homologação seguem pendentes.
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
@@ -13,6 +13,8 @@ Terceiro bloco (17/10): **42 contas RH criadas**, login institucional, painel ad
 Quarto bloco (17/10): integração administrativa do cadastro CNES a vínculo funcional sem conta do funcionário, polo confirmado explicitamente e calendário mensal paginado com colunas funcionais. **353 testes locais aprovados**, ensaio SQL com rollback e CI do código principal aprovado. Migração `20261017222951` e `manage-rh` v2 publicadas. **40 registros reais da UBS Amazonas incorporados, todos pendentes de conferência**; nenhum operador real autorizado. [Evidências e limites](VALIDACAO_CALENDARIO_RH_20261017.md). Próximo bloco: gravação direta de afastamentos e banco de horas por lançamento, conforme BH01–BH05.
 
 Quinto bloco (18/10): programação direta de férias e folgas, prévia do servidor, banco de horas declarado por lançamento e exceção justificada, idempotência, snapshots, histórico, cancelamento e conclusão publicados. **362 testes aprovados**, build/Deno e CI aprovados, SQL com rollback, interface com API simulada e bloqueios da API publicada com sessões reais validados. [Evidências e limites](VALIDACAO_LANCAMENTOS_RH_20261018.md). Próximo bloco: comprovante atualizado e edição/reprogramação. Não equivale à homologação institucional.
+
+Sexto bloco (18/10): comprovante RH com CBO, carga semanal, equipe, situação e dados históricos; distribuição diária removida de todas as saídas do comprovante, inclusive legado. Consulta da situação atual antes de emitir, cópia e impressão disponíveis. **366 testes aprovados** e build concluído; navegador com dados fictícios conferido. [Evidências e limites](VALIDACAO_COMPROVANTE_RH_20261018.md). Próximo bloco: edição/reprogramação com motivo e histórico. Exportação final em PDF e assinaturas institucionais permanecem pendentes.
 
 ## 00. Diretrizes definidas pelo responsável
 
@@ -131,7 +133,7 @@ Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, camp
 - [x] **DB04 — Validação cadastral:** lançamento exige cadastro conferido, matrícula/vínculo ativo e polo confirmado; funcionário sem conta própria.
 - [x] **DB05 — Contrato RH:** endpoint próprio distingue conta autora, operador declarado e beneficiário, com sessão e escopo validados no servidor.
 - [ ] **DB06:** manter pedidos antigos identificados como legado e decidir destino de pendentes/aprovados/programados; não converter estados nem repetir débito automaticamente.
-- [ ] **DB07 (parcial — snapshots dos registros entregues; comprovante pendente):** preservar snapshots funcionais em registros/comprovantes; alteração cadastral não reescreve documentos históricos.
+- [ ] **DB07 (parcial — snapshots dos registros entregues; comprovante entregue; revisão histórica completa pendente):** preservar snapshots funcionais em registros/comprovantes; alteração cadastral não reescreve documentos históricos.
 - [ ] **DB08 (parcial — programação/encerramento protegidos; alteração pendente):** revisar RLS, funções, constraints, versões e idempotência para lançamentos, alterações, cancelamentos e saldo.
 - [ ] **DB09:** ensaiar migration em base isolada, reconciliar contagens/saldos e definir retorno compatível com dados novos; não apagar tabelas antigas antes de remover dependências.
 - [ ] **DB10 (parcial):** integração exige confirmação administrativa explícita do polo e recusa substituir outro polo existente. Polo validado na programação e encerramento; falta aplicar à edição/reprogramação e completar reconciliação histórica; não atribuir responsabilidade por ordem da importação.
@@ -161,19 +163,19 @@ Aceite: RH Amazonas completa ciclo para funcionário sem login; Administrador en
 
 ## 06. Comprovante — prioridade alta
 
-- [ ] **CP01:** retirar seção de distribuição de datas/unidades responsáveis da tela, impressão e texto copiado/compartilhado.
-- [ ] **CP02:** acrescentar CBO, Carga Horária e Equipe, com unidade de medida da carga e snapshot do vínculo/atuação.
-- [ ] **CP03:** preservar nome, matrícula disponível, cargo, unidade, modalidade, período(s), retorno, protocolo, emissão, observações e assinaturas conforme FL07.
-- [ ] **CP04:** indicar informação ausente sem inventar valor; definir se ausência bloqueia emissão final ou exige conferência.
-- [ ] **CP05:** adaptar título/orientação à nova operação, distinguindo registro e autorização institucional quando aplicável.
-- [ ] **CP06:** garantir leitura/reimpressão de legado e validar A4/PDF, nomes/equipes longos e quantidade de páginas sem prejudicar legibilidade.
+- [x] **CP01:** retirar seção de distribuição de datas/unidades responsáveis da tela, impressão e texto copiado/compartilhado.
+- [x] **CP02:** acrescentar CBO, Carga Horária e Equipe, com unidade de medida da carga e snapshot do vínculo/atuação.
+- [ ] **CP03 (parcial — campos e assinaturas genéricas entregues; definição institucional FL07 pendente):** preservar nome, matrícula disponível, cargo, unidade, modalidade, período(s), retorno, protocolo, emissão, observações e assinaturas conforme FL07.
+- [x] **CP04:** indicar informação ausente sem inventar valor; ausência exige conferência expressamente indicada, sem impedir consulta/reimpressão histórica.
+- [x] **CP05:** adaptar título/orientação à nova operação, distinguindo registro e autorização institucional quando aplicável.
+- [ ] **CP06 (parcial — reimpressão e tela verificadas; PDF/A4 e conteúdo máximo pendentes):** garantir leitura/reimpressão de legado e validar A4/PDF, nomes/equipes longos e quantidade de páginas sem prejudicar legibilidade.
 
 Aceite: novos comprovantes contêm três campos adicionais, preservam datas de afastamento/retorno e não mostram distribuição por unidade em nenhuma saída.
 
 ## 07. Calendário e escala — prioridade alta
 
 - [x] **CA01 — Entrega de visualização:** colunas independentes de Nome do funcionário, Cargo, CBO e Equipe antes da grade; matrícula, carga semanal e pendência de conferência identificadas.
-- [ ] **CA02 (parcial):** novo calendário mensal limitado ao CNES do RH, Administrador com seleção explícita; SQL, API autenticada e navegador administrativo validados. Novos lançamentos integrados, com consulta e encerramento; comprovante e homologação institucional pendentes.
+- [ ] **CA02 (parcial):** novo calendário mensal limitado ao CNES do RH, Administrador com seleção explícita; SQL, API autenticada e navegador administrativo validados. Novos lançamentos integrados, com consulta e encerramento; conferência de PDF e homologação institucional pendentes.
 - [ ] **CA03 (parcial):** projeção paginada dos programados legados implementada, respeitando atribuição diária antiga quando existir; novos lançamentos integrados com origem identificada e cancelados preservados na consulta. Evitar duplicação e manter marcadores conforme FL01/FL03.
 - [ ] **CA04 (parcial):** mês, paginação de 50 linhas e busca literal por nome/matrícula/cargo/CBO/equipe implementados; filtros individuais e situação ainda pendentes.
 - [ ] **CA05:** adaptar conflitos, escala mínima, feriados e day-off às modalidades mantidas; separar alerta operacional de impedimento normativo.
