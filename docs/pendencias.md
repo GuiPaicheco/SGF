@@ -1,6 +1,6 @@
 # Pendências do SGF — gestão pelo RH e DAPS
 
-Atualização: **18/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; lançamentos diretos, horas declaradas e encerramento estão publicados tecnicamente; comprovante RH entregue tecnicamente; reprogramação, conferência de PDF e homologação seguem pendentes.
+Atualização: **18/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; lançamentos diretos, horas declaradas e encerramento estão publicados tecnicamente; comprovante RH entregue tecnicamente; edição/reprogramação entregue; conferência de PDF e homologação seguem pendentes.
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
 
@@ -15,6 +15,8 @@ Quarto bloco (17/10): integração administrativa do cadastro CNES a vínculo fu
 Quinto bloco (18/10): programação direta de férias e folgas, prévia do servidor, banco de horas declarado por lançamento e exceção justificada, idempotência, snapshots, histórico, cancelamento e conclusão publicados. **362 testes aprovados**, build/Deno e CI aprovados, SQL com rollback, interface com API simulada e bloqueios da API publicada com sessões reais validados. [Evidências e limites](VALIDACAO_LANCAMENTOS_RH_20261018.md). Próximo bloco: comprovante atualizado e edição/reprogramação. Não equivale à homologação institucional.
 
 Sexto bloco (18/10): comprovante RH com CBO, carga semanal, equipe, situação e dados históricos; distribuição diária removida de todas as saídas do comprovante, inclusive legado. Consulta da situação atual antes de emitir, cópia e impressão disponíveis. **366 testes aprovados** e build concluído; navegador com dados fictícios conferido. [Evidências e limites](VALIDACAO_COMPROVANTE_RH_20261018.md). Próximo bloco: edição/reprogramação com motivo e histórico. Exportação final em PDF e assinaturas institucionais permanecem pendentes.
+
+Sétimo bloco (18/10): edição/reprogramação dos registros RH programados, com motivo, nova prévia comparativa, nova declaração de horas, versão e idempotência. Plano/snapshot anteriores e operador por ação preservados; comprovantes substituídos identificados. **370 testes aprovados**, build/Deno e ensaios SQL com rollback aprovados; navegador com API simulada e bloqueios da API publicada validados. [Evidências e limites](VALIDACAO_REPROGRAMACAO_RH_20261018.md). Próximo bloco: filtros e revisão do calendário (CA04–CA07), preparando o piloto da Amazonas.
 
 ## 00. Diretrizes definidas pelo responsável
 
@@ -38,7 +40,7 @@ Fluxo definido: **login RH → seleção do operador autorizado → funcionário
 
 - [x] **FL01 — Entrada no calendário:** decisão do responsável em 17/10: gravação válida do RH já programa no calendário. Sem confirmação posterior, fila de solicitações ou duas aprovações antigas; permanece validação técnica de datas, escopo e saldo quando aplicável.
 - [x] **FL02 — Modalidades:** decisão do responsável em 17/10: manter os esquemas atuais de férias regulamentares/férias-prêmio e folgas por banco de horas. No novo fluxo, as horas serão informadas por lançamento, sem saldo acumulado no cadastro do funcionário. Simulação rápida e day-off são preservados enquanto a interface migra. Implementação nova detalhada em BH01–BH05.
-- [ ] **FL03 — Ciclo do registro:** definir rascunho, programação, alteração, cancelamento, conclusão e correção de erro. Para folgas novas, não consumir/devolver saldo persistente do funcionário; registrar horas declaradas, necessárias e eventual exceção no próprio lançamento. Não aplicar a proposta anterior de reserva/estorno de banco de horas. Preservar os movimentos antigos como histórico.
+- [ ] **FL03 (parcial — ciclo técnico entregue; política de correção de concluídos e rascunho persistente ainda pendente):** programação direta, alteração somente de programados, cancelamento/conclusão com motivo e versões anteriores preservadas. Rascunho atual é local à tela, sem garantia de persistência após fechar/recarregar. Para folgas novas, não consumir/devolver saldo persistente do funcionário; registrar horas declaradas, necessárias e eventual exceção no próprio lançamento. Não aplicar a proposta anterior de reserva/estorno de banco de horas. Preservar os movimentos antigos como histórico.
 - [x] **FL04 — Múltiplas unidades:** decisão do responsável em 17/10: controle de funcionário eMulti pelo RH da unidade polo no CNES, com articulação humana entre RH. Implementar responsabilidade do polo sem duplicar registro/débito. Casos sem polo identificável exigem conferência cadastral, sem inferência automática.
 - [ ] **FL05 — Cadastro e direitos:** definir quais dados o RH pode complementar/corrigir e quais ações exigem Administrador, inclusive matrícula, jornada, equipe, CBO, cargo, direitos e saldos.
 - [x] **FL06 — RH DAPS:** decisão do responsável em 17/10: incluir inicialmente todo o quadro da Secretaria Municipal de Saúde, CNES 2126486. Separar diretorias futuramente, preservando vínculos/histórico.
@@ -134,9 +136,9 @@ Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, camp
 - [x] **DB05 — Contrato RH:** endpoint próprio distingue conta autora, operador declarado e beneficiário, com sessão e escopo validados no servidor.
 - [ ] **DB06:** manter pedidos antigos identificados como legado e decidir destino de pendentes/aprovados/programados; não converter estados nem repetir débito automaticamente.
 - [ ] **DB07 (parcial — snapshots dos registros entregues; comprovante entregue; revisão histórica completa pendente):** preservar snapshots funcionais em registros/comprovantes; alteração cadastral não reescreve documentos históricos.
-- [ ] **DB08 (parcial — programação/encerramento protegidos; alteração pendente):** revisar RLS, funções, constraints, versões e idempotência para lançamentos, alterações, cancelamentos e saldo.
+- [ ] **DB08 (parcial — programação/edição/encerramento protegidos; revisão ampla do legado pendente):** revisar RLS, funções, constraints, versões e idempotência para lançamentos, alterações, cancelamentos e saldo.
 - [ ] **DB09:** ensaiar migration em base isolada, reconciliar contagens/saldos e definir retorno compatível com dados novos; não apagar tabelas antigas antes de remover dependências.
-- [ ] **DB10 (parcial):** integração exige confirmação administrativa explícita do polo e recusa substituir outro polo existente. Polo validado na programação e encerramento; falta aplicar à edição/reprogramação e completar reconciliação histórica; não atribuir responsabilidade por ordem da importação.
+- [ ] **DB10 (parcial):** integração exige confirmação administrativa explícita do polo e recusa substituir outro polo existente. Polo validado na programação, edição e encerramento; falta completar reconciliação histórica; não atribuir responsabilidade por ordem da importação.
 - [x] **DB11:** modelar autorizações de operadores por CNES e seleção por sessão/contexto; separar autor técnico autenticado de operador declarado, preservando nome histórico após revogação ou alteração cadastral.
 
 Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e ausência de duplicação em gravações concorrentes.
@@ -147,7 +149,7 @@ Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e a
 - [ ] **UI02:** tela principal do RH com funcionários da unidade, busca, matrícula, cargo, CBO, carga, equipe e pendências cadastrais.
 - [ ] **UI03 (parcial — programação entregue; cálculo por retorno e revisão final pendentes):** lançamento por seleção de funcionário/vínculo sob responsabilidade da unidade/polo, modalidade, direito/saldo, datas e conferência; gravar e refletir diretamente no calendário, sem etapa de aprovação. Dados vêm do cadastro e correção respeita permissões.
 - [ ] **UI04:** revisar linguagem de solicitações, meus pedidos, acessos, aprovações, notificações e orientações conforme fluxo consolidado.
-- [ ] **UI05 (parcial — cancelamento/conclusão entregues; edição/reprogramação pendentes):** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.
+- [x] **UI05 — Ciclo técnico dos registros RH:** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.
 - [ ] **UI06:** Administrador consulta todas as unidades com filtro/contexto explícito; relatórios e estatísticas futuras não aparecem como disponíveis.
 - [ ] **UI07:** preservar rascunhos e proteger respostas tardias em troca de tela/unidade; padronizar foco, carregamento, confirmação e erros persistentes.
 
@@ -158,7 +160,7 @@ Aceite: RH Amazonas completa ciclo para funcionário sem login; Administrador en
 - [x] **BH01:** perguntar “Banco de horas do funcionário”, jornada diária efetiva e folgas desejadas no lançamento. Não salvar/atualizar esse valor como saldo acumulado em usuário, funcionário ou conta de banco de horas.
 - [x] **BH02:** calcular no servidor horas necessárias, dias possíveis e diferença de horas; não deduzir jornada diária dividindo a carga semanal. Se insuficientes, orientar a realização das horas faltantes e apresentar opção explícita de aprovação pelo RH.
 - [x] **BH03:** exigir confirmação específica e justificativa quando o RH aprovar folgas sem horas suficientes; registrar conta, operador, instante, horas declaradas, horas necessárias e diferença. Sem checkbox preselecionado e sem aprovação silenciosa.
-- [ ] **BH04 (parcial — snapshot e cancelamento entregues; edição e comprovante pendentes):** guardar valores da conferência como snapshot do lançamento para consulta/auditoria/comprovante. Alterar/cancelar lançamento novo não altera saldo persistente do funcionário nem cria dívida automática. Valores de outro lançamento não são reutilizados como saldo atual por suposição.
+- [x] **BH04:** guardar valores da conferência como snapshot do lançamento para consulta/auditoria/comprovante. Alterar/cancelar lançamento novo não altera saldo persistente do funcionário nem cria dívida automática. Valores de outro lançamento não são reutilizados como saldo atual por suposição.
 - [x] **BH05:** preservar histórico e saldos antigos, retirar sua utilização obrigatória do fluxo novo e manter esquemas de férias/fracionamento/complemento já existentes. Testar horas fracionadas, insuficiência, exceção, repetição e mudança de operador antes de publicar a gravação direta.
 
 ## 06. Comprovante — prioridade alta
@@ -197,7 +199,7 @@ Medição de 17/10: Supabase saudável, plano Free, banco de aproximadamente **1
 - [ ] **TE07:** definir teste sem e-mails reais e separação piloto/produção; testar backup/restauração completos, incluindo itens externos ao PostgreSQL.
 - [ ] **TE08:** revisar domínio, CORS, retorno de login, recuperação, privacidade, retenção e acesso administrativo; explicitar limitação de autoria compartilhada.
 - [ ] **TE09:** limitar no servidor quantidade de itens por página, intervalo consultado, tamanho dos pedidos e frequência de gravações/importações; estabelecer limites por tipo de operação após medição, com mensagens claras e sem bloquear uso normal de unidades no mesmo IP.
-- [ ] **TE10:** impedir gravação duplicada por clique/reenvio com chave de idempotência e transações; validar permissões, operador, datas e versão no servidor. Proteger também endpoints diretamente, independentemente da interface.
+- [ ] **TE10 (parcial — gravações novas protegidas; auditoria completa dos endpoints legados pendente):** impedir gravação duplicada por clique/reenvio com chave de idempotência e transações; validar permissões, operador, datas e versão no servidor. Proteger também endpoints diretamente, independentemente da interface.
 - [ ] **TE11:** buscar enquanto digita com atraso controlado, cancelar/ignorar respostas antigas, reutilizar dados do mesmo contexto e carregar calendário por intervalo. Não fazer consulta CNES externa a cada login, renderização ou célula.
 - [ ] **TE12:** executar importação em lotes limitados, sem paralelismo irrestrito nas 42 unidades, com progresso, retomada e retentativas limitadas; registrar só o necessário e não duplicar snapshots sem mudança. Aplicar prazo de execução e monitorar consultas lentas.
 
