@@ -2,7 +2,11 @@ export function calendarQuery(payload) {
  if(typeof payload.month!=='string'||! /^(19\d{2}|20\d{2}|2100)-(0[1-9]|1[0-2])$/.test(payload.month)
   ||!Number.isInteger(payload.page)||payload.page<0||payload.page>100
   ||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');
- return {target_month:payload.month+'-01',page_index:payload.page,search_text:payload.search.trim()};
+ const filters=payload.filters??{};if(!filters||typeof filters!=='object'||Array.isArray(filters))throw Error('RH_INPUT_INVALID');
+ const allowed={position:null,cbo:null,team:null,review:['todos','pendente','conferido'],type:['todos','regulamentar','premio','banco_horas'],status:['todos','com_afastamento','sem_afastamento','programada','concluida','cancelada']};
+ if(Object.entries(filters).some(([key,value])=>!Object.hasOwn(allowed,key)||typeof value!=='string'||value.length>120||(allowed[key]&&!allowed[key].includes(value))))throw Error('RH_INPUT_INVALID');
+ const clean=Object.fromEntries(Object.entries(filters).map(([k,v])=>[k,v.trim()]));
+ return {filter_json:clean,target_month:payload.month+'-01',page_index:payload.page,search_text:payload.search.trim()};
 }
 
 export function bindingInput(payload) {

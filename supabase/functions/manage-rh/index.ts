@@ -58,7 +58,7 @@ Deno.serve(async request=>{
    if(payload.action==='select-operator'){if(!uuid.test(payload.grantId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_select_operator',{target_grant:payload.grantId}));}
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
-   if(payload.action==='calendar')return json(await rpc('rh_calendar_month',{target_cnes:null,...calendarQuery(payload)}));
+   if(payload.action==='calendar')return json(await rpc('rh_calendar_filtered',{target_cnes:null,...calendarQuery(payload)}));
    if(isLeaveAction){const operation=leaveOperation(payload);return json(await rpc(operation.name,{target_cnes:null,...operation.args}));}
    throw Error('RH_NOT_ALLOWED');
   }
@@ -80,7 +80,7 @@ Deno.serve(async request=>{
    if(error)throw error;return json(data);
   }
   if(payload.action==='calendar') {
-   const {data,error}=await db.rpc('rh_calendar_month',{target_profile:actor,target_session:null,target_cnes:unit.id,...calendarQuery(payload)});
+   const {data,error}=await db.rpc('rh_calendar_filtered',{target_profile:actor,target_session:null,target_cnes:unit.id,...calendarQuery(payload)});
    if(error)throw error;return json(data);
   }
   if(payload.action==='binding-options') {
