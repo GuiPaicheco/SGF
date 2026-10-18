@@ -221,7 +221,7 @@ begin
    and status not in ('cancelada','rejeitada','rascunho','devolvida'))) then raise exception 'RH_LEAVE_CYCLE_IN_USE';end if;
  insert into private.rh_leaves(cnes_unit_id,entry_id,bond_id,created_by,operator_grant_id,operator_name,operator_declared,request_key,input_digest,preview_digest,snapshot,plan)
  values(unit_id,target_entry,bound_bond,target_profile,nullif(actor->'operator'->>'id','')::uuid,actor->'operator'->>'name',(actor->>'declared')::boolean,
-  request_key,input_hash,expected_digest,resources,leave_plan) returning * into result;
+  request_key,input_hash,expected_digest,resources||jsonb_build_object('account_name',(select full_name from public.profiles where id=target_profile)),leave_plan) returning * into result;
  insert into public.audit_events(actor_id,actor_role,action,entity_type,entity_id,context_bond_id,context_cnes_unit_id,reason,new_value)
  values(target_profile,(actor->>'role')::public.app_role,'rh_leave_programmed','rh_leave',result.id,bound_bond,unit_id,
   leave_plan->'bank'->>'override_reason',jsonb_build_object('operator_name',result.operator_name,'operator_grant_id',result.operator_grant_id,
@@ -236,7 +236,11 @@ begin
  actor:=private.rh_leave_actor(target_profile,target_session,target_cnes);
  select * into result from private.rh_leaves where id=target_leave and cnes_unit_id=(actor->'context'->>'cnes_unit_id')::uuid;
  if not found then raise exception 'RH_LEAVE_NOT_FOUND';end if;
- return to_jsonb(result)-'input_digest'-'preview_digest'-'request_key';
+ return (to_jsonb(result)-'input_digest'-'preview_digest'-'request_key')||jsonb_build_object('history',coalesce((select jsonb_agg(to_jsonb(h) order by h.occurred_at,h.id) from (
+  select a.id,a.occurred_at,a.action,a.reason,a.actor_name_at_event account_name,a.new_value->>'operator_name' operator_name,
+   a.new_value->>'declared_identity' declared_identity
+  from public.audit_events a where a.entity_type='rh_leave' and a.entity_id=result.id and a.context_cnes_unit_id=result.cnes_unit_id
+  order by a.occurred_at desc,a.id desc limit 50) h),'[]'));
 end $$;
 
 create function public.rh_close_leave(target_profile uuid,target_session uuid,target_cnes uuid,target_leave uuid,expected_version integer,
@@ -255,7 +259,7 @@ begin
  update private.rh_leaves set status=next_status,version=version+1 where id=entry.id;
  insert into public.audit_events(actor_id,actor_role,action,entity_type,entity_id,context_bond_id,context_cnes_unit_id,reason,previous_value,new_value)
  values(target_profile,(actor->>'role')::public.app_role,'rh_leave_'||next_status,'rh_leave',entry.id,entry.bond_id,entry.cnes_unit_id,btrim(target_reason),
- jsonb_build_object('status',entry.status),jsonb_build_object('status',next_status,'operator_name',actor->'operator'->>'name','declared_identity',actor->'declared'));
+ jsonb_build_object('status',entry.status),jsonb_build_object('status',next_status,'operator_name',actor->'operator'->>'name','operator_grant_id',actor->'operator'->>'id','declared_identity',actor->'declared'));
  return jsonb_build_object('ok',true);
 end $$;
 
@@ -263,7 +267,7 @@ end $$;
 alter function public.rh_calendar_month(uuid,uuid,uuid,date,integer,text) rename to rh_calendar_legacy_month;
 create function public.rh_calendar_month(target_profile uuid,target_session uuid,target_cnes uuid,target_month date,page_index integer default 0,search_text text default '') returns jsonb
 language plpgsql security invoker set search_path='' set statement_timeout='8s' as $$
-declare result jsonb;unit_id uuid;ids uuid[];extra jsonb;
+declare result jsonb;unit_id uuid;ids uuid[];extra jsonb;records jsonb;
 begin
  result:=public.rh_calendar_legacy_month(target_profile,target_session,target_cnes,target_month,page_index,search_text);
  unit_id:=(result->'context'->>'cnes_unit_id')::uuid;
@@ -276,7 +280,14 @@ begin
   where l.cnes_unit_id=unit_id and l.bond_id=any(coalesce(ids,'{}'::uuid[])) and l.status<>'cancelada'
    and (p->>'start_date')::date<(target_month+interval '1 month')::date and (p->>'end_date')::date>=target_month limit 1001) q;
  if jsonb_array_length(extra)+jsonb_array_length(result->'absences')>1000 then raise exception 'RH_CALENDAR_LIMIT';end if;
- return jsonb_set(result,'{absences}',(result->'absences')||extra);
+ select coalesce(jsonb_agg(to_jsonb(q) order by q.created_at desc,q.id),'[]') into records from (
+  select l.id,'RH-'||upper(left(replace(l.id::text,'-',''),12)) protocol,l.snapshot->>'full_name' full_name,
+   l.snapshot->>'registration' registration,l.plan->>'type' type,l.status,l.created_at
+  from private.rh_leaves l where l.cnes_unit_id=unit_id and l.bond_id=any(coalesce(ids,'{}'::uuid[]))
+   and exists(select 1 from jsonb_array_elements(l.plan->'periods') p where (p->>'start_date')::date<(target_month+interval '1 month')::date and (p->>'end_date')::date>=target_month)
+  order by l.created_at desc,l.id limit 51) q;
+ return jsonb_set(result,'{absences}',(result->'absences')||extra)||jsonb_build_object('records',case when jsonb_array_length(records)>50 then records-50 else records end,
+  'records_has_more',jsonb_array_length(records)>50);
 end $$;
 
 do $$ declare f record;begin
