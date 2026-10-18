@@ -3,11 +3,25 @@ import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts
 import {verifiedSessionId,provisionRhAccount} from '../_shared/rh-accounts.mjs';
 import {limitedJson} from '../_shared/limited-json.mjs';
 import {calendarQuery,bindingInput} from '../_shared/rh-calendar.mjs';
+import {leaveOperation} from '../_shared/rh-leaves.mjs';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-sgf-role,x-sgf-cnes,x-sgf-lotacao','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const messages:Record<string,string>={
+ RH_LEAVE_INPUT_INVALID:'Confira os campos, a confirmação do direito e os limites do lançamento.',
+ RH_LEAVE_IDENTITY_REQUIRED:'Informe a data de nascimento correta e confira a admissão antes de calcular as datas.',
+ RH_LEAVE_DATES_INVALID:'O início deve ser uma data válida posterior à admissão.',RH_LEAVE_ACQUISITION_INVALID:'Confira o período aquisitivo; o início precisa ser posterior ao seu término.',
+ RH_LEAVE_DAILY_HOURS_REQUIRED:'Informe a jornada diária efetiva do funcionário. Ela não é deduzida da carga semanal.',
+ RH_LEAVE_OVERRIDE_INVALID:'A aprovação com horas insuficientes exige confirmação e justificativa de 3 a 500 caracteres.',
+ RH_LEAVE_PREVIEW_REQUIRED:'Confira a prévia antes de programar o afastamento.',RH_LEAVE_PREVIEW_CHANGED:'Cadastro, operador ou calendário mudou. Gere e confira uma nova prévia.',
+ RH_LEAVE_HOURS_INSUFFICIENT:'As horas informadas não cobrem as folgas. Complete as horas faltantes ou confirme uma exceção justificada pelo RH.',
+ RH_LEAVE_IDEMPOTENCY_CONFLICT:'Este envio já foi usado para outro lançamento. Confira o registro antes de iniciar outro.',
+ RH_LEAVE_RATE_LIMIT:'Muitos lançamentos em sequência nesta conta. Aguarde um minuto para continuar.',
+ RH_LEAVE_OVERLAP:'Este vínculo já tem afastamento ou pedido ativo nessas datas. Confira o calendário antes de continuar.',
+ RH_LEAVE_CYCLE_IN_USE:'Já existe afastamento ativo para este vínculo e período aquisitivo.',RH_LEAVE_RIGHT_INVALID:'O direito selecionado não corresponde ao vínculo/modalidade ou não possui dias suficientes.',
+ RH_LEAVE_SPLIT_INVALID:'Confira as condições de fracionamento e o início do segundo período.',RH_LEAVE_NOT_FOUND:'Lançamento não encontrado nesta unidade.',
+ RH_LEAVE_NOT_ENDED:'O período ainda não terminou e não pode ser concluído agora.',
  RH_BINDING_INPUT_INVALID:'Selecione o vínculo, confirme a unidade polo e informe a justificativa.',
  RH_ENTRY_INVALID:'Cadastro CNES não encontrado.',RH_ENTRY_REVIEW_REQUIRED:'Confira nome, matrícula, cargo, admissão e vínculo municipal antes de integrar o cadastro ativo.',
  RH_BINDING_IMMUTABLE:'Este cadastro já está associado a outro vínculo. Preserve a associação e solicite revisão administrativa.',
@@ -35,6 +49,7 @@ Deno.serve(async request=>{
   const {data:profile,error:profileError}=await auth.from('profiles').select('roles,disabled_at,must_change_password,institutional_cnes_unit_id').eq('id',identity.user.id).single();
   if(profileError||!profile||profile.disabled_at||profile.must_change_password)throw Error('RH_NOT_ALLOWED');
   const payload=await limitedJson(request),actor=identity.user.id;
+  const isLeaveAction=['leave-resources','preview-leave','create-leave','leave-detail','close-leave'].includes(payload.action);
   if(profile.institutional_cnes_unit_id) {
    if(request.headers.get('x-sgf-role')!=='rh'||profile.roles.length!==1||profile.roles[0]!=='rh')throw Error('RH_NOT_ALLOWED');
    const session=verifiedSessionId(token,actor);
@@ -44,6 +59,7 @@ Deno.serve(async request=>{
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
    if(payload.action==='calendar')return json(await rpc('rh_calendar_month',{target_cnes:null,...calendarQuery(payload)}));
+   if(isLeaveAction){const operation=leaveOperation(payload);return json(await rpc(operation.name,{target_cnes:null,...operation.args}));}
    throw Error('RH_NOT_ALLOWED');
   }
   const context=await validateAccessContext(auth,request,actor,profile.roles);
@@ -58,6 +74,11 @@ Deno.serve(async request=>{
   const configured=catalog.find(unit=>unit.cnes===payload.cnes);if(!configured)throw Error('RH_UNIT_INVALID');
   const {data:unit,error:unitError}=await db.from('cnes_units').select('id').eq('code',configured.cnes).eq('active',true).single();
   if(unitError||!unit)throw Error('RH_UNIT_INVALID');
+  if(isLeaveAction){
+   const operation=leaveOperation(payload);
+   const {data,error}=await db.rpc(operation.name,{target_profile:actor,target_session:verifiedSessionId(token,actor),target_cnes:unit.id,...operation.args});
+   if(error)throw error;return json(data);
+  }
   if(payload.action==='calendar') {
    const {data,error}=await db.rpc('rh_calendar_month',{target_profile:actor,target_session:null,target_cnes:unit.id,...calendarQuery(payload)});
    if(error)throw error;return json(data);
@@ -95,7 +116,7 @@ Deno.serve(async request=>{
  }catch(error){
   const code=String((error as {message?:string})?.message||'');
   if(code==='INVALID_ACCESS_CONTEXT')return json({error:'Selecione o acesso correto para continuar.'},403);
-  if(messages[code])return json({error:messages[code],code},/CONFLICT/.test(code)?409:/NOT_ALLOWED|OUT_OF_UNIT|OPERATOR_REQUIRED/.test(code)?403:400);
+  if(messages[code])return json({error:messages[code],code},/RATE_LIMIT/.test(code)?429:/CONFLICT|PREVIEW_CHANGED/.test(code)?409:/NOT_FOUND/.test(code)?404:/NOT_ALLOWED|OUT_OF_UNIT|OPERATOR_REQUIRED/.test(code)?403:400);
   console.error('manage-rh failed');return json({error:'Não foi possível concluir a operação.'},500);
  }
 });

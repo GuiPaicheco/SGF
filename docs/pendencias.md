@@ -12,6 +12,8 @@ Terceiro bloco (17/10): **42 contas RH criadas**, login institucional, painel ad
 
 Quarto bloco (17/10): integração administrativa do cadastro CNES a vínculo funcional sem conta do funcionário, polo confirmado explicitamente e calendário mensal paginado com colunas funcionais. **353 testes locais aprovados**, ensaio SQL com rollback e CI do código principal aprovado. Migração `20261017222951` e `manage-rh` v2 publicadas. **40 registros reais da UBS Amazonas incorporados, todos pendentes de conferência**; nenhum operador real autorizado. [Evidências e limites](VALIDACAO_CALENDARIO_RH_20261017.md). Próximo bloco: gravação direta de afastamentos e banco de horas por lançamento, conforme BH01–BH05.
 
+Quinto bloco (18/10), em implementação: backend de prévia/programação direta, horas declaradas por lançamento e exceção justificada do RH, idempotência, snapshots e encerramento com versão. **359 testes locais aprovados** e ensaio SQL com rollback. Interface e publicação ainda em andamento; não considerar homologação concluída.
+
 ## 00. Diretrizes definidas pelo responsável
 
 - Ferramenta voltada ao RH das unidades e à Administração/Diretoria da DAPS. Funcionários são cadastros geridos pelo RH e não precisam de conta para ter afastamentos registrados.
