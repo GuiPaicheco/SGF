@@ -4,9 +4,12 @@ const day=value=>{if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value)
 const hours=(value,max)=>{if(typeof value!=='number'||!Number.isFinite(value)||value<0||value>max||Math.abs(value*60-Math.round(value*60))>1e-7)fail();return value;};
 export function leaveItem(item){
  if(!item||typeof item!=='object'||Array.isArray(item))fail();
- const fields=new Set(['type','startDate','secondStartDate','days','availableHours','dailyHours','extraHours','birthDate','acquisitionEnd','unjustifiedAbsences','split','eligibilityConfirmed','rightId','override','overrideReason','notes']);
+ const fields=new Set(['type','dateMode','returnDate','startDate','secondStartDate','days','availableHours','dailyHours','extraHours','birthDate','acquisitionEnd','unjustifiedAbsences','split','eligibilityConfirmed','rightId','override','overrideReason','notes']);
  if(Object.keys(item).some(key=>!fields.has(key))||!['regulamentar','premio','banco_horas'].includes(item.type)||item.eligibilityConfirmed!==true)fail();
- const result={type:item.type,startDate:day(item.startDate),eligibilityConfirmed:true,availableHours:hours(item.availableHours??0,2160),
+ const dateMode=item.dateMode===undefined?'start':item.dateMode;if(!['start','return'].includes(dateMode))fail();
+ if((dateMode==='return'&&item.startDate!==undefined&&item.startDate!=='')||(dateMode==='start'&&item.returnDate!==undefined&&item.returnDate!==''))fail();
+ const chosen=dateMode==='return'?{dateMode:'return',returnDate:day(item.returnDate)}:{startDate:day(item.startDate),...(item.dateMode!==undefined?{dateMode:'start'}:{})};
+ const result={type:item.type,...chosen,eligibilityConfirmed:true,availableHours:hours(item.availableHours??0,2160),
   dailyHours:hours(item.dailyHours??0,24),extraHours:hours(item.extraHours??0,2160),split:item.split??'none',
   override:item.override??false,overrideReason:item.overrideReason??'',notes:item.notes??''};
  if(typeof result.override!=='boolean'||typeof result.overrideReason!=='string'||result.overrideReason.length>500

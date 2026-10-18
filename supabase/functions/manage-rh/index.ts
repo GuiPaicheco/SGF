@@ -9,6 +9,7 @@ const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'au
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const messages:Record<string,string>={
+ RH_LEAVE_RETURN_INVALID:'Escolha uma data exata de retorno em dia útil, fora de feriado e do day-off de aniversário. Confira o período calculado.',
  RH_LEAVE_INPUT_INVALID:'Confira os campos, a confirmação do direito e os limites do lançamento.',
  RH_LEAVE_IDENTITY_REQUIRED:'Informe a data de nascimento correta e confira a admissão antes de calcular as datas.',
  RH_LEAVE_DATES_INVALID:'O início deve ser uma data válida posterior à admissão.',RH_LEAVE_ACQUISITION_INVALID:'Confira o período aquisitivo; o início precisa ser posterior ao seu término.',

@@ -39,3 +39,10 @@ test('reprogramação deriva beneficiário do registro e exige versão, motivo e
  assert.equal(leaveOperation({...payload,action:'preview-revision'}).name,'rh_preview_leave_revision');
  for(const patch of [{version:0},{version:1.5},{version:Infinity},{reason:''},{reason:false},{digest:''},{requestKey:'inválido'},{leaveId:'inválido'}])assert.throws(()=>leaveOperation({...payload,...patch}),/RH_LEAVE_/);
 });
+
+test('cálculo pelo retorno aceita somente a data escolhida e mantém compatibilidade do início',()=>{
+ const {startDate,...other}=bank;const value=leaveItem({...other,dateMode:'return',returnDate:'2027-03-09'});
+ assert.equal(value.returnDate,'2027-03-09');assert.equal(value.dateMode,'return');assert.equal(value.startDate,undefined);assert.equal(leaveItem(bank).dateMode,undefined);
+ for(const patch of [{dateMode:'outro'},{dateMode:null},{returnDate:'2027-02-30'},{returnDate:''},{startDate:'2027-03-01'},{startDate:null}])assert.throws(()=>leaveItem({...other,dateMode:'return',returnDate:'2027-03-09',...patch}),/RH_LEAVE_INPUT_INVALID/);
+ assert.throws(()=>leaveItem({...bank,returnDate:'2027-03-09'}),/RH_LEAVE_INPUT_INVALID/);
+});

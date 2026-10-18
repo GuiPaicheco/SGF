@@ -88,3 +88,11 @@ test('versão anterior abre comprovante histórico com seu próprio snapshot',as
  ui.root.SGFRhReceipt={fromLeave:value=>value,show:({data})=>{shown=data;}};await ui.api.detail({app:ui.app,esc,request:async()=>data,isCurrent:()=>true,leaveId:id,onBack:()=>{}});
  assert.match(ui.app.innerHTML,/Alterado/);ui.app.querySelector('#rh-revision-receipt-1').onclick();assert.equal(shown.superseded,true);assert.equal(shown.version,1);assert.equal(shown.snapshot.position,'CARGO ANTERIOR');
 });
+
+test('retorno envia apenas a data ativa e preserva o modo ao reprogramar',async()=>{
+ const ui=harness();let received;const p={...preview({type:'banco_horas',days:2,dailyHours:8,availableHours:16}).plan,date_mode:'return',requested_return:'2027-03-09',days:2,bank:{daily_minutes:480,required_minutes:960}};
+ const editing={id,version:3,entry_id:id,plan:p};const request=async payload=>{if(payload.action==='leave-resources')return resources;if(payload.action==='preview-revision'){received=payload;return {...preview(payload.item),plan:p,previous_plan:p};}assert.fail(payload.action);};
+ await ui.api.open({app:ui.app,esc,request,isCurrent:()=>true,entryId:id,editing,onBack:()=>{}});assert.equal(ui.app.querySelector('#rh-leave-dateMode').value,'return');assert.equal(ui.app.querySelector('#rh-leave-returnDate').value,'2027-03-09');assert.equal(ui.app.querySelector('#rh-leave-startDate'),null);
+ ui.set('#rh-leave-returnDate','2027-03-16');ui.set('#rh-leave-availableHours','16');ui.set('#rh-leave-reason','Novo retorno fictício');ui.app.querySelector('#rh-leave-form').querySelectorAll('[name]').find(n=>n.name==='eligibilityConfirmed').checked=true;
+ await ui.submit('#rh-leave-form');assert.equal(received.item.returnDate,'2027-03-16');assert.equal(received.item.dateMode,'return');assert.equal(received.item.startDate,undefined);assert.equal(received.version,3);assert.match(ui.app.innerHTML,/Calculado pelo retorno/);
+});
