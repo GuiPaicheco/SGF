@@ -34,6 +34,7 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
     '#access-password': { value: 'senha-segura' },
   };
   runInNewContext(source, {
+    SGFRhCalendar: { mount: async ({app,admin}) => { assert.equal(admin,true); app.innerHTML = "Calendário RH"; } },
     URLSearchParams,
     window: { supabase: { createClient: clientFor }, location: { hash: '', search: '' }, scrollTo() {} },
     sessionStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
@@ -58,5 +59,5 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
   assert.deepEqual(loginPayload, { action: 'login', identifier: 'admin', password: 'senha-segura' });
   assert.equal(saved.get('sgf-access-role'), 'administrador');
   await new Promise(resolve => setImmediate(resolve));
-  assert.match(app.innerHTML, /Solicitações/);
+  assert.match(app.innerHTML, /Calendário RH/);
 });

@@ -33,6 +33,7 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
     };
   };
   runInNewContext(source, {
+    SGFRhCalendar: { mount: async ({app,admin}) => { assert.equal(admin,true); app.innerHTML = "Calendário RH"; } },
     URLSearchParams,
     window: { supabase: { createClient: (_url, _key, options) => clientFor(options) }, location: { hash: '', search: '' }, scrollTo() {} },
     sessionStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
@@ -58,14 +59,14 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
   assert.equal(toast.textContent, '', 'a troca de contexto não conserva mensagem da unidade anterior');
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'servidor');
-  assert.match(app.innerHTML, /Meus pedidos/);
+  assert.match(app.innerHTML, /Registros anteriores/);
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
   await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '1' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'diretor');
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'diretor');
-  assert.match(app.innerHTML, /Solicitações/);
+  assert.match(app.innerHTML, /Registros anteriores/);
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
   await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '2' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
@@ -73,12 +74,12 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'rh');
   assert.equal(clientsCreated, 1, 'a troca de acesso preserva a sessão do cliente');
-  assert.match(app.innerHTML, /Solicitações/);
+  assert.match(app.innerHTML, /Registros anteriores/);
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'choose-access' } } : null } });
   await listeners.click({ target: { closest: selector => selector === '[data-access-context]' ? { dataset: { accessContext: '3' } } : null } });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(saved.get('sgf-access-role'), 'administrador');
   await roleFetch('/rest/v1/vacation_requests');
   assert.equal(headers.at(-1), 'administrador');
-  assert.match(app.innerHTML, /Painel administrativo/);
+  assert.match(app.innerHTML, /Calendário RH/);
 });

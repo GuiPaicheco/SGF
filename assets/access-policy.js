@@ -1,9 +1,9 @@
 (function (root) {
   'use strict';
-  const publicRoutes = new Set(['home','quick','quick-result','login','access-request','recover-password','set-password']);
+  const publicRoutes = new Set(['home','quick','quick-result','login','recover-password','set-password']);
   const sessionRoutes = new Set(['choose-access','change-password','notifications','stored-receipt']);
   const routes = {
-    servidor:new Set(['employee-dashboard','employee-detail','types','identity','rules','dates','confirm','receipt']),
+    servidor:new Set(['employee-dashboard','employee-detail']),
     diretor:new Set(['dashboard','detail','scale','audit-history']),
     rh:new Set(['dashboard','detail','scale','audit-history','catalogs','inclusions','inclusion-detail','access-requests','access-request-detail','employee-registry-detail','location-detail']),
     administrador:new Set(['dashboard','detail','scale','audit-history','catalogs','inclusions','inclusion-detail','access-requests','access-request-detail','employee-registry-detail','location-detail','reference-detail','profiles','profile-detail','profile-create','calendar-admin','rejection-catalog'])

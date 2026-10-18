@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import '../assets/access-policy.js';
 const {allowed,resolve}=globalThis.SGFAccessPolicy;
-test('visitante acessa simulação e cadastro público, não telas internas',()=>{
-  for(const route of ['home','quick','quick-result','login','access-request','recover-password','set-password']) assert.equal(allowed(route,null,false),true);
-  for(const route of ['scale','profiles','detail','employee-dashboard','stored-receipt']) assert.equal(resolve(route,null,false,false),'login');
+test('visitante acessa simulação e login, sem autocadastro',()=>{
+  for(const route of ['home','quick','quick-result','login','recover-password','set-password']) assert.equal(allowed(route,null,false),true);
+  for(const route of ['access-request','scale','profiles','detail','employee-dashboard','stored-receipt']) assert.equal(resolve(route,null,false,false),'login');
 });
 test('servidor fica nas telas próprias e não abre gestão por navegação direta',()=>{
-  for(const route of ['employee-dashboard','employee-detail','types','identity','rules','dates','confirm','receipt','notifications']) assert.equal(resolve(route,'servidor',true,false),route);
-  for(const route of ['dashboard','detail','scale','audit-history','catalogs','profiles','rejection-catalog']) assert.equal(resolve(route,'servidor',true,false),'employee-dashboard');
+  for(const route of ['employee-dashboard','employee-detail','notifications']) assert.equal(resolve(route,'servidor',true,false),route);
+  for(const route of ['types','identity','rules','dates','confirm','receipt','dashboard','detail','scale','audit-history','catalogs','profiles','rejection-catalog']) assert.equal(resolve(route,'servidor',true,false),'employee-dashboard');
 });
 test('diretor consulta gestão mas não abre cadastros ou permissões administrativas',()=>{
   for(const route of ['dashboard','detail','scale','audit-history','notifications']) assert.equal(resolve(route,'diretor',true,false),route);
