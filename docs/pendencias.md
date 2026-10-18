@@ -22,6 +22,8 @@ Oitavo bloco (18/10): filtros individuais e de situação/modalidade aplicados a
 
 Nono bloco (18/10): prévia pelo início ou retorno exato, cálculo inverso no servidor, modos preservados na edição, feriados/day-off e fracionamento do primeiro período conferidos. **375 testes aprovados**, build/Deno e ensaios SQL com rollback aprovados; interface com API simulada e bloqueios da API publicada validados. [Evidências e limites](VALIDACAO_RETORNO_RH_20261018.md). Próximo bloco: revisão de impressão/PDF e acessibilidade para o piloto.
 
+Décimo bloco (18/10): impressão reorganizada e ensaiada em PDF independente — modelo curto em 1 página A4 e extenso em 2, com conteúdo integral. Foco e navegação por Tab revisados no fluxo RH. **378 testes aprovados**, build e verificações dos PDFs aprovados. [Evidências e limites](VALIDACAO_IMPRESSAO_FOCO_20261018.md). Próximo bloco: manual do RH/Administração e roteiro de homologação da UBS Amazonas (QA08/QA06). PDF nativo/equipamento institucional e leitor de tela ainda pendentes.
+
 ## 00. Diretrizes definidas pelo responsável
 
 - Ferramenta voltada ao RH das unidades e à Administração/Diretoria da DAPS. Funcionários são cadastros geridos pelo RH e não precisam de conta para ter afastamentos registrados.
@@ -155,7 +157,7 @@ Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e a
 - [ ] **UI04:** revisar linguagem de solicitações, meus pedidos, acessos, aprovações, notificações e orientações conforme fluxo consolidado.
 - [x] **UI05 — Ciclo técnico dos registros RH:** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.
 - [ ] **UI06:** Administrador consulta todas as unidades com filtro/contexto explícito; relatórios e estatísticas futuras não aparecem como disponíveis.
-- [ ] **UI07:** preservar rascunhos e proteger respostas tardias em troca de tela/unidade; padronizar foco, carregamento, confirmação e erros persistentes.
+- [ ] **UI07 (parcial — foco, carregamento e respostas tardias revisados; rascunho persistente/revisão global pendentes):** preservar rascunhos e proteger respostas tardias em troca de tela/unidade; padronizar foco, carregamento, confirmação e erros persistentes.
 
 Aceite: RH Amazonas completa ciclo para funcionário sem login; Administrador encontra o registro e histórico identifica conta autora de cada ação.
 
@@ -174,7 +176,7 @@ Aceite: RH Amazonas completa ciclo para funcionário sem login; Administrador en
 - [ ] **CP03 (parcial — campos e assinaturas genéricas entregues; definição institucional FL07 pendente):** preservar nome, matrícula disponível, cargo, unidade, modalidade, período(s), retorno, protocolo, emissão, observações e assinaturas conforme FL07.
 - [x] **CP04:** indicar informação ausente sem inventar valor; ausência exige conferência expressamente indicada, sem impedir consulta/reimpressão histórica.
 - [x] **CP05:** adaptar título/orientação à nova operação, distinguindo registro e autorização institucional quando aplicável.
-- [ ] **CP06 (parcial — reimpressão e tela verificadas; PDF/A4 e conteúdo máximo pendentes):** garantir leitura/reimpressão de legado e validar A4/PDF, nomes/equipes longos e quantidade de páginas sem prejudicar legibilidade.
+- [ ] **CP06 (parcial — PDF independente A4 e texto extenso ensaiados; PDF nativo, legado e impressora institucional pendentes):** garantir leitura/reimpressão de legado e validar A4/PDF, nomes/equipes longos e quantidade de páginas sem prejudicar legibilidade.
 
 Aceite: novos comprovantes contêm três campos adicionais, preservam datas de afastamento/retorno e não mostram distribuição por unidade em nenhuma saída.
 
@@ -217,7 +219,7 @@ Base anterior: 309 testes locais aprovados e build concluído em 17/10; não val
 - [ ] **QA04:** testar concorrência, repetição, rede lenta, navegação durante gravação, reprogramação, cancelamento e ausência de débito/estorno de banco de horas no fluxo novo e preservação do saldo legado.
 - [ ] **QA05:** ensaiar migração, leitura de legado e preservação de autoria, saldos e comprovantes sem duplicação no calendário.
 - [ ] **QA06:** primeiro teste real pela Diretora da UBS Amazonas, com cadastro manual se necessário; validar também Administração global e segunda UBS. Preparação/importação das demais unidades pode avançar antes desse aceite, sem declarar homologação concluída.
-- [ ] **QA07:** validar teclado, foco, zoom 200%, leitor de tela, tablet, equipamentos institucionais e impressão.
+- [ ] **QA07 (parcial — teclado, foco e PDF independente ensaiados; zoom 200%, leitor de tela e equipamento institucional pendentes):** validar teclado, foco, zoom 200%, leitor de tela, tablet, equipamentos institucionais e impressão.
 - [ ] **QA08:** atualizar README, arquitetura, manual e treinamento para operação pelo RH, contas de unidade e importação; identificar documentos antigos como históricos.
 - [ ] **QA09:** homologar normas de direito, jornada, fracionamento, aquisição/admissão, feriados e banco de horas pelo RH Central, com referências/responsáveis/vigência.
 - [ ] **QA10:** registrar aceite funcional/cadastral da Diretoria/RH, plano de implantação/retorno e publicação candidata; diferenciar publicação técnica de aceite institucional.
