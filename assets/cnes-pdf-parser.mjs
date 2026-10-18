@@ -18,9 +18,11 @@ export function parseCnesPages(pages,{competence=null,now=new Date().toISOString
   const professionalHeader=items.find(x=>x.s==='Descrição');
   if(professionalHeader){
    const anchors=items.filter(x=>x.x>=136&&x.x<236&&/^\d{15}$/.test(x.s)&&x.y>professionalHeader.y&&x.y<(section?.y??450)).sort((a,b)=>a.y-b.y);
+   const cboRows=items.filter(x=>x.x>=307&&x.x<377&&/^\d{6}$/.test(x.s)&&x.y>professionalHeader.y&&x.y<(section?.y??450));
+   if(cboRows.length!==anchors.length)fail('Há linha de profissional sem CNS/CBO reconhecido. Importação bloqueada.');
    for(let i=0;i<anchors.length;i++){
     const anchor=anchors[i],lo=i?(anchors[i-1].y+anchor.y)/2:professionalHeader.y+7,hi=anchors[i+1]?(anchor.y+anchors[i+1].y)/2:(section?.y??450);
-    const row=items.filter(x=>x.y>lo&&x.y<hi),number=(l,r)=>Number(cell(row,l,r));
+    const row=items.filter(x=>x.y>lo&&x.y<hi),number=(l,r)=>{const value=cell(row,l,r);if(!/^\d+(?:[.,]\d+)?$/.test(value))fail('Carga horária não reconhecida. Importação bloqueada.');return Number(value.replace(',','.'));};
     const raw={fullName:cell(row,16,136),cns:anchor.s,cbo:cell(row,307,377),occupation:cell(row,377,514),
      relationship:canonical(cell(row,546,606)),relationshipType:canonical(cell(row,606,665)),relationshipSubtype:canonical(cell(row,665,724)),
      weeklyHours:number(886,926),hoursOther:number(766,806),hoursAmbulatory:number(806,846),hoursHospital:number(846,886),

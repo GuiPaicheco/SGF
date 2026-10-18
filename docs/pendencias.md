@@ -25,7 +25,8 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] Ensaio SQL com rollback: importar, programar, atualizar e confirmar ausência preserva a folga e o vínculo; consulta por intervalo encontra o registro e ausência impede novo lançamento.
 - [x] 396 testes Node e Deno check das funções aprovados nesta etapa; banco e APIs publicados tecnicamente.
 - [x] Leitor PDF ensaiado no navegador; calendário por período, ocultação/reordenação de colunas e CSV baixado conferidos. HTML real de impressão ensaiado em três páginas A4 horizontais, com nomes/cargas/datas dentro dos limites.
-- [ ] Conferir publicação final e CI; impressão nativa/equipamentos institucionais e seleção de arquivo pelo usuário ainda dependem do ambiente real.
+- [x] Publicação web conferida com sessão administrativa: três guias, 42 unidades ordenadas, calendário sem seleção inicial e formulário de edição de feriados. CI integrado de `5ecb4e2` aprovado.
+- [ ] Conferir impressão nativa/equipamentos institucionais e seleção/arraste do arquivo no ambiente real; automação desses recursos foi limitada pela extensão.
 - [ ] Conferência cadastral e aceite real pelos responsáveis das unidades. Nenhuma importação real foi aprovada automaticamente a partir do PDF enviado.
 
 ## Limites e continuidade

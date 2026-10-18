@@ -14,6 +14,7 @@ test('ficha PDF reconhece CNES, ocupação, horas e CNS de equipe quebrado em du
 test('PDF sem identificação ou com linha inconsistente é bloqueado',()=>{
  const p=page();p.items=p.items.filter(x=>x.s!=='6305245');assert.throws(()=>parseCnesPages([p]),/identificar/);
  const invalid=page();invalid.items.find(x=>x.s==='9000000000000').s='inválido';assert.throws(()=>parseCnesPages([invalid]),/CNS/);
+ const missing=page();missing.items=missing.items.filter(x=>x.s!=='900000000000001');assert.throws(()=>parseCnesPages([missing]),/CNS\/CBO/);
  assert.throws(()=>parseCnesPages([{...page(),width:500}]),/Layout/);
 });
 test('conciliação por CNS/CBO preserva a identidade quando formato do vínculo muda',async()=>{
