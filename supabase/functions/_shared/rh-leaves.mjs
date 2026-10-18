@@ -4,7 +4,7 @@ const day=value=>{if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value)
 const hours=(value,max)=>{if(typeof value!=='number'||!Number.isFinite(value)||value<0||value>max||Math.abs(value*60-Math.round(value*60))>1e-7)fail();return value;};
 export function leaveItem(item){
  if(!item||typeof item!=='object'||Array.isArray(item))fail();
- const fields=new Set(['type','dateMode','returnDate','startDate','secondStartDate','days','availableHours','dailyHours','extraHours','birthDate','acquisitionEnd','unjustifiedAbsences','split','eligibilityConfirmed','rightId','override','overrideReason','notes']);
+ const fields=new Set(['type','dateMode','returnDate','startDate','secondStartDate','days','availableHours','dailyHours','extraHours','birthDate','admissionDate','acquisitionEnd','unjustifiedAbsences','split','eligibilityConfirmed','rightId','override','overrideReason','notes']);
  if(Object.keys(item).some(key=>!fields.has(key))||!['regulamentar','premio','banco_horas'].includes(item.type)||item.eligibilityConfirmed!==true)fail();
  const dateMode=item.dateMode===undefined?'start':item.dateMode;if(!['start','return'].includes(dateMode))fail();
  if((dateMode==='return'&&item.startDate!==undefined&&item.startDate!=='')||(dateMode==='start'&&item.returnDate!==undefined&&item.returnDate!==''))fail();
@@ -19,7 +19,7 @@ export function leaveItem(item){
  if(item.type==='premio'&&![30,60,90].includes(item.days))fail();
  if(item.days!==undefined){if(!Number.isInteger(item.days)||item.days<1||item.days>90)fail();result.days=item.days;}
  if((item.type==='banco_horas'||result.extraHours>0)&&result.dailyHours<=0)throw Error('RH_LEAVE_DAILY_HOURS_REQUIRED');
- for(const key of ['birthDate','acquisitionEnd','secondStartDate'])if(item[key])result[key]=day(item[key]);
+ for(const key of ['birthDate','admissionDate','acquisitionEnd','secondStartDate'])if(item[key])result[key]=day(item[key]);
  if(item.type==='regulamentar'){
   if(!result.acquisitionEnd||!['yes','no'].includes(item.unjustifiedAbsences))fail();result.unjustifiedAbsences=item.unjustifiedAbsences;
  }

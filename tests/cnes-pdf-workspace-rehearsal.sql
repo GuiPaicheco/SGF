@@ -1,0 +1,33 @@
+reset role;
+insert into auth.sessions(id,user_id) values('fa000000-0000-0000-0000-000000000100','f6000000-0000-0000-0000-000000000001');
+set local role service_role;
+do $$
+declare actor uuid:='f6000000-0000-0000-0000-000000000001';unit_id uuid:='f6000000-0000-0000-0000-000000000100';
+ entry uuid;bond uuid;person uuid;result jsonb;preview jsonb;leave_id uuid;historical jsonb;rev bigint;
+ source jsonb:='{"cns":"900000000000001","cbo":"123456","fullName":"CNES PESSOA FICTÍCIA","occupation":"CARGO DA FONTE","weeklyHours":40,"hoursOther":0,"hoursAmbulatory":40,"hoursHospital":0,"relationship":"VINCULO EMPREGATICIO","relationshipType":"ESTATUTARIO EFETIVO","relationshipSubtype":"PROPRIO","status":"ativo","teams":[]}';
+ items jsonb;item jsonb:='{"type":"banco_horas","startDate":"2027-03-01","days":2,"availableHours":16,"dailyHours":8,"birthDate":"1990-06-15","admissionDate":"2020-01-01","eligibilityConfirmed":true}';
+begin
+ items:=jsonb_build_array(jsonb_build_object('sourceId',repeat('e',64),'sourceHash',repeat('f',64),'sourceData',source));
+ result:=public.apply_cnes_reviewed(actor,unit_id,items,repeat('1',64),now(),'202610',0,'[]',jsonb_build_array(repeat('e',64)),'{"origin":"CNES_PDF"}');
+ select e.id,e.servidor_id,m.bond_id into entry,person,bond from private.cnes_registry_entries e join private.rh_registry_bonds m on m.entry_id=e.id where e.source_id=repeat('e',64);
+ if entry is null or (select registration from public.employment_bonds where id=bond) is not null then raise exception 'MATRICULA_REQUIRED_OR_FABRICATED';end if;
+ if not exists(select 1 from private.rh_calendar_employees(unit_id) where entry_id=entry and position='CARGO DA FONTE' and binding_confirmed) then raise exception 'SOURCE_POSITION_MISSING';end if;
+ preview:=public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item);
+ result:=public.rh_create_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item,'fa000000-0000-0000-0000-000000000001',preview->>'digest');leave_id:=(result->>'id')::uuid;
+ select to_jsonb(l) into historical from private.rh_leaves l where l.id=leave_id;
+ source:=source||'{"fullName":"NOME ATUALIZADO FICTÍCIO","weeklyHours":30,"hoursAmbulatory":30}';
+ items:=jsonb_build_array(jsonb_build_object('sourceId',repeat('e',64),'sourceHash',repeat('a',64),'sourceData',source));
+ select revision into rev from private.cnes_registry_state where cnes_unit_id=unit_id;
+ perform public.apply_cnes_reviewed(actor,unit_id,items,repeat('2',64),now(),'202611',rev,'[]',jsonb_build_array(repeat('e',64)),'{}');
+ if (select bond_id from private.rh_registry_bonds where entry_id=entry)<>bond then raise exception 'BOND_REPLACED';end if;
+ if (select to_jsonb(l) from private.rh_leaves l where l.id=leave_id)<>historical then raise exception 'LEAVE_REWRITTEN';end if;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2027-02-25','2027-03-10',0,'NOME ATUALIZADO','{}');
+ if jsonb_array_length(result->'absences')<>1 then raise exception 'RANGE_LOST_LEAVE';end if;
+ select revision into rev from private.cnes_registry_state where cnes_unit_id=unit_id;
+ perform public.apply_cnes_reviewed(actor,unit_id,items,repeat('3',64),now(),'202612',rev,jsonb_build_array(repeat('e',64)),'[]','{}');
+ result:=public.rh_calendar_window(actor,null,unit_id,'2027-02-25','2027-03-10',0,'NOME ATUALIZADO','{}');
+ if jsonb_array_length(result->'absences')<>1 then raise exception 'ABSENT_EMPLOYEE_HISTORY_HIDDEN';end if;
+ begin perform public.rh_leave_resources(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry);raise exception 'ABSENT_ALLOWED_TO_PROGRAM';exception when others then if sqlerrm<>'RH_ENTRY_REVIEW_REQUIRED' then raise;end if;end;
+ if (select to_jsonb(l) from private.rh_leaves l where l.id=leave_id)<>historical then raise exception 'ABSENCE_REWROTE_LEAVE';end if;
+ begin perform public.rh_calendar_window(actor,null,unit_id,'2027-01-01','2028-01-01',0,'','{}');raise exception 'UNBOUNDED_RANGE';exception when others then if sqlerrm<>'RH_INPUT_INVALID' then raise;end if;end;
+end $$;

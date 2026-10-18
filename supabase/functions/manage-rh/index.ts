@@ -2,7 +2,7 @@ import {createClient} from 'npm:@supabase/supabase-js@2.117.2';
 import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts';
 import {verifiedSessionId,provisionRhAccount} from '../_shared/rh-accounts.mjs';
 import {limitedJson} from '../_shared/limited-json.mjs';
-import {calendarQuery,bindingInput} from '../_shared/rh-calendar.mjs';
+import {calendarQuery,calendarWindow,bindingInput} from '../_shared/rh-calendar.mjs';
 import {leaveOperation} from '../_shared/rh-leaves.mjs';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-sgf-role,x-sgf-cnes,x-sgf-lotacao','Access-Control-Allow-Methods':'POST, OPTIONS'};
@@ -59,7 +59,7 @@ Deno.serve(async request=>{
    if(payload.action==='select-operator'){if(!uuid.test(payload.grantId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_select_operator',{target_grant:payload.grantId}));}
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
-   if(payload.action==='calendar')return json(await rpc('rh_calendar_filtered',{target_cnes:null,...calendarQuery(payload)}));
+   if(payload.action==='calendar')return json(await rpc('rh_calendar_window',{target_cnes:null,...calendarWindow(payload)}));
    if(isLeaveAction){const operation=leaveOperation(payload);return json(await rpc(operation.name,{target_cnes:null,...operation.args}));}
    throw Error('RH_NOT_ALLOWED');
   }
@@ -81,7 +81,7 @@ Deno.serve(async request=>{
    if(error)throw error;return json(data);
   }
   if(payload.action==='calendar') {
-   const {data,error}=await db.rpc('rh_calendar_filtered',{target_profile:actor,target_session:null,target_cnes:unit.id,...calendarQuery(payload)});
+   const {data,error}=await db.rpc('rh_calendar_window',{target_profile:actor,target_session:null,target_cnes:unit.id,...calendarWindow(payload)});
    if(error)throw error;return json(data);
   }
   if(payload.action==='binding-options') {
@@ -105,8 +105,9 @@ Deno.serve(async request=>{
    if(typeof payload.enabled!=='boolean'||!Number.isInteger(payload.version)||payload.version<1)throw Error('RH_INPUT_INVALID');
    return json(await rpc('rh_set_account_status',{target_cnes:unit.id,target_enabled:payload.enabled,expected_version:payload.version}));
   }
-  if(payload.action==='reset-password') {
-   if(typeof payload.password!=='string'||payload.password.length<8||payload.password.length>72)throw Error('RH_PASSWORD_INVALID');
+  if(payload.action==='reset-default')payload.password='123456';
+  if(['reset-password','reset-default'].includes(payload.action)) {
+   if(typeof payload.password!=='string'||payload.password.length<(payload.action==='reset-default'?6:8)||payload.password.length>72)throw Error('RH_PASSWORD_INVALID');
    const directory=await rpc('rh_account_directory'),account=directory.find((a:{cnes:string})=>a.cnes===configured.cnes);
    if(!account?.profile_id)throw Error('RH_UNIT_INVALID');
    await rpc('rh_invalidate_sessions',{target_cnes:unit.id});

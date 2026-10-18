@@ -16,12 +16,13 @@ test('diretor consulta gestão mas não abre cadastros ou permissões administra
   for(const route of ['catalogs','access-requests','profiles','calendar-admin','employee-detail']) assert.equal(resolve(route,'diretor',true,false),'dashboard');
 });
 test('RH mantém suas áreas operacionais mas não administração global',()=>{
-  for(const route of ['catalogs','inclusions','access-requests','employee-registry-detail','location-detail']) assert.equal(resolve(route,'rh',true,false),route);
+  for(const route of ['catalogs','inclusions','access-requests','employee-registry-detail','location-detail']) assert.equal(resolve(route,'rh',true,false),'dashboard');
   for(const route of ['profiles','profile-create','reference-detail','calendar-admin','rejection-catalog']) assert.equal(resolve(route,'rh',true,false),'dashboard');
 });
 test('administrador acessa administração mas não solicita como servidor',()=>{
-  for(const route of ['profiles','profile-create','reference-detail','calendar-admin','rejection-catalog','scale']) assert.equal(resolve(route,'administrador',true,false),route);
-  assert.equal(resolve('types','administrador',true,false),'dashboard');
+  for(const route of ['calendar-admin','rh-accounts','cnes-import','rh-calendar']) assert.equal(resolve(route,'administrador',true,false),route);
+  for(const route of ['profiles','profile-create','reference-detail','rejection-catalog','catalogs']) assert.equal(resolve(route,'administrador',true,false),'rh-calendar');
+  assert.equal(resolve('types','administrador',true,false),'rh-calendar');
 });
 test('senha obrigatória, perfil não selecionado e rotas desconhecidas têm destinos seguros',()=>{
   assert.equal(resolve('profiles','administrador',true,true),'change-password');

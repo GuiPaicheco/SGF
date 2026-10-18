@@ -50,9 +50,9 @@ test('direitos e horas mostram matrícula e saldos separados',()=>{
 test('estrutura exclusiva do administrador; recursos de vínculo apenas RH e admin na interface',()=>{
   const policy=vm.createContext({});vm.runInContext(read('assets/access-policy.js'),policy);
   assert.equal(policy.SGFAccessPolicy.allowed('organization','rh',true),false);
-  assert.equal(policy.SGFAccessPolicy.allowed('organization','administrador',true),true);
+  assert.equal(policy.SGFAccessPolicy.allowed('organization','administrador',true),false);
   assert.equal(policy.SGFAccessPolicy.allowed('bond-resources','diretor',true),false);
-  assert.equal(policy.SGFAccessPolicy.allowed('bond-resources','rh',true),true);
+  assert.equal(policy.SGFAccessPolicy.allowed('bond-resources','rh',true),false);
 });
 test('horas novas exigem matrícula, versão e chave; legado não aceita pessoa com vínculos',()=>{
   const edge=read('supabase/functions/manage-operations/index.ts');

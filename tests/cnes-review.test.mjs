@@ -45,15 +45,15 @@ test('prévia separa novos, alterados, iguais e ausentes sem propor exclusão',a
     {source_id:'ausente',source_hash:'antigo',local_data:{}}];
   const result=planImport(normalized,{revision:7,entries:existing});
   assert.deepEqual(result.counts,{added:1,changed:1,unchanged:1,absent:1,pendingTeamMembers:0});
-  const changed=result.changes.find(row=>row.action==='changed');assert.equal(changed.fullName,'NOME MUNICIPAL');
+  const changed=result.changes.find(row=>row.action==='changed');assert.equal(changed.fullName,second.sourceData.fullName);
   assert.deepEqual(changed.preservedLocalFields,['fullName','registration']);assert.deepEqual(changed.fields,['fullName']);
   assert.equal(result.revision,7);assert.ok(!JSON.stringify(result.changes).includes('900000000000'));
 });
 
-test('prévia limita detalhes a 50 sem truncar totais',async()=>{
+test('prévia mantém todos os nomes para conferência individual',async()=>{
   const input=collection(Array.from({length:65},(_,i)=>person({cns:String(900000000000000n+BigInt(i))})));
   const result=planImport(await normalize(input),{revision:0,entries:[]});
-  assert.equal(result.counts.added,65);assert.equal(result.changes.length,50);assert.equal(result.changesTruncated,true);
+  assert.equal(result.counts.added,65);assert.equal(result.changes.length,65);assert.equal(result.changesTruncated,false);
 });
 
 test('entrada adulterada, unidade desconhecida e dados inválidos são recusados',async()=>{

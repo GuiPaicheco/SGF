@@ -16,14 +16,16 @@
   routes.administrador.add('rh-calendar');
   routes.rh.add('choose-operator');
   routes.rh.add('rh-workspace');
+  const retired=new Set(['catalogs','profiles','profile-detail','profile-create','organization','bond-resources','rejection-catalog','reference-detail','location-detail','employee-registry-detail','inclusions','inclusion-detail','access-requests','access-request-detail']);
   function allowed(route,role,session) {
+    if(retired.has(route))return false;
     return publicRoutes.has(route) || Boolean(session && (sessionRoutes.has(route) || (Object.hasOwn(routes,role) && routes[role].has(route))));
   }
   function resolve(route,role,session,mustChangePassword) {
     if (session && mustChangePassword && !['change-password','set-password'].includes(route)) return 'change-password';
     if (session && !Object.hasOwn(routes,role) && !['set-password','change-password','choose-access'].includes(route)) return 'choose-access';
     if (allowed(route,role,session)) return route;
-    return session ? role==='servidor' ? 'employee-dashboard' : Object.hasOwn(routes,role) ? 'dashboard' : 'choose-access' : 'login';
+    return session ? role==='servidor' ? 'employee-dashboard' : role==='administrador' ? 'rh-calendar' : Object.hasOwn(routes,role) ? 'dashboard' : 'choose-access' : 'login';
   }
   const capabilities={
     structure:['administrador'],permissions:['administrador'],calendar:['administrador'],

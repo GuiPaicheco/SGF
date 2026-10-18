@@ -1,6 +1,6 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2';
 import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts';
-import {normalizeCollection,planImport,validateLocalData,validateManualEntry} from '../_shared/cnes-review.mjs';
+import {normalizeCollection,planImport,validateLocalData,reconcileCollection,reviewedItems,fingerprint} from '../_shared/cnes-review.mjs';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
 
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-sgf-role,x-sgf-bond,x-sgf-cnes,x-sgf-lotacao','Access-Control-Allow-Methods':'POST, OPTIONS'};
@@ -67,32 +67,33 @@ Deno.serve(async request=>{
     }
     let normalized;
     if(['preview','apply'].includes(payload.action)) normalized=await normalizeCollection(payload.collection,allowedCodes);
-    else if(!['list','legacy-candidates','create-manual'].includes(payload.action)) return json({error:'Ação inválida.'},400);
+    else if(!['list','legacy-candidates'].includes(payload.action)) return json({error:'Ação indisponível. Utilize a importação CNES.'},400);
     const code=normalized?.cnes||payload.cnes;
     if(!allowedCodes.includes(code)) throw Error('CNES_UNIT_INVALID');
     const {data:unit,error:unitError}=await admin.from('cnes_units').select('id').eq('code',code).eq('active',true).maybeSingle();
     if(unitError||!unit) throw Error('CNES_UNIT_INVALID');
-    if(payload.action==='create-manual') {
-      const manual=validateManualEntry(payload);
-      return json(await rpc('create_manual_registry_entry',{target_cnes:unit.id,request_id:manual.requestId,
-        target_cbo:manual.cbo,local_values:manual.localData,target_reason:manual.reason}));
-    }
     if(payload.action==='legacy-candidates') {
       if(typeof payload.registration!=='string'||payload.registration.length>60||!payload.registration.trim()) throw Error('CNES_LOCAL_DATA_INVALID');
       return json({candidates:await rpc('cnes_legacy_candidates',{target_cnes:unit.id,target_registration:payload.registration.trim().toUpperCase()})});
     }
     if(payload.action==='list') {
       if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100) throw Error('CNES_PAGE_INVALID');
-      return json(await rpc('list_cnes_registry',{target_cnes:unit.id,page_index:payload.page}));
+      if(typeof (payload.search??'')!=='string'||(payload.search||'').length>120)throw Error('CNES_LOCAL_DATA_INVALID');
+      return json(await rpc('cnes_unit_registry',{target_cnes:unit.id,page_index:payload.page,search_text:(payload.search||'').trim(),filter_json:payload.filters||{}}));
     }
     if(!normalized) throw Error('CNES_COLLECTION_INVALID');
-    if(payload.action==='preview') {
-      const snapshot=await rpc('cnes_registry_snapshot',{target_cnes:unit.id});
-      return json(planImport(normalized,snapshot));
-    }
+    const snapshot=await rpc('cnes_registry_snapshot',{target_cnes:unit.id});
+    normalized=await reconcileCollection(normalized,snapshot);
+    if(payload.action==='preview') return json(planImport(normalized,snapshot));
     if(payload.confirmed!==true||payload.digest!==normalized.digest||!Number.isSafeInteger(payload.revision)||payload.revision<0) throw Error('CNES_PREVIEW_REQUIRED');
-    return json(await rpc('apply_cnes_registry_import',{target_cnes:unit.id,items:normalized.items,collection_digest:normalized.digest,
-      collected_at:normalized.collectedAt,competence:normalized.competence,expected_revision:payload.revision}));
+    if(!Array.isArray(payload.decisions)||payload.decisions.length>10000||payload.decisions.some((x:any)=>!x||typeof x.sourceId!=='string'||! /^[a-f0-9]{64}$/.test(x.sourceId)||typeof x.accept!=='boolean'))throw Error('CNES_PREVIEW_REQUIRED');
+    const executionDigest=await fingerprint({collection:normalized.digest,decisions:[...payload.decisions].sort((a:any,b:any)=>a.sourceId.localeCompare(b.sourceId))});
+    const applied=await rpc('cnes_import_status',{target_cnes:unit.id,target_digest:executionDigest});if(applied)return json(applied);
+    const reviewed=reviewedItems(normalized,snapshot,payload.decisions);
+    if(!reviewed.items.length&&!reviewed.absent.length)return json({status:'no_changes'});
+    return json(await rpc('apply_cnes_reviewed',{target_cnes:unit.id,items:reviewed.items,collection_digest:executionDigest,
+      collected_at:normalized.collectedAt,competence:normalized.competence,expected_revision:payload.revision,
+      absent_ids:reviewed.absent,present_ids:reviewed.present,metadata:normalized.metadata}));
   }catch(error){
     const code=String((error as {message?:string})?.message||'');
     if(code==='INVALID_ACCESS_CONTEXT') return json({error:'Selecione o acesso Administrador para continuar.'},403);

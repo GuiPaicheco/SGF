@@ -27,13 +27,13 @@ test('visão RH renderiza colunas, conserva cadastro incompleto e não expande H
  const {api,app}=harness();const calls=[];
  await api.mount({app,esc,isCurrent:()=>true,request:async payload=>{calls.push(payload);return {context:{cnes_name:'UNIDADE TESTE'},total:1,employees:[{row_id:uuid,full_name:'<script>FICTÍCIO</script>',origin:'cnes',weekly_hours:32.5}],absences:[],holidays:[]};}});
  assert.equal(calls.length,1);assert.equal(calls[0].action,'calendar');assert.equal(calls[0].page,0);assert.equal(calls[0].cnes,undefined);
- for(const label of ['Nome do funcionário','Cargo','CBO','Equipe','Conferência pendente','32.5 h/semana'])assert.ok(app.innerHTML.includes(label));
+ for(const label of ['Nome do funcionário','Cargo','CBO','Equipe','Carga horária','32.5h'])assert.ok(app.innerHTML.includes(label));
  assert.ok(!app.innerHTML.includes('<script>FICTÍCIO'));assert.match(app.innerHTML,/tabindex="0"/);
 });
 test('Administrador consulta uma unidade explícita e RH não tem acesso à rota global',async()=>{
  const {api,app}=harness();let queried;
  await api.mount({app,esc,admin:true,isCurrent:()=>true,request:async payload=>payload.action==='directory'?{units:[{cnes:'6305245',login:'UBS AMAZONAS'}]}:(queried=payload,{context:{cnes_name:'UBS AMAZONAS'},total:0,employees:[],absences:[],holidays:[]})});
- assert.equal(queried.cnes,'6305245');assert.equal(SGFAccessPolicy.allowed('rh-calendar','administrador',true),true);
+ assert.equal(queried,undefined);assert.match(app.innerHTML,/Selecione uma unidade/);assert.equal(SGFAccessPolicy.allowed('rh-calendar','administrador',true),true);
  for(const role of ['rh','diretor','servidor'])assert.equal(SGFAccessPolicy.allowed('rh-calendar',role,true),false);
 });
 test('resposta atrasada não substitui tela após navegação',async()=>{

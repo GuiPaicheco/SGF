@@ -28,7 +28,7 @@ export async function fingerprint(value) {
 }
 
 export async function normalizeCollection(input,allowedCodes) {
-  if(!object(input)||input.schemaVersion!==1||input.source!=='CNES_PUBLIC_HTML'||input.requiresReview!==true
+  if(!object(input)||input.schemaVersion!==1||!['CNES_PUBLIC_HTML','CNES_PDF'].includes(input.source)||input.requiresReview!==true
     ||!Array.isArray(input.professionals)||!input.professionals.length||input.professionals.length>5000
     ||!Array.isArray(input.teams)||input.teams.length>100) fail();
   const cnes=identifier(input.cnes,/^\d{7}$/);
@@ -85,7 +85,7 @@ export async function normalizeCollection(input,allowedCodes) {
     item.sourceData.teams.sort((a,b)=>stableJson(a).localeCompare(stableJson(b)));
     item.sourceHash=await fingerprint(item.sourceData);
   }
-  return {cnes,collectedAt,competence,items,pendingTeamMembers:pending,
+  return {cnes,collectedAt,competence,metadata:input.source==='CNES_PDF'?validatePdfMetadata(input.metadata):{},items,pendingTeamMembers:pending,
     digest:await fingerprint({cnes,competence,items})};
 }
 
@@ -99,12 +99,39 @@ export function planImport(normalized,snapshot) {
     const action=!prior?'added':prior.source_hash===item.sourceHash?'unchanged':'changed';counts[action]++;
     if(action==='unchanged') continue;
     const fields=Object.keys(item.sourceData).filter(field=>stableJson(prior?.source_data?.[field]??null)!==stableJson(item.sourceData[field]));
-    changes.push({sourceId:item.sourceId,action,fullName:prior?.local_data?.fullName||item.sourceData.fullName,
-      cbo:item.sourceData.cbo,fields,preservedLocalFields:Object.keys(prior?.local_data||{})});
+    const display=data=>data?Object.fromEntries(Object.entries(data).filter(([key])=>!['cns','principalCns'].includes(key))):null;
+    changes.push({sourceId:item.sourceId,action,fullName:item.sourceData.fullName,
+      cbo:item.sourceData.cbo,fields,before:display(prior?.source_data),after:display(item.sourceData),preservedLocalFields:Object.keys(prior?.local_data||{})});
   }
   counts.absent=existing.size;
-  return {revision:snapshot.revision,digest:normalized.digest,cnes:normalized.cnes,counts,changes:changes.slice(0,50),
-    changesTruncated:changes.length>50,requiresReview:true};
+  for(const prior of existing.values())changes.push({sourceId:prior.source_id,action:'absent',fullName:prior.source_data?.fullName||'Cadastro anterior',cbo:prior.source_data?.cbo||'',before:{fullName:prior.source_data?.fullName,occupation:prior.source_data?.occupation},after:null,fields:['presença no CNES'],preservedLocalFields:[]});
+  return {revision:snapshot.revision,digest:normalized.digest,cnes:normalized.cnes,competence:normalized.competence,metadata:normalized.metadata,counts,changes,
+    changesTruncated:false,requiresReview:true};
+}
+
+function validatePdfMetadata(input){
+ if(!object(input))fail();return {origin:'CNES_PDF',issuedOn:day(input.issuedOn),localUpdatedOn:day(input.localUpdatedOn),nationalUpdatedOn:day(input.nationalUpdatedOn)};
+}
+export async function reconcileCollection(normalized,snapshot){
+ const key=data=>`${data.principalCns||data.cns}:${data.cbo}`;
+ const incoming=new Map(),prior=new Map();
+ for(const item of normalized.items){const k=key(item.sourceData);incoming.set(k,(incoming.get(k)||0)+1);}
+ for(const item of snapshot.entries){const k=key(item.source_data);if(!prior.has(k))prior.set(k,[]);prior.get(k).push(item);}
+ for(const item of normalized.items){const candidates=prior.get(key(item.sourceData))||[];
+  if(candidates.length===1&&incoming.get(key(item.sourceData))===1)item.sourceId=candidates[0].source_id;
+  else if(candidates.length&&!candidates.some(x=>x.source_id===item.sourceId))throw Error('CNES_AMBIGUOUS_SOURCE_IDENTITY');
+ }
+ normalized.digest=await fingerprint({cnes:normalized.cnes,competence:normalized.competence,metadata:normalized.metadata,items:normalized.items});return normalized;
+}
+export function reviewedItems(normalized,snapshot,decisions){
+ const plan=planImport(normalized,snapshot);
+ if(!Array.isArray(decisions)||decisions.length!==plan.changes.length||decisions.some(x=>!object(x)||typeof x.accept!=='boolean'||typeof x.sourceId!=='string')||new Set(decisions.map(x=>x.sourceId)).size!==decisions.length)throw Error('CNES_PREVIEW_REQUIRED');
+ const choices=new Map(decisions.map(x=>[x.sourceId,x.accept]));if(plan.changes.some(x=>!choices.has(x.sourceId)))throw Error('CNES_PREVIEW_REQUIRED');
+ const old=new Map(snapshot.entries.map(x=>[x.source_id,x]));
+ const items=normalized.items.flatMap(x=>{if(choices.get(x.sourceId)!==false)return [x];const previous=old.get(x.sourceId);return previous?[{sourceId:previous.source_id,sourceHash:previous.source_hash,sourceData:previous.source_data}]:[];});
+ const absent=plan.changes.filter(x=>x.action==='absent'&&choices.get(x.sourceId)).map(x=>x.sourceId);
+ const accepted=plan.changes.filter(x=>x.action!=='absent'&&choices.get(x.sourceId)).map(x=>x.sourceId);
+ return {items,absent,accepted,present:normalized.items.filter(x=>choices.get(x.sourceId)!==false).map(x=>x.sourceId)};
 }
 
 export function validateLocalData(input) {
