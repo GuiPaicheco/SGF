@@ -1,5 +1,5 @@
 import { mkdir, copyFile, readdir, readFile, writeFile, rm } from 'node:fs/promises';
-import { versionPublicAssets } from './version-public-assets.mjs';
+import { versionPublicAssets, versionModuleAsset } from './version-public-assets.mjs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -13,10 +13,12 @@ for (const name of ['logo.png']) {
   await copyFile(path.join(root, name), path.join(output, name));
 }
 const html=await readFile(path.join(root,'index.html'),'utf8');
-await writeFile(path.join(output,'index.html'),await versionPublicAssets(html,name=>readFile(path.join(root,name))), 'utf8');
+const moduleCache=new Map();
+const publicAsset=name=>versionModuleAsset(name,file=>readFile(path.join(root,file)),moduleCache);
+await writeFile(path.join(output,'index.html'),await versionPublicAssets(html,publicAsset), 'utf8');
 for (const entry of await readdir(path.join(root, 'assets'), { withFileTypes: true })) {
   if (entry.isFile() && !['rh-manual-ui.js','cnes-import-ui.js','rh-bond-ui.js'].includes(entry.name) && /\.(css|m?js)$/.test(entry.name)) {
-    await copyFile(path.join(root, 'assets', entry.name), path.join(output, 'assets', entry.name));
+    await writeFile(path.join(output, 'assets', entry.name),await publicAsset('assets/'+entry.name));
   }
 }
 await mkdir(path.join(output,'assets','vendor'),{recursive:true});

@@ -30,6 +30,11 @@ test('intervalo real aceita cruzar meses e rejeita datas impossíveis ou mais de
  assert.equal(calendarWindow({mode:'range',start:'2027-02-25',end:'2027-03-10',page:0,search:'',filters:{cbo:'123'}}).range_end,'2027-03-10');
  for(const [start,end] of [['2027-02-30','2027-03-10'],['2027-03-10','2027-03-01'],['2027-01-01','2028-01-01']])assert.throws(()=>calendarWindow({mode:'range',start,end,page:0,search:''}));
 });
+test('CNS secundário do PDF reconhece o CNS principal conhecido sem trocar o vínculo',async()=>{
+ const next=await normalizeCollection(parseCnesPages([page()],{competence:'202610'}),['6305245']);const original=next.items[0];
+ const snapshot={revision:1,entries:[{source_id:'a'.repeat(64),source_hash:'b'.repeat(64),source_data:{...original.sourceData,principalCns:'900000000000002'},local_data:{}}]};
+ const result=await reconcileCollection(next,snapshot);assert.equal(result.items[0].sourceId,'a'.repeat(64));assert.equal(result.items[0].sourceData.principalCns,'900000000000002');assert.equal(planImport(result,snapshot).counts.added,0);
+});
 test('exportação CSV tem carga própria, protege fórmulas e marca afastamentos',()=>{
  const root={};vm.runInNewContext(readFileSync(new URL('../assets/rh-calendar-ui.js',import.meta.url),'utf8'),{globalThis:root,Date});
  const api=root.SGFRhCalendar,days=api.datesBetween('2027-02-28','2027-03-01');assert.equal(days.length,2);

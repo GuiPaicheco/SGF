@@ -15,16 +15,17 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] Redefinição de senha da unidade para `123456`, com confirmação e encerramento das sessões; não redefinir contas sem ação explícita do Administrador.
 - [x] Importação por seleção/arraste de PDF; conferência de CNES e competência confirmada separadamente das datas de emissão/atualização.
 - [x] Conferência individual de inclusões, alterações e ausências. Rejeitar uma alteração mantém o cadastro anterior; ausências confirmadas impedem novos lançamentos sem apagar vínculos, férias, folgas ou histórico.
-- [x] Atualização cadastral preserva IDs de vínculo e snapshots históricos. Integração dos registros aceitos ocorre sem cadastro manual, sem login do funcionário e sem criar direitos/saldos.
-- [x] Inclusão manual retirada da interface e da API; função antiga sem permissão de execução pelo serviço; origem manual não pode integrar vínculo nem autorizar operador no fluxo atual.
+- [x] Atualização cadastral preserva IDs de vínculo e snapshots históricos; reativação reconhece o mesmo vínculo e competências anteriores são recusadas. Integração dos registros aceitos ocorre sem cadastro manual, sem login do funcionário e sem criar direitos/saldos.
+- [x] Endpoints antigos de solicitações e autocadastro encerrados (410); configurações antigas recusadas pela API, mantendo feriados. Inclusão manual retirada da interface e da API; função antiga sem permissão de execução pelo serviço; origem manual não pode integrar vínculo nem autorizar operador no fluxo atual.
 - [x] Feriados com inclusão/edição recolhida e listagem por data; removidas as demais áreas antigas de configuração.
 
 ## Verificação desta revisão
 
 - [x] PDF fornecido: 10 páginas, 40 profissionais, três equipes e 24 associações; nomes/ocupações/cargas conferidos por extração independente, sem divergências nesses campos.
 - [x] Ensaio SQL com rollback: importar, programar, atualizar e confirmar ausência preserva a folga e o vínculo; consulta por intervalo encontra o registro e ausência impede novo lançamento.
-- [x] 392 testes Node e Deno check das funções aprovados nesta etapa; banco e APIs publicados tecnicamente.
-- [ ] Concluir ensaio visual do fluxo PDF, calendário/colunas/exportações e conferir publicação web/CI.
+- [x] 396 testes Node e Deno check das funções aprovados nesta etapa; banco e APIs publicados tecnicamente.
+- [x] Leitor PDF ensaiado no navegador; calendário por período, ocultação/reordenação de colunas e CSV baixado conferidos. HTML real de impressão ensaiado em três páginas A4 horizontais, com nomes/cargas/datas dentro dos limites.
+- [ ] Conferir publicação final e CI; impressão nativa/equipamentos institucionais e seleção de arquivo pelo usuário ainda dependem do ambiente real.
 - [ ] Conferência cadastral e aceite real pelos responsáveis das unidades. Nenhuma importação real foi aprovada automaticamente a partir do PDF enviado.
 
 ## Limites e continuidade

@@ -32,3 +32,10 @@
  .rh-calendar-print .rh-col-full_name{width:17%;}.rh-calendar-print .rh-col-position{width:17%;}.rh-calendar-print .rh-col-team{width:16%;}
  .rh-calendar-print th,.rh-calendar-print td{position:static!important;}
 }
+.app:has(.rh-calendar-card){width:calc(100% - 3rem);max-width:none;}
+.rh-calendar-card{padding:1.5rem;}
+.rh-calendar-card>form.form-grid{max-width:none;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;align-items:end;}
+.rh-calendar-card>form>.field-full:first-child{grid-column:auto;}
+.rh-calendar-card>form>details{margin:0;}
+@media(max-width:1000px){.rh-calendar-card>form.form-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:600px){.app:has(.rh-calendar-card){width:calc(100% - 1rem);}.rh-calendar-card{padding:1rem;}.rh-calendar-card>form.form-grid{grid-template-columns:1fr;}}

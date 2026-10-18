@@ -30,6 +30,7 @@ Deno.serve(async request => {
     const scoped = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers: { ...contextHeaders(context), 'x-sgf-actor': identity.user.id } } });
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
+    if(!['calendar-list','calendar-save'].includes(action))return json({error:'Esta configuração foi retirada. Utilize Cadastro das unidades para atualizar pelo CNES.'},410);
     if(!actionAllowed('catalogs',action,context.role)) return json({error:'Seu perfil não permite executar esta ação.'},403);
     const scopeIds = context.global ? [] : [context.lotacaoId!];
     const employeesInContext = async () => {

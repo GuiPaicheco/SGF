@@ -66,6 +66,7 @@ Deno.serve(async request => {
     };
     const payload = await request.json();
     const action = String(payload.action ?? 'login');
+    if(['request-access','registration-catalogs','locations'].includes(action))return json({error:'O autocadastro foi encerrado. O acesso é gerenciado pelo Administrador.'},410);
     if (action === 'locations') {
       const { data, error } = await admin.from('lotacoes').select('code,name').eq('active', true).not('code', 'is', null).order('name').limit(300);
       if (error) throw error;
@@ -110,7 +111,7 @@ Deno.serve(async request => {
           .select('id,registration,cargo:cargos(name),units:employment_bond_units(id,active,internal_lotacao_id,cnes:cnes_units(id,code,name,active),lotacao:lotacoes(id,code,name,active),team:employment_bond_teams(not_applicable,team:teams(name)))')
           .eq('servidor_id', employee.id).eq('active', true);
         if (error) throw error;
-        for (const bond of bonds || []) for (const unit of bond.units || []) {
+        for (const bond of (bonds || []) as any[]) for (const unit of bond.units || []) {
           if(!unit.active || !unit.cnes?.active || (unit.internal_lotacao_id && !unit.lotacao?.active)) continue;
           contexts.push({
           role: 'servidor', servidor_id: employee.id, bond_id: bond.id, bond_unit_id: unit.id, registration: bond.registration,
@@ -127,7 +128,7 @@ Deno.serve(async request => {
           .eq('profile_id', identity.user.id);
         if (error) throw error;
         for (const role of contextProfile.roles.filter((value: string) => ['diretor', 'rh'].includes(value))) {
-          for (const scope of scopes || []) {
+          for (const scope of (scopes || []) as any[]) {
             if(!scope.lotacao?.active) continue;
             const mappings = (scope.lotacao?.lotacao_cnes_units || []).filter((mapping:any)=>mapping.cnes?.active);
             for (const mapping of mappings) contexts.push({ role, lotacao_id: scope.lotacao?.id, lotacao_name: scope.lotacao?.name, internal_lotacao_id: scope.lotacao?.is_internal_allocation ? scope.lotacao.id : null, cnes_unit_id: mapping.cnes?.id, cnes_code: mapping.cnes?.code, cnes_name: mapping.cnes?.name });

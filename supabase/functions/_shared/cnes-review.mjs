@@ -113,12 +113,15 @@ function validatePdfMetadata(input){
  if(!object(input))fail();return {origin:'CNES_PDF',issuedOn:day(input.issuedOn),localUpdatedOn:day(input.localUpdatedOn),nationalUpdatedOn:day(input.nationalUpdatedOn)};
 }
 export async function reconcileCollection(normalized,snapshot){
- const key=data=>`${data.principalCns||data.cns}:${data.cbo}`;
+ const keys=data=>[...new Set([data.principalCns,data.cns].filter(Boolean))].map(id=>`${id}:${data.cbo}`);
  const incoming=new Map(),prior=new Map();
- for(const item of normalized.items){const k=key(item.sourceData);incoming.set(k,(incoming.get(k)||0)+1);}
- for(const item of snapshot.entries){const k=key(item.source_data);if(!prior.has(k))prior.set(k,[]);prior.get(k).push(item);}
- for(const item of normalized.items){const candidates=prior.get(key(item.sourceData))||[];
-  if(candidates.length===1&&incoming.get(key(item.sourceData))===1)item.sourceId=candidates[0].source_id;
+ for(const item of normalized.items)for(const k of keys(item.sourceData))incoming.set(k,(incoming.get(k)||0)+1);
+ for(const item of snapshot.entries)for(const k of keys(item.source_data)){if(!prior.has(k))prior.set(k,[]);prior.get(k).push(item);}
+ for(const item of normalized.items){const candidates=[...new Map(keys(item.sourceData).flatMap(k=>prior.get(k)||[]).map(x=>[x.source_id,x])).values()];
+  if(candidates.length===1&&keys(item.sourceData).every(k=>incoming.get(k)===1)){
+   item.sourceId=candidates[0].source_id;
+   if(!item.sourceData.principalCns&&candidates[0].source_data.principalCns){item.sourceData.principalCns=candidates[0].source_data.principalCns;item.sourceHash=await fingerprint(item.sourceData);}
+  }
   else if(candidates.length&&!candidates.some(x=>x.source_id===item.sourceId))throw Error('CNES_AMBIGUOUS_SOURCE_IDENTITY');
  }
  normalized.digest=await fingerprint({cnes:normalized.cnes,competence:normalized.competence,metadata:normalized.metadata,items:normalized.items});return normalized;

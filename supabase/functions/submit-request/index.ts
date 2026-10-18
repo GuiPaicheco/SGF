@@ -22,6 +22,8 @@ Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (request.method !== 'POST') return json({ error: 'M\u00e9todo n\u00e3o permitido.' }, 405);
 
+  const retiredWorkflow = true;
+  if (retiredWorkflow) return json({ error: 'O fluxo de solicitações foi encerrado. O RH programa os afastamentos pelo calendário.' }, 410);
   try {
     const url = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');

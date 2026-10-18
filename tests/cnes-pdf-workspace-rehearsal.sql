@@ -29,5 +29,12 @@ begin
  if jsonb_array_length(result->'absences')<>1 then raise exception 'ABSENT_EMPLOYEE_HISTORY_HIDDEN';end if;
  begin perform public.rh_leave_resources(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry);raise exception 'ABSENT_ALLOWED_TO_PROGRAM';exception when others then if sqlerrm<>'RH_ENTRY_REVIEW_REQUIRED' then raise;end if;end;
  if (select to_jsonb(l) from private.rh_leaves l where l.id=leave_id)<>historical then raise exception 'ABSENCE_REWROTE_LEAVE';end if;
+ select revision into rev from private.cnes_registry_state where cnes_unit_id=unit_id;
+ perform public.apply_cnes_reviewed(actor,unit_id,items,repeat('4',64),now(),'202701',rev,'[]',jsonb_build_array(repeat('e',64)),'{}');
+ if not exists(select 1 from private.rh_calendar_employees(unit_id) where entry_id=entry and binding_confirmed) then raise exception 'REACTIVATION_FAILED';end if;
+ if (select to_jsonb(l) from private.rh_leaves l where l.id=leave_id)<>historical then raise exception 'REACTIVATION_REWROTE_LEAVE';end if;
+ select revision into rev from private.cnes_registry_state where cnes_unit_id=unit_id;
+ begin perform public.apply_cnes_reviewed(actor,unit_id,items,repeat('5',64),now(),'202601',rev,'[]',jsonb_build_array(repeat('e',64)),'{}');raise exception 'OLDER_COMPETENCE_ACCEPTED';
+ exception when others then if sqlerrm<>'CNES_STALE_COLLECTION' then raise;end if;end;
  begin perform public.rh_calendar_window(actor,null,unit_id,'2027-01-01','2028-01-01',0,'','{}');raise exception 'UNBOUNDED_RANGE';exception when others then if sqlerrm<>'RH_INPUT_INVALID' then raise;end if;end;
 end $$;
