@@ -26,6 +26,8 @@ Décimo bloco (18/10): impressão reorganizada e ensaiada em PDF independente �
 
 Décimo primeiro bloco (18/10): entrada pública concentrada em login/simulação, Administração abre no calendário, navegação prioriza CNES/operadores e registros anteriores ficam identificados. Autocadastro e etapas de nova solicitação bloqueados na política de rotas do frontend; serviços antigos ainda não desativados. **381 testes aprovados** e build concluído. [Evidências e limites](VALIDACAO_ENTRADA_RH_20261018.md). Próximo bloco: cadastro operacional de funcionários e alternativa manual; manual/treinamento ficam após funcionalidade real.
 
+Décimo segundo bloco (18/10): inclusão manual administrativa com origem explícita, motivo, controle de duplicação/reenvio, auditoria e conferência antes da integração; tela de funcionários simplificada e integração ao vínculo na mesma área. **386 testes locais aprovados**, build, SQL com rollback e bloqueios da API publicada validados. [Evidências e limites](VALIDACAO_CADASTRO_MANUAL_20261018.md). Próximo bloco: completar situação cadastral/integração e busca operacional, com acesso contextual pelo calendário.
+
 ## 00. Diretrizes definidas pelo responsável
 
 - Ferramenta voltada ao RH das unidades e à Administração/Diretoria da DAPS. Funcionários são cadastros geridos pelo RH e não precisam de conta para ter afastamentos registrados.
@@ -114,7 +116,7 @@ CNES obtidos do catálogo existente, sujeitos à conferência da fonte. Logins p
 - [ ] **AC05 (parcial):** isolamento implementado no novo acesso e consultas; calendário e comprovante novos ainda dependem do fluxo de lançamentos. Aplicar isolamento por unidade/lotação no banco e nas funções, inclusive leitura direta, busca, calendário e comprovante. DAPS RH não é global; Administrador é global.
 - [x] **AC06:** adaptar recuperação, bloqueio, sessões, limitação de tentativas e política de senha ao modelo definido. Não alterar conta TESTE ou senhas antigas para ensaios.
 - [ ] **AC07 (parcial — autocadastro e nova solicitação retirados da entrada/rotas; desativação dos endpoints e revisão de dependências pendentes):** após migração validada, retirar da interface cadastro/autosserviço que não pertence mais ao fluxo e decidir destino de acessos Servidor existentes sem apagar histórico.
-- [ ] **AC08 (parcial):** tela e seleção obrigatória implementadas para funcionários ativos já incorporados. Cadastro manual inicial e autorização nominal real continuam pendentes. Tela exclusiva do Administrador para autorizar/revogar operadores entre funcionários do CNES; seleção obrigatória após login RH, sem lista livre ou operador de outra unidade. Definir cadastro inicial pelo Administrador quando a carga CNES ainda não existir.
+- [ ] **AC08 (parcial):** tela e seleção obrigatória implementadas para funcionários ativos já incorporados. Cadastro manual administrativo entregue no bloco 12; autorização nominal real continua pendente. Tela exclusiva do Administrador para autorizar/revogar operadores entre funcionários do CNES; seleção obrigatória após login RH, sem lista livre ou operador de outra unidade. Definir cadastro inicial pelo Administrador quando a carga CNES ainda não existir.
 - [ ] **AC09 (parcial):** sessão, revogação e auditoria da seleção implementadas; exigir a mesma validação e autoria nas futuras gravações de afastamentos. Vincular operador escolhido à sessão/contexto no servidor, conferir autorização vigente em cada gravação e invalidar seleção revogada. Registrar conta Auth, operador, CNES e instante nos eventos; não confiar em ID enviado sem validação nem criar novas contas Auth para cada operador nesta etapa.
 
 Aceite: 42 logins RH mapeados aos escopos previstos, Administrador global e acesso cruzado negado por alteração de parâmetros. Isolamento técnico de sessão não corrige o risco de uma senha conhecida entre contas.
@@ -132,7 +134,7 @@ Pesquisa: [VIABILIDADE_CNES_SUPABASE_20261017.md](VIABILIDADE_CNES_SUPABASE_2026
 - [x] **CN07 — Entrega técnica:** prévia, incorporação e cadastro de conferência implementados com origem/competência e proteção contra duplicação. Disponível ao Administrador até entregar acessos RH. Revisão da carga real e interface autenticada permanecem CN04/QA06.
 - [x] **CN08 — Entrega técnica:** fonte e campos municipais separados; reimportação preserva correções, associação legada e ausentes. Identificação por chaves e associação explícita por matrícula/unidade, sem união por nome. Testes locais e SQL com rollback; conferência real permanece CN04.
 - [ ] **CN09:** definir periodicidade, execução manual/automática, retentativas e avisos de falha. Operar com última carga aprovada e processar integração no backend.
-- [ ] **CN10:** catálogo, coleta e importação persistente para conferência implementados. Falta incorporar/conferir as cargas reais das 41 UBS e Secretaria e disponibilizar alternativa manual. Amazonas é primeiro teste real, sem bloquear preparação das demais.
+- [ ] **CN10:** catálogo, coleta e importação persistente para conferência implementados. Alternativa manual administrativa entregue no bloco 12. Falta incorporar/conferir as cargas reais das 41 UBS e Secretaria e conciliar explicitamente cadastro manual com carga CNES posterior. Amazonas é primeiro teste real, sem bloquear preparação das demais.
 
 Aceite: cadastro Amazonas conferido pelo RH, competência/origem visíveis, campos ausentes explícitos e nova carga sem duplicação ou perda de ajustes municipais.
 
@@ -155,7 +157,7 @@ Aceite: migração reproduzível, sem perda histórica, saldo por matrícula e a
 ## 05. Trabalho do RH e Administrador — prioridade alta
 
 - [x] **UI01 — Entrada operacional:** após escolher operador, RH entra no calendário e lança afastamentos diretamente; ausência de operador bloqueia operação.
-- [ ] **UI02:** tela principal do RH com funcionários da unidade, busca, matrícula, cargo, CBO, carga, equipe e pendências cadastrais.
+- [ ] **UI02 (parcial — lista administrativa, conferência, inclusão manual e atalho de integração entregues; busca/situação de integração e acesso contextual pelo calendário pendentes):** tela principal do RH com funcionários da unidade, busca, matrícula, cargo, CBO, carga, equipe e pendências cadastrais.
 - [ ] **UI03 (parcial — programação, edição e cálculo por início/retorno entregues; revisão final e homologação pendentes):** lançamento por seleção de funcionário/vínculo sob responsabilidade da unidade/polo, modalidade, direito/saldo, datas e conferência; gravar e refletir diretamente no calendário, sem etapa de aprovação. Dados vêm do cadastro e correção respeita permissões.
 - [ ] **UI04 (parcial — entrada/login e navegação principal repaginados; telas internas legadas e serviços pendentes):** revisar linguagem de solicitações, meus pedidos, acessos, aprovações, notificações e orientações conforme fluxo consolidado.
 - [x] **UI05 — Ciclo técnico dos registros RH:** editar/reprogramar, cancelar e concluir conforme FL03, com motivo, histórico e proteção contra envio duplicado.

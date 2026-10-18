@@ -121,3 +121,12 @@ export function validateLocalData(input) {
   if(result.registration) result.registration=result.registration.toUpperCase();
   return result;
 }
+
+export function validateManualEntry(input) {
+  if(!object(input)||typeof input.requestId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.requestId)) fail();
+  const localData=validateLocalData(input.localData);
+  if(!localData.fullName||!localData.registration) fail();
+  if(localData.admissionDate && localData.admissionDate>new Date().toISOString().slice(0,10)) fail();
+  const reason=text(input.reason,500);if(reason.length<3) fail();
+  return {requestId:input.requestId,cbo:identifier(input.cbo,/^[0-9]{6}$/),localData,reason};
+}

@@ -757,7 +757,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   async function renderCnesImport() {
     const current = captureView();
     if (state.profile?.role !== 'administrador') return go('home');
-    await SGFCnesImport.mount({ app, esc, isCurrent: current, request: async payload => {
+    await SGFCnesImport.mount({ app, esc, isCurrent: current, bind: ({cnes,entryId,onDone}) => SGFRhBond.open({app,esc,request:rhRequest,isCurrent:current,cnes,entryId,onDone,backLabel:'Voltar aos funcionários'}), request: async payload => {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-cnes`, { method: 'POST', headers: { ...sessionHeaders(state.session), 'x-sgf-role': state.profile.role }, body: JSON.stringify(payload) });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error || 'Não foi possível conferir o cadastro CNES.');

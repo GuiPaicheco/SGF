@@ -1,6 +1,6 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2';
 import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts';
-import {normalizeCollection,planImport,validateLocalData} from '../_shared/cnes-review.mjs';
+import {normalizeCollection,planImport,validateLocalData,validateManualEntry} from '../_shared/cnes-review.mjs';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
 
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-sgf-role,x-sgf-bond,x-sgf-cnes,x-sgf-lotacao','Access-Control-Allow-Methods':'POST, OPTIONS'};
@@ -20,6 +20,7 @@ const messages:Record<string,string>={
   CNES_LOCAL_DATA_INVALID:'Confira os campos municipais informados.',
   CNES_PREVIEW_REQUIRED:'Gere a prévia e confirme a conferência antes de incorporar.',
   CNES_PAGE_INVALID:'Página inválida.',
+  CNES_MANUAL_DUPLICATE:'Esta matrícula já existe. Localize e confira o cadastro existente antes de incluir outro funcionário.',
 };
 
 export async function readLimitedJson(request:Request,maxBytes=4_000_000) {
@@ -66,11 +67,16 @@ Deno.serve(async request=>{
     }
     let normalized;
     if(['preview','apply'].includes(payload.action)) normalized=await normalizeCollection(payload.collection,allowedCodes);
-    else if(!['list','legacy-candidates'].includes(payload.action)) return json({error:'Ação inválida.'},400);
+    else if(!['list','legacy-candidates','create-manual'].includes(payload.action)) return json({error:'Ação inválida.'},400);
     const code=normalized?.cnes||payload.cnes;
     if(!allowedCodes.includes(code)) throw Error('CNES_UNIT_INVALID');
     const {data:unit,error:unitError}=await admin.from('cnes_units').select('id').eq('code',code).eq('active',true).maybeSingle();
     if(unitError||!unit) throw Error('CNES_UNIT_INVALID');
+    if(payload.action==='create-manual') {
+      const manual=validateManualEntry(payload);
+      return json(await rpc('create_manual_registry_entry',{target_cnes:unit.id,request_id:manual.requestId,
+        target_cbo:manual.cbo,local_values:manual.localData,target_reason:manual.reason}));
+    }
     if(payload.action==='legacy-candidates') {
       if(typeof payload.registration!=='string'||payload.registration.length>60||!payload.registration.trim()) throw Error('CNES_LOCAL_DATA_INVALID');
       return json({candidates:await rpc('cnes_legacy_candidates',{target_cnes:unit.id,target_registration:payload.registration.trim().toUpperCase()})});
