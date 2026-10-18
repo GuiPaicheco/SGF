@@ -3,6 +3,7 @@
   gap: 1.25rem;
 }
 .receipt {
+  overflow-wrap: anywhere;
   background: #fff;
   border: 1px solid #bfcac4;
   border-radius: 12px;

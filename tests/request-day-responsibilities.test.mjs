@@ -53,10 +53,11 @@ test("planejador diário filtra as unidades pelo vínculo ativo", async () => {
   assert.match(app, /Defina o CNES responsável por todos os dias úteis/);
 });
 
-test("comprovante e acompanhamento carregam a distribuição diária", async () => {
+test("acompanhamento preserva distribuição legada, sem incluí-la no comprovante", async () => {
   const app = await read("assets/app.js");
   assert.match(app, /request_day_responsibilities/);
-  assert.match(app, /CNES responsável por dia/);
-  assert.match(app, /Responsabilidade por dia:/);
+  const receipt = await read("assets/rh-receipt.js");
+  assert.doesNotMatch(receipt, /CNES responsável por dia/);
+  assert.doesNotMatch(receipt, /Responsabilidade por dia:/);
   assert.match(app, /source\.bond\?\.registration/);
 });

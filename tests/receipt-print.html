@@ -2,25 +2,15 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
+  <base href="/">
   <title>Teste de impressão do comprovante SGF</title>
   <link rel="stylesheet" href="../assets/app.css">
   <link rel="stylesheet" href="../assets/receipt.css">
 </head>
 <body>
-  <main class="app">
-    <section class="card receipt-card">
-      <div class="receipt">
-        <header class="receipt-head"><img src="../logo.png" alt="Prefeitura de Betim"><div><span>Prefeitura Municipal de Betim</span><strong>COMPROVANTE DE SOLICITAÇÃO</strong><small>Sistema de Gestão de Funcionários</small></div></header>
-        <div class="receipt-protocol"><div><span>Protocolo</span><strong>SGF-2026-000001</strong></div><div><span>Situação</span><strong>Programada</strong></div><div><span>Solicitado em</span><strong>30/09/2026</strong></div></div>
-        <h2>Férias regulamentares</h2>
-        <div class="receipt-data"><div><span>Servidor(a)</span><strong>Servidor de Teste com Nome Completo Extenso</strong></div><div><span>Matrícula</span><strong>123456</strong></div><div class="receipt-data-wide"><span>Lotação</span><strong>SECRETARIA MUNICIPAL DE SAÚDE DE BETIM — UNIDADE DE REFERÊNCIA</strong></div></div>
-        <div class="receipt-periods"><div class="receipt-period"><span>1º período</span><strong>01/10/2026 a 15/10/2026</strong><small>Retorno ao trabalho: 16/10/2026</small></div><div class="receipt-period"><span>2º período</span><strong>01/12/2026 a 15/12/2026</strong><small>Retorno ao trabalho: 16/12/2026</small></div><div class="receipt-period receipt-dayoff"><span>Day-off de aniversário</span><strong>08/10/2026</strong><small>Direito do servidor; não consome saldo.</small></div></div>
-        <div class="receipt-notes"><span>Observações</span><p>Texto representativo para validar quebra de linha, legibilidade e permanência do documento em uma única página A4.</p></div>
-        <p class="receipt-warning"><strong>Atenção:</strong> este comprovante registra o pedido, mas não autoriza sozinho o afastamento. A autorização deve ser formalizada abaixo.</p>
-        <div class="signature-grid"><div class="signature"><strong>Servidor(a) solicitante</strong><span>Assinatura do servidor que realizou o pedido</span></div><div class="signature"><strong>RH ou Chefia Imediata</strong><span>Assinatura de quem autorizou as férias ou folgas neste período</span><small>Nome/matrícula e carimbo</small></div></div>
-        <footer class="receipt-footer">Emitido pelo SGF em 30 de setembro de 2026 às 12:00</footer>
-      </div>
-    </section>
-  </main>
-</body>
+  <main class="app"><p>Ensaio fictício — Sistema de Gestão de Funcionários — sem gravação no banco.</p></main>
+<script src="../assets/rh-receipt.js"></script><script>
+const sample={id:'f7000000-0000-0000-0000-000000000001',status:'programada',version:1,created_at:'2026-10-18T12:00:00Z',snapshot:{full_name:'FUNCIONÁRIO FICTÍCIO COM NOME COMPLETO EXTENSO PARA CONFERÊNCIA',registration:'TESTE-001',unit:'UNIDADE FICTÍCIA — POLO DO ENSAIO',position:'CARGO FICTÍCIO PARA VERIFICAÇÃO',cbo:'123456',weekly_hours:32.5,team:'EQUIPE FICTÍCIA COM NOME EXTENSO PARA CONFERÊNCIA DE QUEBRA DE LINHA'},operator_name:'OPERADOR FICTÍCIO',operator_declared:true,plan:{type:'regulamentar',birth_date:'1990-10-08',periods:[{start_date:'2026-10-01',end_date:'2026-10-15',return_date:'2026-10-16'},{start_date:'2026-12-01',end_date:'2026-12-15',return_date:'2026-12-16'}],bank:{required_minutes:0},notes:'Documento fictício para conferência visual e impressão. Sem gravação no banco.'}};
+SGFRhReceipt.show({app:document.querySelector('main'),data:SGFRhReceipt.fromLeave(sample),onBack:()=>location.reload()});
+</script></body>
 </html>

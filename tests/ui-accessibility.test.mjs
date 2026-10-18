@@ -13,7 +13,7 @@ const css = [
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
 test('identidade SGF representa gestão de funcionários, não apenas férias e folgas', () => {
-  for (const source of [html, app, readFileSync(new URL('../README.md', import.meta.url), 'utf8'), readFileSync(new URL('./receipt-print.html', import.meta.url), 'utf8')]) {
+  for (const source of [html, app + readFileSync(new URL('../assets/rh-receipt.js', import.meta.url), 'utf8'), readFileSync(new URL('../README.md', import.meta.url), 'utf8'), readFileSync(new URL('./receipt-print.html', import.meta.url), 'utf8')]) {
     assert.match(source, /Sistema de Gestão de Funcionários/);
     assert.doesNotMatch(source, /Sistema de Gestão de Férias e Folgas/);
   }

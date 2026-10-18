@@ -22,7 +22,7 @@ function harness(){
   }
  }});
  const root={};runInNewContext(source,{globalThis:root,crypto:{randomUUID:()=>id},Date});
- return {app,api:root.SGFRhLeave,set:(name,value)=>{const node=app.querySelector(name);assert.ok(node,name);if(typeof value==='boolean')node.checked=value;else node.value=value;},
+ return {app,root,api:root.SGFRhLeave,set:(name,value)=>{const node=app.querySelector(name);assert.ok(node,name);if(typeof value==='boolean')node.checked=value;else node.value=value;},
   submit:async selector=>{const form=app.querySelector(selector);assert.ok(form,selector);form.onsubmit({preventDefault(){}});await settle();},
   change:selector=>app.querySelector(selector).listeners.change()};
 }
@@ -61,3 +61,10 @@ test('resposta de cadastro não sobrescreve tela depois de navegar',async()=>{
  const pending=ui.api.open({app:ui.app,esc,isCurrent:()=>current,entryId:id,onBack:()=>{},request:()=>new Promise(resolve=>{finish=resolve;})});
  current=false;ui.app.innerHTML='OUTRA TELA';finish(resources);await pending;assert.equal(ui.app.innerHTML,'OUTRA TELA');
 });
+
+ test('emissão consulta novamente o registro para refletir cancelamento feito em outra sessão',async()=>{
+ const ui=harness();let calls=0,shown;const record={id,status:'programada',version:1,snapshot:resources,operator_name:'TESTE',created_at:'2026-10-18T12:00:00Z',plan:preview({type:'banco_horas',days:2,dailyHours:8,availableHours:16}).plan};
+ ui.root.SGFRhReceipt={fromLeave:data=>data,show:({data})=>{shown=data;}};
+ await ui.api.detail({app:ui.app,esc,isCurrent:()=>true,leaveId:id,onBack:()=>{},request:async()=>({...record,status:++calls===1?'programada':'cancelada'})});
+ await ui.app.querySelector('#rh-detail-receipt').onclick();assert.equal(calls,2);assert.equal(shown.status,'cancelada');
+ });
