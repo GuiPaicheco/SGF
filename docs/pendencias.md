@@ -18,6 +18,8 @@ Sexto bloco (18/10): comprovante RH com CBO, carga semanal, equipe, situação e
 
 Sétimo bloco (18/10): edição/reprogramação dos registros RH programados, com motivo, nova prévia comparativa, nova declaração de horas, versão e idempotência. Plano/snapshot anteriores e operador por ação preservados; comprovantes substituídos identificados. **370 testes aprovados**, build/Deno e ensaios SQL com rollback aprovados; navegador com API simulada e bloqueios da API publicada validados. [Evidências e limites](VALIDACAO_REPROGRAMACAO_RH_20261018.md). Próximo bloco: filtros e revisão do calendário (CA04–CA07), preparando o piloto da Amazonas.
 
+Oitavo bloco (18/10): filtros individuais e de situação/modalidade aplicados antes da paginação, limpeza de critérios, sinalização operacional de sobreposição e ajustes de rolagem/foco em telas estreitas. **373 testes aprovados**, build/Deno e ensaio SQL com 66 cadastros fictícios e rollback aprovados; navegador e API administrativa publicados conferidos. [Evidências e limites](VALIDACAO_FILTROS_CALENDARIO_20261018.md). Próximo bloco: cálculo pela data de retorno na prévia RH (UI03). Escala mínima e homologação permanecem abertas.
+
 ## 00. Diretrizes definidas pelo responsável
 
 - Ferramenta voltada ao RH das unidades e à Administração/Diretoria da DAPS. Funcionários são cadastros geridos pelo RH e não precisam de conta para ter afastamentos registrados.
@@ -179,10 +181,10 @@ Aceite: novos comprovantes contêm três campos adicionais, preservam datas de a
 - [x] **CA01 — Entrega de visualização:** colunas independentes de Nome do funcionário, Cargo, CBO e Equipe antes da grade; matrícula, carga semanal e pendência de conferência identificadas.
 - [ ] **CA02 (parcial):** novo calendário mensal limitado ao CNES do RH, Administrador com seleção explícita; SQL, API autenticada e navegador administrativo validados. Novos lançamentos integrados, com consulta e encerramento; conferência de PDF e homologação institucional pendentes.
 - [ ] **CA03 (parcial):** projeção paginada dos programados legados implementada, respeitando atribuição diária antiga quando existir; novos lançamentos integrados com origem identificada e cancelados preservados na consulta. Evitar duplicação e manter marcadores conforme FL01/FL03.
-- [ ] **CA04 (parcial):** mês, paginação de 50 linhas e busca literal por nome/matrícula/cargo/CBO/equipe implementados; filtros individuais e situação ainda pendentes.
-- [ ] **CA05:** adaptar conflitos, escala mínima, feriados e day-off às modalidades mantidas; separar alerta operacional de impedimento normativo.
+- [x] **CA04:** mês, paginação de 50 linhas, busca literal e filtros individuais de cargo/CBO/equipe, conferência, modalidade e situação implementados no servidor antes da paginação. Limpeza preserva mês/unidade; cancelados RH consultáveis sem ocupar a grade.
+- [ ] **CA05 (parcial — sobreposição operacional sinalizada; escala mínima e revisão normativa pendentes):** adaptar conflitos, escala mínima, feriados e day-off às modalidades mantidas; separar alerta operacional de impedimento normativo.
 - [ ] **CA06:** tratar várias equipes/atuações e afastamento multiunidade segundo FL04, sem esconder vínculos ou contar pessoas indevidamente.
-- [ ] **CA07:** validar muitas linhas, cabeçalhos/colunas fixos quando úteis, teclado e leitura em computador/tablet/telas menores.
+- [ ] **CA07 (parcial — 50 linhas, foco/rolagem e telas de 390/768 px ensaiados; zoom, leitor de tela e equipamento institucional pendentes):** validar muitas linhas, cabeçalhos/colunas fixos quando úteis, teclado e leitura em computador/tablet/telas menores.
 
 Aceite: colunas legíveis, filtros correspondentes aos registros e alteração/cancelamento refletidos sem resíduos no calendário.
 
