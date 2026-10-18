@@ -29,18 +29,22 @@ export function leaveOperation(payload){
   if(!uuid.test(payload.entryId||''))fail();args.target_entry=payload.entryId;
   if(payload.action!=='leave-resources')args.item=leaveItem(payload.item);
  }
- if(payload.action==='create-leave'){
+ if(['create-leave','revise-leave'].includes(payload.action)){
   if(!uuid.test(payload.requestKey||'')||! /^[a-f0-9]{64}$/.test(payload.digest||''))throw Error('RH_LEAVE_PREVIEW_REQUIRED');
   args.request_key=payload.requestKey;args.expected_digest=payload.digest;
  }
- if(['leave-detail','close-leave'].includes(payload.action)){
+ if(['leave-detail','close-leave','preview-revision','revise-leave'].includes(payload.action)){
   if(!uuid.test(payload.leaveId||''))fail();args.target_leave=payload.leaveId;
+  if(['preview-revision','revise-leave'].includes(payload.action)){
+   if(!Number.isSafeInteger(payload.version)||payload.version<1)fail();args.expected_version=payload.version;args.item=leaveItem(payload.item);
+   if(payload.action==='revise-leave'){if(typeof payload.reason!=='string'||payload.reason.trim().length<3||payload.reason.length>500)fail();args.target_reason=payload.reason.trim();}
+  }
   if(payload.action==='close-leave'){
    if(!Number.isSafeInteger(payload.version)||payload.version<1||!['cancelada','concluida'].includes(payload.status)
     ||typeof payload.reason!=='string'||payload.reason.trim().length<3||payload.reason.length>500)fail();
    Object.assign(args,{expected_version:payload.version,next_status:payload.status,target_reason:payload.reason.trim()});
   }
  }
- const names={'leave-resources':'rh_leave_resources','preview-leave':'rh_preview_leave','create-leave':'rh_create_leave','leave-detail':'rh_leave_detail','close-leave':'rh_close_leave'};
+ const names={'preview-revision':'rh_preview_leave_revision','revise-leave':'rh_revise_leave','leave-resources':'rh_leave_resources','preview-leave':'rh_preview_leave','create-leave':'rh_create_leave','leave-detail':'rh_leave_detail','close-leave':'rh_close_leave'};
  if(!Object.hasOwn(names,payload.action))fail();return {name:names[payload.action],args};
 }

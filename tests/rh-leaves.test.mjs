@@ -32,3 +32,10 @@ test('encerramento exige versão, estado permitido e motivo',()=>{
  assert.equal(leaveOperation(data).args.expected_version,1);
  for(const patch of [{version:0},{status:'aprovada'},{reason:''},{leaveId:'invalid'}])assert.throws(()=>leaveOperation({...data,...patch}),/RH_LEAVE_INPUT_INVALID/);
 });
+
+test('reprogramação deriva beneficiário do registro e exige versão, motivo e envio identificado',()=>{
+ const payload={action:'revise-leave',leaveId:uuid,version:2,item:bank,reason:'  Reprogramação conferida  ',requestKey:uuid,digest:'a'.repeat(64),entryId:'forjado',target_profile:'forjado'};
+ const op=leaveOperation(payload);assert.equal(op.name,'rh_revise_leave');assert.equal(op.args.target_leave,uuid);assert.equal(op.args.target_entry,undefined);assert.equal(op.args.target_profile,undefined);assert.equal(op.args.target_reason,'Reprogramação conferida');
+ assert.equal(leaveOperation({...payload,action:'preview-revision'}).name,'rh_preview_leave_revision');
+ for(const patch of [{version:0},{version:1.5},{version:Infinity},{reason:''},{reason:false},{digest:''},{requestKey:'inválido'},{leaveId:'inválido'}])assert.throws(()=>leaveOperation({...payload,...patch}),/RH_LEAVE_/);
+});

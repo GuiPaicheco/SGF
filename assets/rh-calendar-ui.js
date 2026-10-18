@@ -31,7 +31,7 @@
    const change=app.querySelector('#rh-calendar-switch');if(change)change.onclick=async()=>{change.disabled=true;try{const selection=await request({action:'clear-operator'});if(isCurrent())onSwitch(selection);}catch(e){if(isCurrent()){error=e.message;draw();}}};
    for(const button of app.querySelectorAll?.('[data-rh-new-leave]')||[])button.onclick=()=>SGFRhLeave.open({app,esc,request,isCurrent,cnes:admin?unit:null,entryId:button.dataset.rhNewLeave,
     onBack:createdMonth=>{if(createdMonth)month=createdMonth;return load();}});
-   for(const button of app.querySelectorAll?.('[data-rh-leave-detail]')||[])button.onclick=()=>SGFRhLeave.detail({app,esc,request,isCurrent,cnes:admin?unit:null,leaveId:button.dataset.rhLeaveDetail,onBack:()=>load()});
+   for(const button of app.querySelectorAll?.('[data-rh-leave-detail]')||[])button.onclick=()=>SGFRhLeave.detail({app,esc,request,isCurrent,cnes:admin?unit:null,leaveId:button.dataset.rhLeaveDetail,onBack:changedMonth=>{if(changedMonth)month=changedMonth;return load();}});
   }
   await load();
  }

@@ -34,7 +34,7 @@ const messages:Record<string,string>={
  RH_UNIT_INVALID:'Unidade fora do catálogo de RH.',RH_LOCATION_REVIEW_REQUIRED:'Confira o vínculo CNES/lotação principal da unidade antes de criar a conta.',
  RH_NOT_ALLOWED:'Esta ação não é permitida para este acesso.',RH_OPERATOR_OUT_OF_UNIT:'Operador não autorizado, inativo ou de outra unidade.',
  RH_OPERATOR_REQUIRED:'Selecione novamente um operador autorizado para continuar.',RH_SESSION_INVALID:'A sessão não está mais disponível. Entre novamente.',
- RH_VERSION_CONFLICT:'A autorização foi alterada. Atualize a lista antes de continuar.',RH_ACCOUNT_MANAGED_SEPARATELY:'Gerencie esta conta pela área de contas RH.',
+ RH_VERSION_CONFLICT:'O registro ou a autorização foi alterado. Atualize a tela antes de continuar.',RH_ACCOUNT_MANAGED_SEPARATELY:'Gerencie esta conta pela área de contas RH.',
 };
 Deno.serve(async request=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:cors});
@@ -49,7 +49,7 @@ Deno.serve(async request=>{
   const {data:profile,error:profileError}=await auth.from('profiles').select('roles,disabled_at,must_change_password,institutional_cnes_unit_id').eq('id',identity.user.id).single();
   if(profileError||!profile||profile.disabled_at||profile.must_change_password)throw Error('RH_NOT_ALLOWED');
   const payload=await limitedJson(request),actor=identity.user.id;
-  const isLeaveAction=['leave-resources','preview-leave','create-leave','leave-detail','close-leave'].includes(payload.action);
+  const isLeaveAction=['leave-resources','preview-leave','create-leave','leave-detail','close-leave','preview-revision','revise-leave'].includes(payload.action);
   if(profile.institutional_cnes_unit_id) {
    if(request.headers.get('x-sgf-role')!=='rh'||profile.roles.length!==1||profile.roles[0]!=='rh')throw Error('RH_NOT_ALLOWED');
    const session=verifiedSessionId(token,actor);

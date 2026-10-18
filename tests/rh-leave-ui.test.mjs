@@ -68,3 +68,23 @@ test('resposta de cadastro não sobrescreve tela depois de navegar',async()=>{
  await ui.api.detail({app:ui.app,esc,isCurrent:()=>true,leaveId:id,onBack:()=>{},request:async()=>({...record,status:++calls===1?'programada':'cancelada'})});
  await ui.app.querySelector('#rh-detail-receipt').onclick();assert.equal(calls,2);assert.equal(shown.status,'cancelada');
  });
+
+test('edição pede horas novamente, preserva motivo e repete o mesmo envio após falha de rede',async()=>{
+ const ui=harness(),creates=[];const oldPlan={...preview({type:'banco_horas',days:2,dailyHours:8,availableHours:16}).plan,days:2,bank:{daily_minutes:480,declared_minutes:960,required_minutes:960}};
+ const editing={id,entry_id:id,version:4,status:'programada',snapshot:resources,plan:oldPlan};
+ const request=async payload=>{if(payload.action==='leave-resources')return resources;if(payload.action==='preview-revision'){assert.equal(payload.version,4);assert.equal(payload.leaveId,id);return {...preview(payload.item),previous_plan:oldPlan};}
+  if(payload.action==='revise-leave'){creates.push(payload);if(creates.length===1)throw Error('Conexão perdida');return {id,version:5};}
+  if(payload.action==='leave-detail')return {...editing,version:5,operator_name:'TESTE',created_at:'2026-10-18T12:00:00Z'};assert.fail(payload.action);};
+ await ui.api.open({app:ui.app,esc,request,isCurrent:()=>true,entryId:id,editing,onBack:()=>{}});
+ assert.equal(ui.app.querySelector('#rh-leave-availableHours').value,'');assert.equal(ui.app.querySelector('#rh-leave-form').querySelectorAll('[name]').find(n=>n.name==='eligibilityConfirmed').checked,false);
+ ui.set('#rh-leave-availableHours','16');ui.set('#rh-leave-startDate','2027-03-08');ui.set('#rh-leave-reason','Reprogramação fictícia conferida');ui.app.querySelector('#rh-leave-form').querySelectorAll('[name]').find(n=>n.name==='eligibilityConfirmed').checked=true;
+ await ui.submit('#rh-leave-form');assert.match(ui.app.innerHTML,/Versão atual · 4/);assert.match(ui.app.innerHTML,/Nova proposta/);assert.match(ui.app.innerHTML,/Reprogramação fictícia conferida/);
+ await ui.submit('#rh-leave-confirm');assert.equal(ui.app.querySelector('#rh-leave-edit').disabled,true);await ui.submit('#rh-leave-confirm');assert.equal(creates.length,2);assert.deepEqual(creates[0],creates[1]);assert.equal(creates[0].version,4);assert.equal(creates[0].reason,'Reprogramação fictícia conferida');assert.equal(creates[0].entryId,undefined);
+});
+
+test('versão anterior abre comprovante histórico com seu próprio snapshot',async()=>{
+ const ui=harness();let shown;const plan=preview({type:'banco_horas',days:2,dailyHours:8,availableHours:16}).plan;
+ const data={id,entry_id:id,version:2,status:'programada',snapshot:resources,plan,created_at:'2026-10-18T12:00:00Z',operator_name:'TESTE',revisions:[{version:1,snapshot:{...resources,position:'CARGO ANTERIOR'},plan,status:'programada',reason:'Mudança fictícia',operator_name:'OUTRO OPERADOR',changed_at:'2026-10-18T13:00:00Z'}],history:[{action:'rh_leave_revised',occurred_at:'2026-10-18T13:00:00Z'}]};
+ ui.root.SGFRhReceipt={fromLeave:value=>value,show:({data})=>{shown=data;}};await ui.api.detail({app:ui.app,esc,request:async()=>data,isCurrent:()=>true,leaveId:id,onBack:()=>{}});
+ assert.match(ui.app.innerHTML,/Alterado/);ui.app.querySelector('#rh-revision-receipt-1').onclick();assert.equal(shown.superseded,true);assert.equal(shown.version,1);assert.equal(shown.snapshot.position,'CARGO ANTERIOR');
+});
