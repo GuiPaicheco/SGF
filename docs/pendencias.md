@@ -37,8 +37,9 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] **Bloco 2 — Lançamento e conferência normativa:** matriz oficial em [Normas de férias](NORMAS_FERIAS_BETIM.md); duração por aquisição/regime, reduções, parcelas, impedimentos, protocolo, concordância, referência documental, histórico conhecido de consumo e prévia confirmada. Regras no servidor para criação e revisão. Vínculos especiais não recebem direito presumido.
 - [x] **Banco de horas retirado do escopo:** sem novas folgas, complementação de férias, trabalho adicional ou exceção por horas insuficientes; retirada também da simulação pública. Registros antigos permanecem consultáveis/canceláveis e não podem gerar nova programação dessa modalidade.
 - [ ] **Aceite dos blocos 1 e 2:** RH/SARH deve conferir o enquadramento e os assentamentos reais, as referências documentais e a regra especial quando aplicável. CNES não prova direito adquirido nem saldo. Nenhum funcionário real recebeu férias automaticamente.
-- [ ] **Próximo bloco — Manutenção e comprovante:** concluir a homologação de edição/cancelamento, documentação normativa no comprovante e exportações nos equipamentos institucionais, sem apagar histórico.
-- [ ] **Bloco seguinte — Piloto completo:** teste institucional com importação aprovada, identificação inicial, conferência, lançamento, alteração, cancelamento e reimportação; aceite dos responsáveis antes de ampliar o uso.
+- [x] **Bloco técnico — Manutenção e comprovante:** edição/cancelamento com versão, motivo e preservação do histórico; conflito recarrega o estado atual sem repetir a ação. Comprovante inclui regime, aquisição, base normativa, referência, protocolo e versão da conferência, sem divulgar contagens de licenças. Antes de imprimir/copiar o documento atual, consultar novamente o registro; mudanças exigem revisão e falha de conexão impede exportação desatualizada. Versões antigas permanecem identificadas como substituídas.
+- [ ] **Aceite do comprovante nos equipamentos institucionais:** conferir impressão nativa, assinaturas e circulação do documento pela unidade. As fixtures técnicas não substituem esse aceite.
+- [ ] **Próximo bloco — Piloto completo:** teste institucional com importação aprovada, identificação inicial, conferência, lançamento, alteração, cancelamento e reimportação; aceite dos responsáveis antes de ampliar o uso.
 
 ### Evidências desta entrega
 
@@ -47,6 +48,12 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - Ensaio integrado no Supabase com rollback: importação sintética, programação, reenvio idempotente, operador e escopo, revisão, atualização/ausência/reativação sem perda de histórico; prêmio com prevenção de reutilização, cancelamento e nova prévia.
 - SQL e função manage-rh atualizados. Ensaios históricos de contratos encerrados são explicitamente separados dos cenários normativos atuais no CI.
 - Consulta de segurança: não surgiram novos objetos expostos nem concessões amplas. Os avisos anteriores de RLS sem política em tabelas bloqueadas e proteção de senhas vazadas permanecem como pendências de infraestrutura, sem mudança nesta entrega.
+
+### Manutenção e comprovante — 19/10/2026
+
+- 404 testes Node aprovados; ensaio SQL com rollback confirma revisão, preservação do snapshot, recusa de cancelamento com versão antiga, recusa de conclusão antes do término e cancelamento sem apagar a conferência normativa.
+- A4 conferido por renderização e extração: exemplo normativo em uma página e histórico extenso em duas, sem perda de texto nem elementos fora dos limites. Contagens de licenças e dados internos da avaliação não aparecem no comprovante.
+- Alterações deste bloco são de interface/documento e testes; não houve alteração de esquema nem concessão real.
 
 ## Limites e continuidade
 

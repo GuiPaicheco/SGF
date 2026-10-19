@@ -53,7 +53,11 @@ begin
  preview:=public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,prize);
  result:=public.rh_create_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,prize,'fa000000-0000-0000-0000-000000000003',preview->>'digest');prize_id:=(result->>'id')::uuid;
  begin perform public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,prize);raise exception 'PRIZE_BALANCE_REUSED';exception when others then if sqlerrm<>'RH_LEAVE_RIGHT_INVALID' then raise;end if;end;
+ begin perform public.rh_close_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,prize_id,2,'cancelada','Versão desatualizada');raise exception 'STALE_CANCEL_ALLOWED';exception when others then if sqlerrm<>'RH_VERSION_CONFLICT' then raise;end if;end;
+ begin perform public.rh_close_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,prize_id,1,'concluida','Conclusão futura');raise exception 'FUTURE_COMPLETION_ALLOWED';exception when others then if sqlerrm<>'RH_LEAVE_NOT_ENDED' then raise;end if;end;
  perform public.rh_close_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,prize_id,1,'cancelada','Cancelamento sintético');
+ if not exists(select 1 from private.rh_leaves where id=prize_id and status='cancelada' and plan->'legal'->>'version'='betim-2026-10-18') then raise exception 'CANCEL_REMOVED_LEGAL_HISTORY';end if;
+ if not exists(select 1 from private.rh_leave_revisions r where r.leave_id=(historical->>'id')::uuid and r.version=1 and r.plan->'legal'->>'version'='betim-2026-10-18') then raise exception 'REVISION_SNAPSHOT_LOST';end if;
  perform public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,prize);
  insert into public.vacation_rights(servidor_id,bond_id,type,acquisition_start,acquisition_end,available_days,source_reference)
  values(person,bond,'premio','2020-01-01','2024-12-31',30,'Fixture saldo conhecido') returning id into right_id;

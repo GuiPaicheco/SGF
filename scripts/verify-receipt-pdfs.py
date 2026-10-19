@@ -12,8 +12,9 @@ for name, expected_pages in [("comprovante-curto", 1), ("comprovante-extenso", 2
     with pdfplumber.open(f"output/pdf/{name}.pdf") as pdf:
         assert len(pdf.pages) == expected_pages, (name, len(pdf.pages))
         text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+        content = re.sub(r"(?m)^Página \d+ de \d+\s*$", "", text)
         for field in expected["required"]:
-            assert compact(field) in compact(text), (name, "conteúdo ausente")
+            assert compact(field) in compact(content), (name, "conteúdo ausente")
         for field in ["COMPROVANTE", "CBO", "Carga horária semanal", "Retorno ao trabalho", "RH ou Chefia Imediata", "Página"]:
             assert field in text, (name, field)
         for page in pdf.pages:

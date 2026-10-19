@@ -278,10 +278,13 @@
   .receipt-protocol > div { display: table-cell; width: 33.33%; vertical-align: top; }
   .receipt-data {
     grid-template-columns: 2fr 1fr;
-    display: block;
+    display: table;
+    table-layout: fixed;
     width: 100%;
   }
-  .receipt-data > div { display: block; margin-bottom: 1mm; padding: 1.5mm 2mm; break-inside: avoid; }
+  .receipt-data > div { display: table-row; break-inside: avoid; }
+  .receipt-data > div > span { display: table-cell; width: 35%; padding: 1mm 2mm; }
+  .receipt-data > div > strong { display: table-cell; width: 65%; padding: 1mm 2mm; }
   .receipt-data span, .receipt-protocol span { display: block; font-size: 8pt; }
   .receipt-data strong, .receipt-protocol strong { font-size: 9.5pt; }
   .receipt-data-wide {
@@ -296,4 +299,20 @@
   .receipt-footer {
     margin-top: 5mm;
   }
+}
+.receipt-legal { margin: 1rem 0; border-top: 1px solid #cbd5cf; padding-top: .8rem; }
+.receipt-legal h3 { font-size: .95rem; color: #123c2f; margin: 0 0 .5rem; }
+.receipt-legal dl { margin: 0; }
+.receipt-legal dl > div { display: grid; grid-template-columns: 1fr 2fr; gap: .75rem; padding: .3rem 0; }
+.receipt-legal dt { color: #52625a; font-size: .76rem; }
+.receipt-legal dd { margin: 0; font-size: .82rem; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .receipt-legal dl > div { grid-template-columns: 1fr; gap: .15rem; }
+}
+@media print {
+  .receipt-legal { margin: 3mm 0; padding-top: 2mm; }
+  .receipt-legal h3 { break-after: avoid; font-size: 10pt; }
+  .receipt-legal dl > div { display: table; table-layout: fixed; width: 100%; break-inside: avoid; padding: .6mm 0; }
+  .receipt-legal dt { display: table-cell; width: 35%; padding-right: 3mm; font-size: 8pt; }
+  .receipt-legal dd { display: table-cell; width: 65%; font-size: 9pt; }
 }

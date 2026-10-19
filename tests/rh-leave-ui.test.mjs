@@ -62,3 +62,11 @@ test('folga histórica continua consultável e cancelável, sem nova programaç�
 test('comprovante atual é reconsultado para refletir cancelamento de outra sessão',async()=>{
  const ui=harness();let n=0,shown;ui.root.SGFRhReceipt={fromLeave:x=>x,show:({data})=>{shown=data;}};await ui.api.detail({app:ui.app,esc,isCurrent:()=>true,leaveId:id,onBack:()=>{},request:async()=>({id,status:++n===1?'programada':'cancelada',snapshot:resources,plan,created_at:'2026-10-18T12:00:00Z'})});await ui.app.querySelector('#rh-detail-receipt').onclick();assert.equal(shown.status,'cancelada');
 });
+
+test('conflito ao encerrar recarrega a versão atual sem repetir a ação automaticamente',async()=>{
+ const ui=harness();let reads=0,closes=0;const request=async p=>{
+  if(p.action==='leave-detail')return{id,version:++reads===1?1:2,status:'programada',snapshot:resources,plan,created_at:'2026-10-18T12:00:00Z'};
+  if(p.action==='close-leave'){closes++;throw Object.assign(Error('Versão alterada'),{code:'RH_VERSION_CONFLICT'});}
+ };
+ await ui.api.detail({app:ui.app,esc,isCurrent:()=>true,leaveId:id,onBack(){},request});ui.set('#rh-close-reason','Motivo sintético');await ui.submit('#rh-close-form');assert.equal(reads,2);assert.equal(closes,1);assert.match(ui.app.innerHTML,/Versão 2/);assert.match(ui.app.innerHTML,/outra sessão/);assert.equal(ui.app.querySelector('#rh-close-reason').value,'Motivo sintético');
+});
