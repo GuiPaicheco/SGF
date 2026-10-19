@@ -21,27 +21,28 @@ function harness(){
    nodes.set(attributes.id?'#'+attributes.id:'@'+match.index,node);
   }
  }});
- const root={};runInNewContext(source,{globalThis:root,crypto:{randomUUID:()=>id},Date});
- return {app,root,api:root.SGFRhLeave,set:(name,value)=>{const node=app.querySelector(name);assert.ok(node,name);if(typeof value==='boolean')node.checked=value;else node.value=value;},
+ const root={},saved=[];runInNewContext(source,{globalThis:root,crypto:{randomUUID:()=>id},Date});
+ return {app,root,saved,api:root.SGFRhLeave,set:(name,value)=>{const node=app.querySelector(name);assert.ok(node,name);if(typeof value==='boolean')node.checked=value;else node.value=value;},
   submit:async selector=>{const form=app.querySelector(selector);assert.ok(form,selector);form.onsubmit({preventDefault(){}});await settle();},
   change:selector=>app.querySelector(selector).listeners.change()};
 }
 const resources={full_name:'PESSOA <script>FICTÍCIA',position:'CARGO',unit:'UNIDADE',cbo:'123456',weekly_hours:40,admission_date:'2020-01-01'};
 const plan={type:'regulamentar',days:25,vacation_days:25,counting_mode:'uteis',periods:[{sequence:1,start_date:'2027-03-01',end_date:'2027-04-02',return_date:'2027-04-05',days:25,counting_mode:'uteis'}],bank:{required_minutes:0},legal:{basis:'Lei 7.989/2025',reference:'Processo sintético',warnings:['Conferência do RH']}};
 const preview={digest:'a'.repeat(64),plan,actor:{operator:{name:'OPERADOR FICTÍCIO'}}};
-async function form(ui,request,editing){await ui.api.open({app:ui.app,esc,request,isCurrent:()=>true,entryId:id,onBack:()=>{},editing});
+async function form(ui,request,editing){await ui.api.open({app:ui.app,esc,request,isCurrent:()=>true,entryId:id,onBack:value=>ui.saved.push(value),editing});
  for(const [key,value] of Object.entries({regime:'efetivo',acquisitionStart:'2025-01-01',acquisitionEnd:'2025-12-31',startDate:'2027-03-01',absenceCount:'0',regularLicenseLoss:'no',protocolDate:'2026-10-01',recognitionReference:'Processo sintético'}))if(ui.app.querySelector('#rh-leave-'+key))ui.set('#rh-leave-'+key,value);
  for(const node of ui.app.querySelector('#rh-leave-form').querySelectorAll('[name]'))if(node.type==='checkbox')node.checked=true;
 }
 test('formulário não oferece banco, horas extras, matrícula ou nascimento obrigatório',async()=>{
  const ui=harness();await form(ui,async()=>resources);assert.doesNotMatch(ui.app.innerHTML,/value="banco_horas"|availableHours|extraHours|Matrícula|name="birthDate"/);assert.match(ui.app.innerHTML,/O que é período aquisitivo/);assert.equal(ui.app.querySelector('#rh-leave-acquisitionStart'),null);assert.equal(ui.app.querySelector('#rh-leave-admissionDate'),null);assert.doesNotMatch(ui.app.innerHTML,/name="managerConsent"|name="employeeConsent"|name="eligibilityConfirmed"/);
 });
-test('prévia normativa mostra base e confirmação antes da gravação',async()=>{
- const ui=harness(),calls=[];const request=async p=>{calls.push(p);return p.action==='leave-resources'?resources:preview;};await form(ui,request);await ui.submit('#rh-leave-form');assert.match(ui.app.innerHTML,/Lei 7.989\/2025/);assert.match(ui.app.innerHTML,/Processo sintético/);assert.ok(ui.app.querySelector('#rh-leave-confirm'));assert.equal(calls[1].item.regime,'efetivo');assert.equal(calls[1].item.availableHours,undefined);assert.equal(calls.filter(x=>x.action==='create-leave').length,0);
+test('um clique valida, grava e encaminha ao calendário no intervalo salvo',async()=>{
+ const ui=harness(),calls=[];const request=async p=>{calls.push(p);return p.action==='leave-resources'?resources:p.action==='preview-leave'?preview:{id};};await form(ui,request);await ui.submit('#rh-leave-form');
+ assert.deepEqual(calls.map(x=>x.action),['leave-resources','preview-leave','create-leave']);assert.equal(calls[2].digest,preview.digest);assert.equal(ui.saved[0].start,'2027-03-01');assert.equal(ui.saved[0].end,'2027-04-05');assert.equal(ui.saved[0].leaveId,id);
 });
-test('reenvio após falha de conexão mantém chave e payload, bloqueando edição incerta',async()=>{
- const ui=harness(),creates=[];const request=async p=>{if(p.action==='leave-resources')return resources;if(p.action==='preview-leave')return preview;if(p.action==='create-leave'){creates.push(p);if(creates.length===1)throw Error('Falha de conexão');return{id};}if(p.action==='leave-detail')return{id,status:'programada',snapshot:resources,plan,operator_name:'TESTE',created_at:'2026-10-18T12:00:00Z'};};
- await form(ui,request);await ui.submit('#rh-leave-form');await ui.submit('#rh-leave-confirm');assert.equal(ui.app.querySelector('#rh-leave-edit').disabled,true);await ui.submit('#rh-leave-confirm');assert.deepEqual(creates[0],creates[1]);assert.match(ui.app.innerHTML,/Registro de afastamento/);assert.doesNotMatch(ui.app.innerHTML,/<script>FICTÍCIA/);
+test('falha de conexão oferece reenvio com a mesma chave, sem duplicar o lançamento',async()=>{
+ const ui=harness(),creates=[];const request=async p=>{if(p.action==='leave-resources')return resources;if(p.action==='preview-leave')return preview;if(p.action==='create-leave'){creates.push(p);if(creates.length===1)throw Error('Falha de conexão');return{id};}};
+ await form(ui,request);await ui.submit('#rh-leave-form');assert.equal(ui.app.querySelector('#rh-leave-edit').disabled,true);await ui.submit('#rh-leave-confirm');assert.deepEqual(creates[0],creates[1]);assert.equal(ui.saved.length,1);
 });
 test('trocar modalidade revela quinquênio, parcelas 30/60 e conferência de impedimentos',async()=>{
  const ui=harness();await form(ui,async()=>resources);ui.set('#rh-leave-type','premio');ui.change('#rh-leave-type');assert.equal(ui.app.querySelector('#rh-leave-split').value,'30-60');assert.ok(ui.app.querySelector('#rh-leave-prizeCycle'));assert.ok(ui.app.querySelector('#rh-leave-healthLeaveDays'));assert.doesNotMatch(ui.app.innerHTML,/90 dias corridos/);

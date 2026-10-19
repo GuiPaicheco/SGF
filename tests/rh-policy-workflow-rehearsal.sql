@@ -68,14 +68,41 @@ end $$;
 -- Criação e reprogramação simplificadas passam pelas mesmas transações e saldos.
 do $$
 declare actor uuid:='f6000000-0000-0000-0000-000000000001';unit_id uuid:='f6000000-0000-0000-0000-000000000100';entry uuid;preview jsonb;result jsonb;leave_id uuid;
-item jsonb:='{"entryMode":"simplified","type":"regulamentar","regime":"efetivo","acquisitionEnd":"2026-12-31","startDate":"2028-03-01","protocolDate":"2026-01-01","recognitionReference":"Processo sintético simplificado","absenceCount":0,"familyLeaveDays":0,"personalLeaveDays":0,"spouseLeaveDays":0,"healthLeaveDays":0,"suspended":false,"cltLoss":false,"regularLicenseLoss":false,"split":"none"}';
+item jsonb:='{"entryMode":"simplified","type":"regulamentar","regime":"efetivo","acquisitionEnd":"2026-12-31","startDate":"2028-03-01","recognitionReference":"Processo sintético simplificado","absenceCount":0,"familyLeaveDays":0,"personalLeaveDays":0,"spouseLeaveDays":0,"healthLeaveDays":0,"suspended":false,"cltLoss":false,"regularLicenseLoss":false,"split":"none"}';
 begin
  select id into strict entry from private.cnes_registry_entries where cnes_unit_id=unit_id and source_id=repeat('e',64);
  preview:=public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item);
  result:=public.rh_create_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item,'fa000000-0000-0000-0000-000000000004',preview->>'digest');leave_id:=(result->>'id')::uuid;
- if not exists(select 1 from private.rh_leaves where id=leave_id and plan->>'acquisition_start'='2026-01-01' and plan->'admission_date'='null'::jsonb and plan->>'confirmation_collection'='not_collected_in_sgf') then raise exception 'SIMPLIFIED_CREATE_INVENTED_DATA';end if;
+ if not exists(select 1 from private.rh_leaves where id=leave_id and plan->>'acquisition_start'='2026-01-01' and plan->'admission_date'='null'::jsonb and plan->>'confirmation_collection'='not_collected_in_sgf' and plan->'legal'->'protocol_date'='null'::jsonb and plan->>'notice_verified'='false') then raise exception 'SIMPLIFIED_CREATE_INVENTED_DATA';end if;
  item:=item||'{"startDate":"2028-05-02"}';
  preview:=public.rh_preview_leave_revision(actor,'fa000000-0000-0000-0000-000000000100',unit_id,leave_id,1,item);
  perform public.rh_revise_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,leave_id,1,item,'fa000000-0000-0000-0000-000000000005',preview->>'digest','Reprogramação sintética simplificada');
  if not exists(select 1 from private.rh_leave_revisions where private.rh_leave_revisions.leave_id=(result->>'id')::uuid and version=1 and plan->'eligibility_confirmed'='null'::jsonb) then raise exception 'SIMPLIFIED_REVISION_LOST_HISTORY';end if;
+end $$;
+
+-- Cadastro de aniversário pelo RH: escopo, versão, privacidade e histórico.
+do $$
+declare actor uuid:='f6000000-0000-0000-0000-000000000001';unit_id uuid:='f6000000-0000-0000-0000-000000000100';entry uuid;profile uuid;result jsonb;grant_id uuid;before_history jsonb;after_history jsonb;
+session uuid:='f6000000-0000-0000-0000-000000000200';
+begin
+ select id into strict entry from private.cnes_registry_entries where cnes_unit_id=unit_id and source_id=repeat('e',64);
+ select profile_id into profile from private.rh_unit_accounts where cnes_unit_id=unit_id;
+ begin perform public.rh_employee_profile(profile,'f6000000-0000-0000-0000-000000000201',entry);raise exception 'NO_OPERATOR_PROFILE_ALLOWED';exception when others then if sqlerrm<>'RH_OPERATOR_REQUIRED' then raise;end if;end;
+ result:=public.rh_grant_operator(actor,unit_id,'f6000000-0000-0000-0000-000000000300',true,0);grant_id:=(result->>'id')::uuid;
+ perform public.rh_select_operator(profile,session,grant_id);
+ select coalesce(jsonb_agg(to_jsonb(l) order by id),'[]') into before_history from private.rh_leaves l where cnes_unit_id=unit_id;
+ result:=public.rh_employee_profile(profile,session,entry);if result ? 'birth_date' or result->>'version'<>'0' then raise exception 'PROFILE_LEAK_OR_WRONG_VERSION';end if;
+ result:=public.rh_save_employee_birthday(profile,session,entry,0,2,29);
+ if result->>'birthday'<>'02-29' or result->>'version'<>'1' then raise exception 'BIRTHDAY_SAVE_FAILED';end if;
+ begin perform public.rh_save_employee_birthday(profile,session,entry,0,3,1);raise exception 'BIRTHDAY_CONFLICT_IGNORED';exception when others then if sqlerrm<>'RH_VERSION_CONFLICT' then raise;end if;end;
+ begin perform public.rh_save_employee_birthday(profile,session,entry,1,4,31);raise exception 'INVALID_BIRTHDAY_ALLOWED';exception when others then if sqlerrm<>'RH_INPUT_INVALID' then raise;end if;end;
+ begin perform public.rh_employee_profile(profile,session,'f6000000-0000-0000-0000-000000000301');raise exception 'OTHER_UNIT_PROFILE_ALLOWED';exception when others then if sqlerrm<>'RH_BOND_OUT_OF_UNIT' then raise;end if;end;
+ result:=public.rh_calendar_window(profile,session,null,'2028-02-01','2028-02-29',0,'','{}');
+ if not exists(select 1 from jsonb_array_elements(result->'employees') r where (r->>'entry_id')::uuid=entry and r->>'birth_month_day'='02-29' and not r ? 'birth_date') then raise exception 'BIRTHDAY_CALENDAR_MISSING';end if;
+ if result->>'source_competence' is null then raise exception 'COMPETENCE_MISSING';end if;
+ perform public.rh_save_employee_birthday(profile,session,entry,1,null,null);
+ if public.rh_employee_profile(profile,session,entry)->'birthday'<>'null'::jsonb then raise exception 'BIRTHDAY_CLEAR_FAILED';end if;
+ select coalesce(jsonb_agg(to_jsonb(l) order by id),'[]') into after_history from private.rh_leaves l where cnes_unit_id=unit_id;
+ if before_history is distinct from after_history then raise exception 'BIRTHDAY_REWROTE_LEAVE';end if;
+ if has_table_privilege('authenticated','private.rh_employee_birthdays','select') or has_function_privilege('authenticated','public.rh_save_employee_birthday(uuid,uuid,uuid,integer,integer,integer)','execute') then raise exception 'BIRTHDAY_DIRECT_ACCESS';end if;
 end $$;

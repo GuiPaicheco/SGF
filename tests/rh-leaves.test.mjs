@@ -45,3 +45,8 @@ test('modo simplificado aceita só fim aquisitivo e não fabrica aceites nem adm
  assert.throws(()=>leaveItem({...simple,entryMode:'outro'}),/RH_LEAVE_INPUT_INVALID/);
  assert.throws(()=>leaveItem({...simple,entryMode:'simplified',acquisitionEnd:'2025-02-30'}),/RH_LEAVE_INPUT_INVALID/);
 });
+
+test('data de comunicação pode ser omitida no formulário simplificado, sem inventar protocolo',()=>{
+ const {admissionDate,acquisitionStart,protocolDate,eligibilityConfirmed,managerConsent,...simple}=regular;
+ const result=leaveItem({...simple,entryMode:'simplified'});assert.equal(result.protocolDate,undefined);
+});

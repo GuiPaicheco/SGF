@@ -2,7 +2,7 @@ import {createClient} from 'npm:@supabase/supabase-js@2.117.2';
 import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts';
 import {verifiedSessionId,provisionRhAccount} from '../_shared/rh-accounts.mjs';
 import {limitedJson} from '../_shared/limited-json.mjs';
-import {calendarQuery,calendarWindow,bindingInput} from '../_shared/rh-calendar.mjs';
+import {calendarQuery,calendarWindow,bindingInput,birthdayInput} from '../_shared/rh-calendar.mjs';
 import {leaveOperation} from '../_shared/rh-leaves.mjs';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-sgf-role,x-sgf-cnes,x-sgf-lotacao','Access-Control-Allow-Methods':'POST, OPTIONS'};
@@ -66,6 +66,8 @@ Deno.serve(async request=>{
    if(payload.action==='select-operator'){if(!uuid.test(payload.grantId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_select_operator',{target_grant:payload.grantId}));}
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
    if(payload.action==='launch-employees'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_launch_employees',{page_index:payload.page,search_text:payload.search.trim()}));}
+   if(payload.action==='employee-profile'){if(!uuid.test(payload.entryId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_employee_profile',{target_entry:payload.entryId}));}
+   if(payload.action==='save-birthday')return json(await rpc('rh_save_employee_birthday',birthdayInput(payload)));
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
    if(payload.action==='calendar')return json(await rpc('rh_calendar_window',{target_cnes:null,...calendarWindow(payload)}));
    if(isLeaveAction){const operation=leaveOperation(payload);return json(await rpc(operation.name,{target_cnes:null,...operation.args}));}

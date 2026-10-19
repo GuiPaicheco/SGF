@@ -81,3 +81,15 @@
     .rh-calendar-card > .actions > span { flex-basis: 100%; }
   }
 }
+/* Contexto e cabeçalhos permanecem visíveis nas duas direções de rolagem. */
+.rh-calendar-wrap{--rh-meta-height:64px;position:relative;}
+.rh-calendar-meta{position:sticky;top:0;left:0;z-index:6;box-sizing:border-box;height:var(--rh-meta-height);width:100%;display:flex;flex-direction:column;justify-content:center;gap:.2rem;padding:.6rem 1rem;background:var(--green-900,#154734);color:white;}
+.rh-calendar-meta strong,.rh-calendar-meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rh-calendar-meta span{font-size:.78rem;}
+@media screen{.rh-calendar caption{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);}.rh-calendar thead th{top:var(--rh-meta-height);}}
+.rh-calendar .rh-record-col{min-width:210px;max-width:270px;white-space:normal;}
+.rh-calendar .rh-type-premio{background:#e2d8f4;color:#392758;}
+.rh-calendar .rh-type-banco_horas{background:#d6e7fa;color:#163b65;}
+.rh-calendar .rh-return{background:#eef8eb;color:#245521;font-weight:700;}
+.rh-calendar .rh-birthday{background:#fff4df;color:#75520b;font-weight:700;}
+@media print{.rh-calendar-meta{display:none!important;}.rh-calendar caption{position:static;width:auto;height:auto;clip-path:none;background:white;color:black;}.rh-calendar .rh-record-col{min-width:0;max-width:none;}}

@@ -166,7 +166,7 @@
     const show = state.session && state.profile?.role && !state.profile.must_change_password && (!state.activeContext?.institutional || Boolean(state.rhState?.operator)) && !['change-password', 'set-password'].includes(state.route);
     workspaceNav.classList.toggle('hidden', !show);
     if (!show) { workspaceNav.innerHTML = ''; return; }
-    if(state.activeContext?.institutional){workspaceNav.innerHTML=[['rh-workspace','Calendário da Unidade'],['rh-launch','Lançar Férias']].map(([route,label])=>`<button type="button" data-go="${route}" ${state.route===route?'aria-current="page"':''}>${label}</button>`).join('');return;}
+    if(state.activeContext?.institutional){workspaceNav.innerHTML=[['rh-workspace','Calendário da Unidade'],['rh-launch','Férias e Cadastros']].map(([route,label])=>`<button type="button" data-go="${route}" ${state.route===route?'aria-current="page"':''}>${label}</button>`).join('');return;}
     const employee = state.profile?.role === 'servidor';
     const items = state.profile?.role === 'administrador'
       ? [['rh-calendar', 'Calendário da Unidade'], ['rh-accounts', 'Cadastro das unidades'], ['calendar-admin', 'Feriados']]
@@ -767,7 +767,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   async function renderRhLaunch(){
     if(state.profile?.role!=='rh'||!state.activeContext?.institutional)return go('home');
     const current=captureView();
-    const launch=()=>SGFRhLaunch.mount({app,esc,request:rhRequest,isCurrent:current,viewState:rhView('launch'),onBack:()=>go('rh-workspace')});
+    const launch=()=>SGFRhLaunch.mount({app,esc,request:rhRequest,isCurrent:current,viewState:rhView('launch'),onBack:saved=>{if(saved)rhView('calendar').focusRange=saved;return go('rh-workspace');}});
     await SGFRhAccounts.workspace({app,esc,request:rhRequest,isCurrent:current,go,destination:'rh-launch',onState:value=>{state.rhState=value;renderHeaderUser();renderWorkspaceNav();},calendar:launch});
   }
   async function renderRhCalendar(){if(state.profile?.role!=='administrador')return go('home');await SGFRhCalendar.mount({app,esc,request:rhRequest,isCurrent:captureView(),admin:true,viewState:rhView('calendar')});}

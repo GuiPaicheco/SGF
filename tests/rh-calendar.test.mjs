@@ -71,3 +71,18 @@ test('calendário restaura período, filtros e colunas ao voltar à aba',async()
  await api.mount({app,esc,isCurrent:()=>true,viewState,request:async q=>(query=q,{employees:[],absences:[],records:[],holidays:[],total:51,range_start:'2027-03-01',range_end:'2027-03-20'})});
  assert.equal(query.mode,'range');assert.equal(query.start,'2027-03-01');assert.equal(query.search,'Ana');assert.equal(query.page,1);assert.equal(query.filters.team,'Equipe A');assert.match(app.innerHTML,/value="2027-03-20"/);
 });
+
+test('visões nominal e longitudinal preservam registros e mostram sobreposições',async()=>{
+ const {api,app}=harness(),row={bond_id:uuid,full_name:'TESTE',birth_month_day:'01-20'},items=[{id:'ferias',origin:'rh',sequence:1,bond_id:uuid,type:'regulamentar',protocol:'F1',start_date:'2027-01-18',end_date:'2027-02-22',return_date:'2027-02-23'},{id:'folga',origin:'legado',sequence:1,bond_id:uuid,type:'banco_horas',protocol:'B1',start_date:'2027-01-16',end_date:'2027-01-25',return_date:'2027-01-26'}];
+ assert.equal(api.calendarRows([row],items,'longitudinal').length,1);assert.equal(api.calendarRows([row],items,'nominal').length,2);assert.deepEqual(Array.from(api.returnDates(items)),['2027-02-23']);
+ const saved={layout:'nominal'};await api.mount({app,esc,isCurrent:()=>true,viewState:saved,request:async()=>({context:{cnes_name:'UBS TESTE'},source_competence:'202610',employees:[row],absences:items,total:1,range_start:'2027-01-16',range_end:'2027-02-23'})});
+ assert.match(app.innerHTML,/RH|F1/);assert.match(app.innerHTML,/B1/);assert.match(app.innerHTML,/! F/);assert.match(app.innerHTML,/! B/);assert.match(app.innerHTML,/Competência CNES: 10\/2026/);assert.doesNotMatch(app.innerHTML,/data-rh-new-leave|<th>Ações<\/th>|>Programar</);assert.match(app.innerHTML,/rh-calendar-meta/);
+ assert.equal(api.cellMark(row,'2027-01-20',[], 'longitudinal'),'A');assert.equal(api.cellMark(row,'2027-02-23',items,'longitudinal'),'R');
+ const exported=api.csv([row],items,['2027-01-18'],undefined,'nominal');assert.match(exported,/F1/);assert.match(exported,/B1/);assert.equal(exported.split('\r\n').length,3);
+});
+test('retornos separados não são apresentados como afastamento contínuo',()=>{
+ const {api}=harness();assert.deepEqual(Array.from(api.returnDates([{start_date:'2027-01-01',return_date:'2027-01-05'},{start_date:'2027-01-10',return_date:'2027-01-15'}])),['2027-01-05','2027-01-15']);
+});
+test('após lançar, calendário abre intervalo salvo e limpa filtros anteriores',async()=>{
+ const {api,app}=harness();let query;await api.mount({app,esc,isCurrent:()=>true,viewState:{focusRange:{month:'2027-01',start:'2027-01-18',end:'2027-02-23'}},request:async q=>(query=q,{context:{},employees:[],absences:[],total:0})});assert.equal(query.mode,'range');assert.equal(query.start,'2027-01-18');assert.equal(query.end,'2027-02-23');
+});

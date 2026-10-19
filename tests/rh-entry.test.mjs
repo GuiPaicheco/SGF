@@ -39,6 +39,6 @@ test('abas ocultas antes de identificar operador e lançamento ausente no admini
  const start=source.indexOf('  function renderWorkspaceNav()'),end=source.indexOf('  function renderHome()',start),body=source.slice(start,end);
  function nav(role,operator){const hidden=[],workspaceNav={innerHTML:'',classList:{toggle:(name,value)=>hidden.push(value)}},state={session:{},profile:{role},route:'rh-workspace',accessContexts:[],activeContext:{institutional:role==='rh'},rhState:operator?{operator:{id:'operator'}}:null};vm.runInNewContext(body+';renderWorkspaceNav();',{workspaceNav,state,esc:String});return {html:workspaceNav.innerHTML,hidden:hidden.at(-1)};}
  assert.equal(nav('rh',false).html,'');assert.equal(nav('rh',false).hidden,true);
- assert.match(nav('rh',true).html,/Lançar Férias/);assert.equal(nav('rh',true).hidden,false);
+ assert.match(nav('rh',true).html,/Férias e Cadastros/);assert.equal(nav('rh',true).hidden,false);
  assert.doesNotMatch(nav('administrador',false).html,/Lançar Férias|rh-launch/);
 });

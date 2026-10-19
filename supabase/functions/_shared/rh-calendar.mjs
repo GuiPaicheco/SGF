@@ -28,3 +28,10 @@ export function calendarWindow(payload){
  if(!valid(start)||!valid(end)||end<start||(Date.parse(end)-Date.parse(start))/86400000>92)throw Error('RH_INPUT_INVALID');
  return {range_start:start,range_end:end,page_index:base.page_index,search_text:base.search_text,filter_json:base.filter_json};
 }
+
+export function birthdayInput(payload){
+ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+ if(!uuid.test(payload.entryId||'')||!Number.isSafeInteger(payload.version)||payload.version<0)throw Error('RH_INPUT_INVALID');
+ const m=payload.month,d=payload.day;if(m!==null||d!==null){if(!Number.isInteger(m)||!Number.isInteger(d)||m<1||m>12||d<1||d>31||new Date(Date.UTC(2000,m-1,d)).getUTCMonth()!==m-1)throw Error('RH_INPUT_INVALID');}
+ return {target_entry:payload.entryId,expected_version:payload.version,target_month:m,target_day:d};
+}

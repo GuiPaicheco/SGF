@@ -4,6 +4,13 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ## Requisitos prioritários e implementação
 
+- [x] Aba RH renomeada para Férias e Cadastros: nome, profissão, Lançar Férias, Lançar Folga desativado e Visualizar cadastro. RH informa aniversário apenas como dia/mês; alteração auditada e versionada, restrita à própria unidade, sem sobrescrever CNES ou recalcular histórico.
+- [x] Lançar no calendário valida e grava numa única ação, com chave contra duplicação; redireciona para funcionário e intervalo incluindo retorno. Falhas exibem mensagem; envio sem confirmação pode ser repetido com a mesma chave.
+- [x] Campo Número do processo ou memorando; comunicação ao RH retirada. Data ausente permanece nula e prazo não é atestado automaticamente; conferência de antecedência fica no processo externo.
+- [x] Calendário sem Programar/Ações. Unidade, competência CNES e cabeçalhos fixos; competência ausente indicada sem inferir data. Visão longitudinal padrão por funcionário e nominal por período de afastamento, preservando configurações, CSV/PDF, modalidade e sobreposições. Retornos de intervalos separados não são unidos ficticiamente.
+- [ ] Definir e documentar regra municipal do day-off de aniversário antes de descontá-lo da duração das férias. Aniversário é exibido quando informado; não equivale a folga concedida.
+- [ ] Implementar Lançar Folga em etapa futura; por enquanto o botão permanece inativo. As visões exibem os registros efetivamente existentes, inclusive os históricos, sem fabricar folgas de exemplo.
+
 - [x] Lançamento simplificado: perguntar o fim do período aquisitivo, calcular o início de 12 meses / quinquênio no servidor e usar admissão apenas se já conhecida. Explicação recolhida com exemplo inclusivo; férias já gozadas não reiniciam o ciclo. Manter os limites, saldos e impedimentos normativos.
 - [x] Corrigir digitação do fim aquisitivo: não reconstruir formulário em eventos de edição da data; atualizar apenas opções de fracionamento ao sair do campo. Observações opcionais recolhidas.
 - [x] Retirar aceites repetidos do lançamento e da prévia, registrando que a ciência não foi coletada no SGF, sem marcar consentimento ou conferência como verdadeiros. Preservar o contrato e os registros históricos anteriores.

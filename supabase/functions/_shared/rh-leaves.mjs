@@ -11,9 +11,9 @@ export function leaveItem(item){
  const mode=item.dateMode??'start';if(!['start','return'].includes(mode))fail();
  if((mode==='return'&&item.startDate)||(mode==='start'&&item.returnDate))fail();
  const result={type:item.type,regime:item.regime,dateMode:mode,...(mode==='return'?{returnDate:day(item.returnDate)}:{startDate:day(item.startDate)}),eligibilityConfirmed:true,managerConsent:true,employeeConsent:item.employeeConsent===true,scheduleConfirmed:item.scheduleConfirmed===true,split:item.split??'none',notes:item.notes??''};
- if(typeof result.notes!=='string'||result.notes.length>1000||typeof item.recognitionReference!=='string'||item.recognitionReference.trim().length<3||item.recognitionReference.length>300)throw Error('RH_LEAVE_EVIDENCE_REQUIRED');
+ if(typeof result.notes!=='string'||result.notes.length>1000||typeof item.recognitionReference!=='string'||item.recognitionReference.trim().length<(simplified?1:3)||item.recognitionReference.length>300)throw Error('RH_LEAVE_EVIDENCE_REQUIRED');
  result.recognitionReference=item.recognitionReference.trim();
- if(simplified){result.entryMode='simplified';delete result.eligibilityConfirmed;delete result.managerConsent;delete result.employeeConsent;for(const k of ['acquisitionEnd','protocolDate'])result[k]=day(item[k]);for(const k of ['admissionDate','acquisitionStart'])if(item[k])result[k]=day(item[k]);}
+ if(simplified){result.entryMode='simplified';delete result.eligibilityConfirmed;delete result.managerConsent;delete result.employeeConsent;result.acquisitionEnd=day(item.acquisitionEnd);if(item.protocolDate)result.protocolDate=day(item.protocolDate);for(const k of ['admissionDate','acquisitionStart'])if(item[k])result[k]=day(item[k]);}
  else for(const k of ['admissionDate','acquisitionStart','acquisitionEnd','protocolDate'])result[k]=day(item[k]);
  for(const k of ['secondStartDate','thirdStartDate','previousPrizeStart'])if(item[k])result[k]=day(item[k]);
  for(const k of ['absenceCount','familyLeaveDays','personalLeaveDays','spouseLeaveDays','healthLeaveDays','prizeCycle','historicalUsedDays']){
