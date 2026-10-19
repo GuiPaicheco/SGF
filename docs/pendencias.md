@@ -21,6 +21,8 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ## Verificação desta revisão
 
+- [x] Identidade visual retomada em 18/10: verde institucional e dourado, cartões centralizados, filtros agrupados, tabelas com maior contraste e controles recolhíveis padronizados. Calendário mantém rolagem interna. Conferência no navegador em desktop e largura móvel, 396 testes e build aprovados; alterações visuais de tabelas limitadas à tela para preservar o PDF.
+
 - [x] PDF fornecido: 10 páginas, 40 profissionais, três equipes e 24 associações; nomes/ocupações/cargas conferidos por extração independente, sem divergências nesses campos.
 - [x] Ensaio SQL com rollback: importar, programar, atualizar e confirmar ausência preserva a folga e o vínculo; consulta por intervalo encontra o registro e ausência impede novo lançamento.
 - [x] 396 testes Node e Deno check das funções aprovados nesta etapa; banco e APIs publicados tecnicamente.
