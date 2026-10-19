@@ -77,7 +77,7 @@ test('visões nominal e longitudinal preservam registros e mostram sobreposiçõ
  assert.equal(api.calendarRows([row],items,'longitudinal').length,1);assert.equal(api.calendarRows([row],items,'nominal').length,2);assert.deepEqual(Array.from(api.returnDates(items)),['2027-02-23']);
  const saved={layout:'nominal'};await api.mount({app,esc,isCurrent:()=>true,viewState:saved,request:async()=>({context:{cnes_name:'UBS TESTE'},source_competence:'202610',employees:[row],absences:items,total:1,range_start:'2027-01-16',range_end:'2027-02-23'})});
  assert.match(app.innerHTML,/RH|F1/);assert.match(app.innerHTML,/B1/);assert.match(app.innerHTML,/! F/);assert.match(app.innerHTML,/! B/);assert.match(app.innerHTML,/Competência CNES: 10\/2026/);assert.doesNotMatch(app.innerHTML,/data-rh-new-leave|<th>Ações<\/th>|>Programar</);assert.match(app.innerHTML,/rh-calendar-meta/);
- assert.equal(api.cellMark(row,'2027-01-20',[], 'longitudinal'),'A');assert.equal(api.cellMark(row,'2027-02-23',items,'longitudinal'),'R');
+ assert.equal(api.cellMark(row,'2027-01-20',[], 'longitudinal'),'A');assert.equal(api.cellMark(row,'2027-01-20',items,'longitudinal'),'F/B/A');assert.equal(api.cellMark(row,'2027-02-23',items,'longitudinal'),'R');
  const exported=api.csv([row],items,['2027-01-18'],undefined,'nominal');assert.match(exported,/F1/);assert.match(exported,/B1/);assert.equal(exported.split('\r\n').length,3);
 });
 test('retornos separados não são apresentados como afastamento contínuo',()=>{
