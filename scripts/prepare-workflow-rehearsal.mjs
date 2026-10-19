@@ -10,7 +10,7 @@ const scenarios = { access: 'access-rls', unit: 'unit-workflow', calendar: 'cale
 const scenario = process.argv[2] || 'unit';
 if (!Object.hasOwn(scenarios, scenario)) throw new Error('Cenário inválido: use access, unit, calendar, distribution, registration, legacy, block4, block5, block6 ou cnes.');
 const checks = await readFile(new URL(`../tests/${scenarios[scenario]}-rehearsal.sql`, import.meta.url), 'utf8');
-if(scenario==='rhpolicy'){process.stdout.write('begin;\n'+checks+'\nrollback;\n');} else if(['rhcalendar','rhleaves','rhrevisions','rhfilters','rhreturn','manualregistry','cnespdf','rhpolicyworkflow'].includes(scenario)) {
+if(['rhcalendar','rhleaves','rhrevisions','rhfilters','rhreturn','manualregistry','cnespdf','rhpolicy','rhpolicyworkflow'].includes(scenario)) {
   const base=await readFile(new URL('../tests/rh-accounts-rehearsal.sql',import.meta.url),'utf8');
   const end=base.indexOf('do $$');if(end<0)throw new Error('Fundação RH não encontrada.');
   // Ensaios históricos preservam seus contratos anteriores dentro de ROLLBACK.
