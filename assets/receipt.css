@@ -155,6 +155,11 @@
   font-size: 0.84rem;
   margin-top: 0.25rem;
 }
+.receipt-tools { flex-wrap: wrap; gap: 1rem; }
+.receipt-tools > div:first-child { flex: 1 1 220px; }
+.receipt-tools > .actions { flex: 1 1 360px; margin-top: 0; }
+.receipt-tools > [role="status"] { flex-basis: 100%; margin: 0; }
+.receipt-tools > [role="status"]:empty { display: none; }
 
 @media (max-width: 680px) {
   .receipt {
