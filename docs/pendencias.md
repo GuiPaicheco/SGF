@@ -4,6 +4,8 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ## Requisitos prioritários e implementação
 
+- [x] Aba Lançar Férias ao lado do calendário, para administrador e RH; busca paginada de funcionários CNES e acesso direto ao formulário normativo, preservando identificação do operador e escopo da unidade.
+
 - [x] Calendário administrativo sem unidade selecionada automaticamente; UBS em ordem alfabética e Secretaria por último.
 - [x] Consulta mensal ou por datas, com CBO, cargo, equipe, modalidade e situação; filtros adicionais recolhidos. Intervalos de até 93 dias por consulta.
 - [x] Matrícula deixa de ser requisito para funcionários CNES; não fabricar matrícula. Coluna independente de carga horária, por exemplo `40h`.

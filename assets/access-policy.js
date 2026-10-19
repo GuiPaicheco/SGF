@@ -14,6 +14,8 @@
   routes.administrador.add('cnes-import');
   routes.administrador.add('rh-accounts');
   routes.administrador.add('rh-calendar');
+  routes.rh.add('rh-launch');
+  routes.administrador.add('rh-launch');
   routes.rh.add('choose-operator');
   routes.rh.add('rh-workspace');
   const retired=new Set(['catalogs','profiles','profile-detail','profile-create','organization','bond-resources','rejection-catalog','reference-detail','location-detail','employee-registry-detail','inclusions','inclusion-detail','access-requests','access-request-detail']);

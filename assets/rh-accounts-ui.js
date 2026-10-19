@@ -21,13 +21,13 @@
   }
   await run(load);
  }
- async function workspace({app,esc,request,isCurrent,onState,go,calendar}){
+ async function workspace({app,esc,request,isCurrent,onState,go,calendar,destination='rh-workspace'}){
   let page=0;
   async function load(){
    try{
     const state=await request({action:'session'});if(!isCurrent())return;onState(state);
     if(!state.operator){app.innerHTML=`<section class="card"><h2>Identifique o operador</h2><p>${esc(state.context.login_name)}</p><p>Selecione seu nome. Esta identificação é declarada e ficará registrada nas ações.</p><form id="rh-operator-form"><div class="field"><label for="rh-operator">Operador autorizado</label><select id="rh-operator" class="control" required><option value="">Selecione</option>${state.operators.map(row=>`<option value="${esc(row.id)}">${esc(row.name)} · ${esc(row.cbo)}</option>`).join('')}</select></div><button class="button button-primary" ${state.operators.length?'':'disabled'}>Continuar</button></form>${state.operators.length?'':'<p>Nenhum operador autorizado. O Administrador deve incorporar os funcionários do CNES e autorizar quem utilizará esta conta.</p>'}<p id="rh-error" role="alert"></p></section>`;
-     app.querySelector('#rh-operator-form').onsubmit=async e=>{e.preventDefault();const button=e.submitter;button.disabled=true;try{const next=await request({action:'select-operator',grantId:app.querySelector('#rh-operator').value});if(isCurrent()){onState(next);go('rh-workspace');}}catch(error){if(isCurrent()){app.querySelector('#rh-error').textContent=error.message;button.disabled=false;}}};return;
+     app.querySelector('#rh-operator-form').onsubmit=async e=>{e.preventDefault();const button=e.submitter;button.disabled=true;try{const next=await request({action:'select-operator',grantId:app.querySelector('#rh-operator').value});if(isCurrent()){onState(next);go(destination);}}catch(error){if(isCurrent()){app.querySelector('#rh-error').textContent=error.message;button.disabled=false;}}};return;
     }
     if(calendar)return await calendar(state);
     const data=await request({action:'registry',page});if(!isCurrent())return;
