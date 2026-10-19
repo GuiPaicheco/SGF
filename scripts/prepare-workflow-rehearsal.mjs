@@ -6,14 +6,22 @@ const fixture = await readFile(new URL('../tests/access-rls-rehearsal.sql', impo
 const marker = "select set_config('request.jwt.claim.sub'";
 const boundary = fixture.indexOf(marker);
 if (boundary < 0) throw new Error('Limite das fixtures não encontrado; ensaio cancelado.');
-const scenarios = { access: 'access-rls', unit: 'unit-workflow', calendar: 'calendar-planning', distribution: 'distribution-planning', registration: 'registration-workflow', legacy: 'legacy-cycle', block4: 'block-four', block5: 'block-five', block6: 'block-six', cnes: 'cnes-registry', rh: 'rh-accounts', rhcalendar: 'rh-calendar', rhleaves:'rh-leaves', rhrevisions:'rh-revisions', rhfilters:'rh-calendar-filters', rhreturn:'rh-return',manualregistry:'manual-registry',cnespdf:'cnes-pdf-workspace' };
+const scenarios = { access: 'access-rls', unit: 'unit-workflow', calendar: 'calendar-planning', distribution: 'distribution-planning', registration: 'registration-workflow', legacy: 'legacy-cycle', block4: 'block-four', block5: 'block-five', block6: 'block-six', cnes: 'cnes-registry', rh: 'rh-accounts', rhcalendar: 'rh-calendar', rhleaves:'rh-leaves', rhrevisions:'rh-revisions', rhfilters:'rh-calendar-filters', rhreturn:'rh-return',manualregistry:'manual-registry',cnespdf:'cnes-pdf-workspace',rhpolicy:'rh-policy',rhpolicyworkflow:'rh-policy-workflow' };
 const scenario = process.argv[2] || 'unit';
 if (!Object.hasOwn(scenarios, scenario)) throw new Error('Cenário inválido: use access, unit, calendar, distribution, registration, legacy, block4, block5, block6 ou cnes.');
 const checks = await readFile(new URL(`../tests/${scenarios[scenario]}-rehearsal.sql`, import.meta.url), 'utf8');
-if(['rhcalendar','rhleaves','rhrevisions','rhfilters','rhreturn','manualregistry','cnespdf'].includes(scenario)) {
+if(scenario==='rhpolicy'){process.stdout.write('begin;\n'+checks+'\nrollback;\n');} else if(['rhcalendar','rhleaves','rhrevisions','rhfilters','rhreturn','manualregistry','cnespdf','rhpolicyworkflow'].includes(scenario)) {
   const base=await readFile(new URL('../tests/rh-accounts-rehearsal.sql',import.meta.url),'utf8');
   const end=base.indexOf('do $$');if(end<0)throw new Error('Fundação RH não encontrada.');
-  process.stdout.write('begin;\n'+base.slice(0,end)+'\n'+checks+'\nrollback;\n');
+  // Ensaios históricos preservam seus contratos anteriores dentro de ROLLBACK.
+  // Os cenários rhpolicy/rhpolicyworkflow abaixo usam exclusivamente as funções atuais.
+  let historical='';
+  if(['rhleaves','rhrevisions','rhfilters','rhreturn','cnespdf'].includes(scenario)){
+    const files=[['20261018223409_cnes_pdf_workspace.sql','private.rh_make_leave_plan'],['20261018081927_rh_direct_leaves.sql','public.rh_preview_leave'],['20261018092805_rh_leave_revisions.sql','public.rh_preview_leave_revision']];
+    for(const [file,name] of files){const sql=await readFile(new URL('../supabase/migrations/'+file,import.meta.url),'utf8');const start=sql.indexOf('function '+name+'(');const finish=sql.indexOf('end $$;',start);if(start<0||finish<0)throw Error('Contrato histórico ausente.');historical+='create or replace '+sql.slice(start,finish+7)+'\n';}
+  }
+  if(historical)historical='reset role;\n'+historical+'set local role service_role;\n';
+  process.stdout.write('begin;\n'+base.slice(0,end)+'\n'+historical+'\n'+checks+'\nrollback;\n');
 }
 else if(['cnes','rh'].includes(scenario)) process.stdout.write(`begin;\n${checks}\nrollback;\n`);
 else if(['legacy','block4','block5','block6'].includes(scenario)){

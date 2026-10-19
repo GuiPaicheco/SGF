@@ -124,7 +124,7 @@
     const { data, error } = await client.from('calendar_events').select('event_date,type,name').eq('active', true).order('event_date');
     if (error) { console.error('calendar-events', error); return; }
     HOLIDAYS.clear(); CALENDAR_EVENTS.clear();
-    (data || []).forEach(event => { HOLIDAYS.add(event.event_date); CALENDAR_EVENTS.set(event.event_date, event); });
+    (data || []).forEach(event => { if(event.type==='feriado') HOLIDAYS.add(event.event_date); CALENDAR_EVENTS.set(event.event_date, event); });
     state.calendarLoaded = true;
   }
 
@@ -179,17 +179,15 @@
     if (state.session && state.profile?.role) return go(accessHome(state.profile.role));
     if (state.session) return go('choose-access');
     setProgress(0);
-    app.innerHTML = `<section class="card hero"><div><p class="eyebrow">RH das unidades e Diretoria DAPS</p><h1>Férias e folgas em um só lugar.</h1><p class="lead">Gerencie os afastamentos da unidade pelo calendário ou simule datas sem entrar.</p></div><div class="choice-grid"><button class="choice choice-featured" data-go="login"><span class="choice-kicker">RH e Administração</span><strong>Entrar no SGF →</strong><span>Acesse o calendário, os funcionários e os registros da sua unidade.</span></button><button class="choice" data-go="quick"><span class="choice-kicker">Consulta livre</span><strong>Simulação Rápida</strong><span>Estime férias ou folgas sem informar dados pessoais.</span></button></div><p class="page-footnote">A simulação é uma estimativa. A programação dos afastamentos é realizada pelo RH.</p></section>`;
+    app.innerHTML = `<section class="card hero"><div><p class="eyebrow">RH das unidades e Diretoria DAPS</p><h1>Férias da unidade em um só lugar.</h1><p class="lead">Gerencie os afastamentos da unidade pelo calendário ou simule datas sem entrar.</p></div><div class="choice-grid"><button class="choice choice-featured" data-go="login"><span class="choice-kicker">RH e Administração</span><strong>Entrar no SGF →</strong><span>Acesse o calendário, os funcionários e os registros da sua unidade.</span></button><button class="choice" data-go="quick"><span class="choice-kicker">Consulta livre</span><strong>Simulação Rápida</strong><span>Estime datas de férias sem informar dados pessoais.</span></button></div><p class="page-footnote">A simulação é uma estimativa. A programação dos afastamentos é realizada pelo RH.</p></section>`;
   }
   function renderQuick() {
     setProgress(0);
     const q = state.quick;
     app.innerHTML = shell('Simulação Rápida', 'Faça uma estimativa sem cadastrar seus dados ou enviar um pedido.', `<form id="quick-form" class="form-grid">
-      <div class="form-section-heading field-full"><span class="step-number">1</span><div><h3>Escolha o que calcular</h3><p>Informe os dias de férias ou as horas disponíveis para folga.</p></div></div>
-      <div class="field"><label for="quick-type">O que deseja simular?</label><select class="control" id="quick-type"><option value="vacation" ${q.type === 'vacation' ? 'selected' : ''}>Férias</option><option value="bank" ${q.type === 'bank' ? 'selected' : ''}>Folga por banco de horas</option></select></div>
+      <div class="form-section-heading field-full"><span class="step-number">1</span><div><h3>Escolha o que calcular</h3><p>Informe a quantidade e a forma de contagem dos dias.</p></div></div>
+      <div class="field"><label for="quick-type">O que deseja simular?</label><select class="control" id="quick-type"><option value="vacation" ${q.type === 'vacation' ? 'selected' : ''}>Férias</option></select></div>
       <div class="field" id="quick-days-group"><label for="quick-days">Quantos dias?</label><input class="control" id="quick-days" type="number" min="1" max="90" step="1" value="${esc(q.days)}"></div>
-      <div class="field" id="quick-hours-group"><label for="quick-hours">Horas disponíveis no banco</label><input class="control" id="quick-hours" type="number" min="0.5" max="2160" step="0.5" value="${esc(q.availableHours)}"><small>Saldo informado apenas para esta simulação.</small></div>
-      <div class="field" id="quick-daily-group"><label for="quick-daily">Carga horária diária</label><input class="control" id="quick-daily" type="number" min="1" max="24" step="0.5" value="${esc(q.dailyHours)}"></div>
       <div class="form-section-heading field-full"><span class="step-number">2</span><div><h3>Defina a contagem e a data</h3><p>Você pode partir do primeiro dia de afastamento ou do dia em que deseja voltar.</p></div></div>
       <div class="field"><label for="quick-unit">Como contar os dias?</label><select class="control" id="quick-unit"><option value="uteis" ${q.unit === 'uteis' ? 'selected' : ''}>Dias úteis</option><option value="corridos" ${q.unit === 'corridos' ? 'selected' : ''}>Dias corridos</option></select><small>Corridos incluem fins de semana e feriados.</small></div>
       <div class="field"><label for="quick-mode">Calcular a partir de</label><select class="control" id="quick-mode"><option value="start" ${q.mode === 'start' ? 'selected' : ''}>Data de início</option><option value="return" ${q.mode === 'return' ? 'selected' : ''}>Data de retorno</option></select></div>
@@ -213,11 +211,12 @@
     event.preventDefault();
     if (!state.calendarLoaded) return showToast('O calendário está indisponível. Atualize a página e tente novamente.');
     const type = document.querySelector('#quick-type').value;
+    if(type!=='vacation') return showToast('A simulação está disponível apenas para férias.');
     const unit = document.querySelector('#quick-unit').value;
     const mode = document.querySelector('#quick-mode').value;
     const chosenDate = document.querySelector('#quick-date').value;
-    const availableHours = Number(document.querySelector('#quick-hours').value);
-    const dailyHours = Number(document.querySelector('#quick-daily').value);
+    const availableHours = 0;
+    const dailyHours = 0;
     const days = type === 'bank' ? Math.floor(availableHours / dailyHours) : Number(document.querySelector('#quick-days').value);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(chosenDate) || !['uteis', 'corridos'].includes(unit) || !['start', 'return'].includes(mode) || !Number.isInteger(days) || days < 1 || days > 90 ||
       (type === 'bank' && (!Number.isFinite(availableHours) || !Number.isFinite(dailyHours) || availableHours < 0.5 || dailyHours < 1 || dailyHours > 24))) {
@@ -241,7 +240,7 @@
       <div class="summary-row"><span>Dias ${q.unit === 'corridos' ? 'corridos' : 'úteis'} simulados</span><strong>${period.days}</strong></div>
       ${bank ? `<div class="summary-row"><span>Horas utilizadas</span><strong>${q.usedHours} h de ${q.availableHours} h informadas</strong></div><div class="summary-row"><span>Horas restantes</span><strong>${(Number(q.availableHours) - q.usedHours).toFixed(1)} h</strong></div>` : ''}
       ${q.mode === 'start' && q.chosenDate !== period.start_date ? `<div class="summary-row"><span>Data informada</span><strong>${formatDate(q.chosenDate)} — ajustada para o próximo dia útil</strong></div>` : ''}<div class="summary-row"><span>Início</span><strong>${formatDate(period.start_date)}</strong></div><div class="summary-row"><span>Último dia do período</span><strong>${formatDate(period.end_date)}</strong></div><div class="summary-row"><span>Retorno ao trabalho</span><strong>${formatDate(period.return_date)}</strong></div>
-    </div>${renderCalendar(q.periods, null)}<p class="page-footnote">Estimativa sem identificação pessoal e sem day-off de aniversário. Não comprova direito, saldo ou autorização de afastamento.</p><div class="actions"><button class="button button-primary" data-go="quick">Alterar simulação</button><button class="button button-secondary" data-go="${state.session ? state.profile?.role === 'servidor' ? 'employee-dashboard' : 'dashboard' : 'login'}">${state.session ? 'Ir para os pedidos' : 'Entrar para solicitar'}</button></div>`);
+    </div>${renderCalendar(q.periods, null)}<p class="page-footnote">Estimativa sem identificação pessoal e sem day-off de aniversário. Não comprova direito, saldo ou autorização de afastamento.</p><div class="actions"><button class="button button-primary" data-go="quick">Alterar simulação</button><button class="button button-secondary" data-go="${state.session ? state.profile?.role === 'servidor' ? 'employee-dashboard' : 'dashboard' : 'login'}">${state.session ? 'Abrir calendário' : 'Entrar no SGF'}</button></div>`);
   }
   function renderTypes() {
     app.innerHTML = shell('O que você deseja solicitar?', 'Escolha a modalidade. As regras e os cálculos serão ajustados automaticamente.', `<div class="choice-grid">

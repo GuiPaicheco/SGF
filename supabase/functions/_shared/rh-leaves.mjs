@@ -1,28 +1,25 @@
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const fail=()=>{throw Error('RH_LEAVE_INPUT_INVALID');};
 const day=value=>{if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))fail();const date=new Date(value+'T12:00:00Z');if(!Number.isFinite(date.valueOf())||date.toISOString().slice(0,10)!==value)fail();return value;};
-const hours=(value,max)=>{if(typeof value!=='number'||!Number.isFinite(value)||value<0||value>max||Math.abs(value*60-Math.round(value*60))>1e-7)fail();return value;};
 export function leaveItem(item){
  if(!item||typeof item!=='object'||Array.isArray(item))fail();
- const fields=new Set(['type','dateMode','returnDate','startDate','secondStartDate','days','availableHours','dailyHours','extraHours','birthDate','admissionDate','acquisitionEnd','unjustifiedAbsences','split','eligibilityConfirmed','rightId','override','overrideReason','notes']);
- if(Object.keys(item).some(key=>!fields.has(key))||!['regulamentar','premio','banco_horas'].includes(item.type)||item.eligibilityConfirmed!==true)fail();
- const dateMode=item.dateMode===undefined?'start':item.dateMode;if(!['start','return'].includes(dateMode))fail();
- if((dateMode==='return'&&item.startDate!==undefined&&item.startDate!=='')||(dateMode==='start'&&item.returnDate!==undefined&&item.returnDate!==''))fail();
- const chosen=dateMode==='return'?{dateMode:'return',returnDate:day(item.returnDate)}:{startDate:day(item.startDate),...(item.dateMode!==undefined?{dateMode:'start'}:{})};
- const result={type:item.type,...chosen,eligibilityConfirmed:true,availableHours:hours(item.availableHours??0,2160),
-  dailyHours:hours(item.dailyHours??0,24),extraHours:hours(item.extraHours??0,2160),split:item.split??'none',
-  override:item.override??false,overrideReason:item.overrideReason??'',notes:item.notes??''};
- if(typeof result.override!=='boolean'||typeof result.overrideReason!=='string'||result.overrideReason.length>500
-  ||typeof result.notes!=='string'||result.notes.length>1000||!['none','15-10','10-15'].includes(result.split))fail();
- if(result.override&&result.overrideReason.trim().length<3)throw Error('RH_LEAVE_OVERRIDE_INVALID');
- if(item.type==='banco_horas'&&(typeof item.availableHours!=='number'||!Number.isInteger(item.days)||item.days<1||item.days>90))fail();
- if(item.type==='premio'&&![30,60,90].includes(item.days))fail();
- if(item.days!==undefined){if(!Number.isInteger(item.days)||item.days<1||item.days>90)fail();result.days=item.days;}
- if((item.type==='banco_horas'||result.extraHours>0)&&result.dailyHours<=0)throw Error('RH_LEAVE_DAILY_HOURS_REQUIRED');
- for(const key of ['birthDate','admissionDate','acquisitionEnd','secondStartDate'])if(item[key])result[key]=day(item[key]);
- if(item.type==='regulamentar'){
-  if(!result.acquisitionEnd||!['yes','no'].includes(item.unjustifiedAbsences))fail();result.unjustifiedAbsences=item.unjustifiedAbsences;
+ const fields=new Set(['type','dateMode','returnDate','startDate','secondStartDate','thirdStartDate','admissionDate','acquisitionStart','acquisitionEnd','split','parts','regime','absenceCount','familyLeaveDays','personalLeaveDays','spouseLeaveDays','healthLeaveDays','suspended','cltLoss','prizeCycle','historicalUsedDays','previousPrizeStart','recognitionReference','protocolDate','managerConsent','employeeConsent','eligibilityConfirmed','rightId','notes','scheduleConfirmed','regularLicenseLoss']);
+ if(Object.keys(item).some(key=>!fields.has(key))||!['regulamentar','premio'].includes(item.type))throw Error('RH_LEAVE_MODALITY_DISABLED');
+ if(item.eligibilityConfirmed!==true||item.managerConsent!==true)throw Error('RH_LEAVE_CONFIRMATION_REQUIRED');
+ if(!['efetivo','comissionado','contratado_estatutario','acs_ace_estatutario','celetista','especial'].includes(item.regime))throw Error('RH_LEAVE_REGIME_REQUIRED');
+ const mode=item.dateMode??'start';if(!['start','return'].includes(mode))fail();
+ if((mode==='return'&&item.startDate)||(mode==='start'&&item.returnDate))fail();
+ const result={type:item.type,regime:item.regime,dateMode:mode,...(mode==='return'?{returnDate:day(item.returnDate)}:{startDate:day(item.startDate)}),eligibilityConfirmed:true,managerConsent:true,employeeConsent:item.employeeConsent===true,scheduleConfirmed:item.scheduleConfirmed===true,split:item.split??'none',notes:item.notes??''};
+ if(typeof result.notes!=='string'||result.notes.length>1000||typeof item.recognitionReference!=='string'||item.recognitionReference.trim().length<3||item.recognitionReference.length>300)throw Error('RH_LEAVE_EVIDENCE_REQUIRED');
+ result.recognitionReference=item.recognitionReference.trim();
+ for(const k of ['admissionDate','acquisitionStart','acquisitionEnd','protocolDate'])result[k]=day(item[k]);
+ for(const k of ['secondStartDate','thirdStartDate','previousPrizeStart'])if(item[k])result[k]=day(item[k]);
+ for(const k of ['absenceCount','familyLeaveDays','personalLeaveDays','spouseLeaveDays','healthLeaveDays','prizeCycle','historicalUsedDays']){
+  const v=item[k]??0;if(!Number.isInteger(v)||v<0||v>3000)fail();result[k]=v;
  }
+ for(const k of ['suspended','cltLoss','regularLicenseLoss']){if(typeof item[k]!=='boolean')throw Error('RH_LEAVE_CONFIRMATION_REQUIRED');result[k]=item[k];}
+ if(item.parts!==undefined){if(!Array.isArray(item.parts)||item.parts.length<1||item.parts.length>3||item.parts.some(x=>!Number.isInteger(x)||x<1||x>90))fail();result.parts=item.parts;}
+ if(!['none','15-10','10-15','15-15','30-60','60-30'].includes(result.split))fail();
  if(item.rightId){if(!uuid.test(item.rightId))fail();result.rightId=item.rightId;}
  return result;
 }

@@ -70,13 +70,12 @@ test('dias corridos contam fim de semana e feriado dentro do período', async ()
   assert.doesNotMatch(ui.app.innerHTML, /ajustada para o próximo dia útil/);
 });
 
-test('folga pública converte saldo em dias sem registrar pedido', async () => {
+test('simulação não oferece nem aceita banco de horas', async () => {
   const ui = await openQuick();
   setFields(ui, { type: 'bank', date: '2026-10-09', days: '', hours: '20', daily: '8' });
   await ui.listeners.submit({ target: { id: 'quick-form' }, preventDefault() {} });
-  assert.match(ui.app.innerHTML, /16 h de 20 h informadas/);
-  assert.match(ui.app.innerHTML, /4\.0 h/);
-  assert.doesNotMatch(ui.app.innerHTML, /Enviar solicitação/);
+  assert.match(ui.toast.textContent,/apenas para férias/);
+  assert.doesNotMatch(ui.app.innerHTML,/value="bank"|id="quick-hours"|id="quick-daily"/);
 });
 
 test('data de retorno calcula o início com dias corridos', async () => {
@@ -97,13 +96,12 @@ test('data de retorno calcula o início com dias úteis', async () => {
   assert.match(ui.app.innerHTML, /Retorno ao trabalho<\/span><strong>13\/10\/2026/);
 });
 
-test('folga também permite dias corridos', async () => {
+test('simulação recusa modalidade encerrada mesmo em dias corridos', async () => {
   const ui = await openQuick();
   setFields(ui, { type: 'bank', unit: 'corridos', date: '2026-10-10', days: '', hours: '20', daily: '8' });
   await ui.listeners.submit({ target: { id: 'quick-form' }, preventDefault() {} });
-  assert.match(ui.app.innerHTML, /Dias corridos simulados<\/span><strong>2/);
-  assert.match(ui.app.innerHTML, /Último dia do período<\/span><strong>11\/10\/2026/);
-  assert.match(ui.app.innerHTML, /Retorno ao trabalho<\/span><strong>13\/10\/2026/);
+  assert.match(ui.toast.textContent,/apenas para férias/);
+  assert.doesNotMatch(ui.app.innerHTML,/value="bank"|id="quick-hours"|id="quick-daily"/);
 });
 
 test('retorno informado precisa ser dia útil', async () => {

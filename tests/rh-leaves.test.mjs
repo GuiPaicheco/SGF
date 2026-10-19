@@ -1,48 +1,39 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import {leaveItem,leaveOperation} from '../supabase/functions/_shared/rh-leaves.mjs';
-const uuid='f7000000-0000-0000-0000-000000000001';
-const bank={type:'banco_horas',startDate:'2027-03-01',days:2,availableHours:15,dailyHours:7.5,birthDate:'1990-06-15',eligibilityConfirmed:true};
-test('folga usa horas declaradas e jornada explícita sem aceitar autoria/vínculo do cliente',()=>{
- const value=leaveItem(bank);assert.equal(value.availableHours,15);assert.equal(value.dailyHours,7.5);assert.equal(value.override,false);
- for(const patch of [{operatorId:uuid},{bondId:uuid},{eligibilityConfirmed:false},{availableHours:-1},{availableHours:Infinity},{dailyHours:0},{dailyHours:25},{availableHours:0.0001}])assert.throws(()=>leaveItem({...bank,...patch}),/RH_LEAVE_/);
+import test from 'node:test';import assert from 'node:assert/strict';import{leaveItem,leaveOperation}from'../supabase/functions/_shared/rh-leaves.mjs';
+const id='f7000000-0000-0000-0000-000000000001';
+const regular={type:'regulamentar',regime:'efetivo',dateMode:'start',startDate:'2027-03-01',admissionDate:'2020-01-01',acquisitionStart:'2025-01-01',acquisitionEnd:'2025-12-31',protocolDate:'2026-10-01',recognitionReference:'Processo sintético',absenceCount:0,suspended:false,cltLoss:false,regularLicenseLoss:false,eligibilityConfirmed:true,managerConsent:true};
+test('novo lançamento aceita apenas férias; horas, exceções e autoria forjada são recusadas',()=>{
+ assert.equal(leaveItem(regular).regime,'efetivo');
+ for(const patch of [{type:'banco_horas'},{availableHours:8},{extraHours:8},{override:true},{operatorId:id},{bondId:id}])assert.throws(()=>leaveItem({...regular,...patch}),/RH_LEAVE_/);
 });
-test('exceção requer escolha booleana e justificativa; horas zero continuam válidas para prévia',()=>{
- assert.equal(leaveItem({...bank,availableHours:0}).availableHours,0);
- assert.equal(leaveItem({...bank,override:true,overrideReason:'Exceção conferida'}).override,true);
- for(const patch of [{override:'true'},{override:true},{override:true,overrideReason:'x'},{override:true,overrideReason:'x'.repeat(501)}])assert.throws(()=>leaveItem({...bank,...patch}),/RH_LEAVE_/);
+test('regime, comprovação, anuência e impedimentos precisam ser conferidos',()=>{
+ for(const patch of [{regime:''},{regime:'estatutario_generico'},{eligibilityConfirmed:false},{managerConsent:false},{recognitionReference:''},{suspended:'no'},{cltLoss:undefined},{regularLicenseLoss:undefined}])assert.throws(()=>leaveItem({...regular,...patch}),/RH_LEAVE_/);
+ assert.equal(leaveItem({...regular,regime:'especial'}).regime,'especial'); // servidor impede regime não regulamentado
 });
-test('datas reais, quantidades limitadas e fracionamento declarado são verificados',()=>{
- for(const patch of [{startDate:'2027-02-30'},{birthDate:'invalid'},{days:0},{days:91},{days:1.5},{notes:'x'.repeat(1001)},{split:'13-12'}])assert.throws(()=>leaveItem({...bank,...patch}),/RH_LEAVE_INPUT_INVALID/);
- assert.equal(leaveItem({...bank,startDate:'2028-02-29'}).startDate,'2028-02-29');
+test('datas reais, contadores e limites são verificados antes do banco',()=>{
+ for(const patch of [{acquisitionEnd:'2027-02-30'},{protocolDate:''},{admissionDate:'inválido'},{absenceCount:-1},{absenceCount:1.5},{healthLeaveDays:Infinity},{notes:'x'.repeat(1001)},{parts:[10,10,10,10]},{parts:[14,0,16]}])assert.throws(()=>leaveItem({...regular,...patch}),/RH_LEAVE_/);
+ assert.equal(leaveItem({...regular,acquisitionEnd:'2028-02-29'}).acquisitionEnd,'2028-02-29');
 });
-test('férias preservam modalidades e exigem informação de aquisição e faltas',()=>{
- const regular={type:'regulamentar',startDate:'2027-05-03',acquisitionEnd:'2026-12-31',unjustifiedAbsences:'no',split:'15-10',secondStartDate:'2027-07-05',eligibilityConfirmed:true};
- assert.equal(leaveItem(regular).split,'15-10');assert.throws(()=>leaveItem({...regular,acquisitionEnd:''}),/RH_LEAVE_INPUT_INVALID/);
- assert.equal(leaveItem({type:'premio',startDate:'2027-05-03',days:90,eligibilityConfirmed:true}).days,90);
- assert.throws(()=>leaveItem({type:'premio',startDate:'2027-05-03',days:31,eligibilityConfirmed:true}),/RH_LEAVE_INPUT_INVALID/);
+test('fracionamentos municipais e CLT são enviados para conferência normativa no servidor',()=>{
+ for(const split of ['none','15-10','10-15','15-15','30-60','60-30'])assert.equal(leaveItem({...regular,split}).split,split);
+ assert.deepEqual(leaveItem({...regular,regime:'celetista',parts:[14,8,8],thirdStartDate:'2027-09-01'}).parts,[14,8,8]);
+ assert.throws(()=>leaveItem({...regular,split:'13-12'}),/RH_LEAVE_/);
 });
-test('gravação exige prévia e idempotência; identidade autenticada não vem do payload',()=>{
- const operation=leaveOperation({action:'create-leave',entryId:uuid,item:bank,requestKey:uuid,digest:'a'.repeat(64),target_profile:'forjado'});
- assert.equal(operation.name,'rh_create_leave');assert.equal(operation.args.target_profile,undefined);assert.equal(operation.args.request_key,uuid);
- for(const patch of [{digest:'forjado'},{requestKey:'invalid'},{entryId:'invalid'}])assert.throws(()=>leaveOperation({action:'create-leave',entryId:uuid,item:bank,requestKey:uuid,digest:'a'.repeat(64),...patch}),/RH_LEAVE_/);
+test('gravação exige prévia, chave e beneficiário válidos; contexto não vem do cliente',()=>{
+ const payload={action:'create-leave',entryId:id,item:regular,requestKey:id,digest:'a'.repeat(64),target_profile:'forjado'};
+ const op=leaveOperation(payload);assert.equal(op.name,'rh_create_leave');assert.equal(op.args.target_profile,undefined);
+ for(const patch of [{digest:'x'},{requestKey:'x'},{entryId:'x'}])assert.throws(()=>leaveOperation({...payload,...patch}),/RH_LEAVE_/);
 });
-test('encerramento exige versão, estado permitido e motivo',()=>{
- const data={action:'close-leave',leaveId:uuid,version:1,status:'cancelada',reason:'Cancelamento conferido'};
- assert.equal(leaveOperation(data).args.expected_version,1);
- for(const patch of [{version:0},{status:'aprovada'},{reason:''},{leaveId:'invalid'}])assert.throws(()=>leaveOperation({...data,...patch}),/RH_LEAVE_INPUT_INVALID/);
+test('revisão deriva beneficiário do registro e exige versão e motivo',()=>{
+ const payload={action:'revise-leave',leaveId:id,version:2,item:regular,reason:'  Conferência documental  ',requestKey:id,digest:'a'.repeat(64),entryId:'forjado'};
+ const op=leaveOperation(payload);assert.equal(op.args.target_reason,'Conferência documental');assert.equal(op.args.target_entry,undefined);
+ for(const patch of [{version:0},{version:Infinity},{reason:''},{digest:'x'},{leaveId:'x'}])assert.throws(()=>leaveOperation({...payload,...patch}),/RH_LEAVE_/);
 });
-
-test('reprogramação deriva beneficiário do registro e exige versão, motivo e envio identificado',()=>{
- const payload={action:'revise-leave',leaveId:uuid,version:2,item:bank,reason:'  Reprogramação conferida  ',requestKey:uuid,digest:'a'.repeat(64),entryId:'forjado',target_profile:'forjado'};
- const op=leaveOperation(payload);assert.equal(op.name,'rh_revise_leave');assert.equal(op.args.target_leave,uuid);assert.equal(op.args.target_entry,undefined);assert.equal(op.args.target_profile,undefined);assert.equal(op.args.target_reason,'Reprogramação conferida');
- assert.equal(leaveOperation({...payload,action:'preview-revision'}).name,'rh_preview_leave_revision');
- for(const patch of [{version:0},{version:1.5},{version:Infinity},{reason:''},{reason:false},{digest:''},{requestKey:'inválido'},{leaveId:'inválido'}])assert.throws(()=>leaveOperation({...payload,...patch}),/RH_LEAVE_/);
+test('encerramento mantém versão e motivo obrigatórios',()=>{
+ const payload={action:'close-leave',leaveId:id,version:1,status:'cancelada',reason:'Cancelamento conferido'};
+ assert.equal(leaveOperation(payload).args.expected_version,1);
+ for(const patch of [{version:0},{status:'aprovada'},{reason:''}])assert.throws(()=>leaveOperation({...payload,...patch}),/RH_LEAVE_/);
 });
-
-test('cálculo pelo retorno aceita somente a data escolhida e mantém compatibilidade do início',()=>{
- const {startDate,...other}=bank;const value=leaveItem({...other,dateMode:'return',returnDate:'2027-03-09'});
- assert.equal(value.returnDate,'2027-03-09');assert.equal(value.dateMode,'return');assert.equal(value.startDate,undefined);assert.equal(leaveItem(bank).dateMode,undefined);
- for(const patch of [{dateMode:'outro'},{dateMode:null},{returnDate:'2027-02-30'},{returnDate:''},{startDate:'2027-03-01'},{startDate:null}])assert.throws(()=>leaveItem({...other,dateMode:'return',returnDate:'2027-03-09',...patch}),/RH_LEAVE_INPUT_INVALID/);
- assert.throws(()=>leaveItem({...bank,returnDate:'2027-03-09'}),/RH_LEAVE_INPUT_INVALID/);
+test('retorno envia apenas a data ativa e rejeita contextos internos de revisão',()=>{
+ const {startDate,...rest}=regular;assert.equal(leaveItem({...rest,dateMode:'return',returnDate:'2027-03-09'}).startDate,undefined);
+ for(const patch of [{dateMode:'outro'},{returnDate:'2027-02-30'},{startDate:'2027-03-01'},{revision:true},{_revisionLeave:id}])assert.throws(()=>leaveItem({...rest,dateMode:'return',returnDate:'2027-03-09',...patch}),/RH_LEAVE_/);
 });

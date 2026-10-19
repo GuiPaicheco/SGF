@@ -9,7 +9,17 @@ const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'au
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const messages:Record<string,string>={
- RH_LEAVE_RETURN_INVALID:'Escolha uma data exata de retorno em dia útil, fora de feriado e do day-off de aniversário. Confira o período calculado.',
+ RH_LEAVE_MODALITY_DISABLED:'Banco de horas e complementação de férias foram encerrados. Use férias regulamentares ou férias-prêmio.',
+ RH_LEAVE_CONFIRMATION_REQUIRED:'Confirme os assentamentos, a anuência da chefia e a concordância com o fracionamento.',
+ RH_LEAVE_REGIME_REQUIRED:'Confirme o regime jurídico. Vínculo cedido ou especial exige análise específica do RH.',
+ RH_LEAVE_EVIDENCE_REQUIRED:'Informe a referência do assentamento, processo ou ato que comprova o direito e saldo.',
+ RH_LEAVE_PRIZE_INELIGIBLE:'Férias-prêmio exigem vínculo efetivo e quinquênio sem os impedimentos do art. 75. Confira suspensão, faltas e licenças.',
+ RH_LEAVE_REGULAR_INELIGIBLE:'Há impedimento à concessão neste período. Confira as licenças (art. 73 do Estatuto) ou a perda do direito na CLT.',
+ RH_LEAVE_NOTICE_REQUIRED:'Confira o protocolo: antecedência de 60 dias para programação municipal, 45 para reprogramação regulamentar, ou 30 dias na CLT.',
+ RH_LEAVE_PRIZE_YEAR_INVALID:'As parcelas de férias-prêmio devem ocorrer em anos subsequentes (30 + 60 ou 60 + 30 dias).',
+ RH_LEAVE_SCHEDULE_REQUIRED:'Para cálculo CLT, confirme jornada de segunda a sexta. Outra escala exige análise específica.',
+ RH_LEAVE_CLT_START_INVALID:'Na CLT, não inicie as férias nos dois dias anteriores ao repouso semanal ou feriado. Confira a escala.',
+ RH_LEAVE_RETURN_INVALID:'Escolha retorno em dia útil, fora de feriado. Confira o início e o período calculado.',
  RH_LEAVE_INPUT_INVALID:'Confira os campos, a confirmação do direito e os limites do lançamento.',
  RH_LEAVE_IDENTITY_REQUIRED:'Informe a data de nascimento correta e confira a admissão antes de calcular as datas.',
  RH_LEAVE_DATES_INVALID:'O início deve ser uma data válida posterior à admissão.',RH_LEAVE_ACQUISITION_INVALID:'Confira o período aquisitivo; o início precisa ser posterior ao seu término.',

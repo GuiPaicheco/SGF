@@ -1,6 +1,6 @@
 # Pendências do SGF — revisão urgente de 18/10/2026
 
-Esta é a única fila ativa. A orientação mais recente substitui a inclusão manual e a exigência de matrícula dos blocos anteriores. O [planejamento anterior](HISTORICO_PENDENCIAS_20261018_ANTES_PDF.md) fica como histórico; sua ordem não deve ser retomada automaticamente. Novos blocos serão considerados após esta revisão.
+Esta é a única fila ativa. A orientação mais recente substitui a inclusão manual e a exigência de matrícula dos blocos anteriores. O [planejamento anterior](HISTORICO_PENDENCIAS_20261018_ANTES_PDF.md) fica como histórico; sua ordem não deve ser retomada automaticamente. Os blocos abaixo incorporam a pesquisa normativa de férias e a retirada de banco de horas.
 
 ## Requisitos prioritários e implementação
 
@@ -31,21 +31,27 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [ ] Conferir impressão nativa/equipamentos institucionais e seleção/arraste do arquivo no ambiente real; automação desses recursos foi limitada pela extensão.
 - [ ] Conferência cadastral e aceite real pelos responsáveis das unidades. Nenhuma importação real foi aprovada automaticamente a partir do PDF enviado.
 
+## Blocos atuais — férias regulamentares e férias-prêmio
+
+- [x] **Bloco 1 — Base técnica cadastral e acesso:** importação CNES preserva vínculo, férias, snapshots e versões; ensaio integrado atual cobre atualização, ausência, reativação, competência, operador obrigatório e isolamento entre unidades. Login neutro, identificação no início da sessão e sem troca no calendário.
+- [x] **Bloco 2 — Lançamento e conferência normativa:** matriz oficial em [Normas de férias](NORMAS_FERIAS_BETIM.md); duração por aquisição/regime, reduções, parcelas, impedimentos, protocolo, concordância, referência documental, histórico conhecido de consumo e prévia confirmada. Regras no servidor para criação e revisão. Vínculos especiais não recebem direito presumido.
+- [x] **Banco de horas retirado do escopo:** sem novas folgas, complementação de férias, trabalho adicional ou exceção por horas insuficientes; retirada também da simulação pública. Registros antigos permanecem consultáveis/canceláveis e não podem gerar nova programação dessa modalidade.
+- [ ] **Aceite dos blocos 1 e 2:** RH/SARH deve conferir o enquadramento e os assentamentos reais, as referências documentais e a regra especial quando aplicável. CNES não prova direito adquirido nem saldo. Nenhum funcionário real recebeu férias automaticamente.
+- [ ] **Próximo bloco — Manutenção e comprovante:** concluir a homologação de edição/cancelamento, documentação normativa no comprovante e exportações nos equipamentos institucionais, sem apagar histórico.
+- [ ] **Bloco seguinte — Piloto completo:** teste institucional com importação aprovada, identificação inicial, conferência, lançamento, alteração, cancelamento e reimportação; aceite dos responsáveis antes de ampliar o uso.
+
+### Evidências desta entrega
+
+- 397 testes Node e Deno check de manage-rh aprovados.
+- SQL normativo executado no PostgreSQL isolado e no Supabase com rollback: corte em 02/12/2025, 30/20 e 25/16, ponto facultativo, feriado, aniversário sem acréscimo, impedimentos, fracionamento CLT e prêmio.
+- Ensaio integrado no Supabase com rollback: importação sintética, programação, reenvio idempotente, operador e escopo, revisão, atualização/ausência/reativação sem perda de histórico; prêmio com prevenção de reutilização, cancelamento e nova prévia.
+- SQL e função manage-rh atualizados. Ensaios históricos de contratos encerrados são explicitamente separados dos cenários normativos atuais no CI.
+- Consulta de segurança: não surgiram novos objetos expostos nem concessões amplas. Os avisos anteriores de RLS sem política em tabelas bloqueadas e proteção de senhas vazadas permanecem como pendências de infraestrutura, sem mudança nesta entrega.
+
 ## Limites e continuidade
-
-## Blocos para consolidar o lançamento de férias
-
-- [x] Ajuste de acesso: login com indicação neutra, sem sugerir `admin`; retirada da troca de operador do calendário e da visualização alternativa. A identificação continua no início da sessão; para outro operador, sair e entrar novamente.
-- [ ] **Bloco 1 — Base cadastral e acesso:** validar com o responsável a importação real, competência, cargo/CBO/carga/equipe e operadores autorizados; conferir isolamento entre unidades e preservação de férias após reimportação. A estrutura está implementada; falta o aceite real.
-- [ ] **Bloco 2 — Lançamento de férias no calendário:** revisar o fluxo já existente de selecionar funcionário, modalidade, datas e prévia; conferir regras de férias regulamentares e prêmio, fracionamento, feriados, retorno e sobreposições. Tratar dados que o CNES não fornece no lançamento, sem inventar direitos ou saldos.
-- [ ] **Bloco 3 — Folgas e banco de horas informado:** validar horas declaradas no lançamento, jornada, cálculo e insuficiência. Permitir exceção confirmada com justificativa e auditoria; não manter banco de horas como saldo permanente no cadastro.
-- [ ] **Bloco 4 — Manutenção e comprovante:** validar edição e cancelamento sem apagar histórico, atualização do calendário e comprovante com CBO, carga e equipe; conferir PDF e planilha nos equipamentos usados pelas unidades.
-- [ ] **Bloco 5 — Ensaio completo e piloto:** executar acesso, seleção inicial do operador, lançamento, edição, cancelamento, reimportação e exportação; conferir permissões, duplicidades e uso simultâneo antes do teste institucional.
-
-Próximo trabalho técnico: Bloco 1. Os blocos consolidam e validam o que já existe; não significam que o lançamento de férias precise ser refeito do zero. Relatórios analíticos, estatísticas e treinamento ficam para depois desse ciclo funcional.
 
 O leitor reconhece ficha completa textual no layout CNES ensaiado; PDFs digitalizados ou de outro layout são recusados, sem incorporação parcial silenciosa. PDF sem competência explícita exige mês informado pelo Administrador. Data de emissão não prova competência nem atualização da fonte.
 
-Dados necessários às regras de um afastamento que não existam no CNES continuam sendo conferidos no lançamento (por exemplo nascimento/day-off e admissão), sem exigir cadastro manual do funcionário. Não inventar esses dados nem direitos.
+Dados necessários às regras de um afastamento que não existam no CNES continuam sendo conferidos no lançamento (admissão/exercício, aquisição, faltas, licenças e enquadramento jurídico), sem exigir cadastro manual do funcionário. Não inventar esses dados nem direitos.
 
 A revisão não é homologação normativa/institucional. Relatórios analíticos e estatísticas continuam futuros; CSV/PDF do calendário pertencem ao escopo urgente. Manual/treinamento continuam depois da funcionalidade real.
