@@ -65,6 +65,7 @@ Deno.serve(async request=>{
    if(payload.action==='session')return json(await rpc('rh_session_state'));
    if(payload.action==='select-operator'){if(!uuid.test(payload.grantId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_select_operator',{target_grant:payload.grantId}));}
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
+   if(payload.action==='launch-employees'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_launch_employees',{page_index:payload.page,search_text:payload.search.trim()}));}
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
    if(payload.action==='calendar')return json(await rpc('rh_calendar_window',{target_cnes:null,...calendarWindow(payload)}));
    if(isLeaveAction){const operation=leaveOperation(payload);return json(await rpc(operation.name,{target_cnes:null,...operation.args}));}

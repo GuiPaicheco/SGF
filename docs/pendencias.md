@@ -4,12 +4,12 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ## Requisitos prioritários e implementação
 
-- [ ] Liberação cadastral do piloto: verificação em produção em 19/10 encontrou os 40 registros CNES da UBS Amazonas com revisão pendente e sem vínculo integrado. O administrador deve conferir e aplicar a importação PDF, confirmando competência e diferenças individuais; não liberar automaticamente os registros nem incluir o registro legado sem CNES. A tela explica esse impedimento.
+- [x] Corrigir integração incompleta da importação administrativa antiga: os 40 funcionários CNES da UBS Amazonas foram integrados a partir da importação já realizada pelo administrador, sem pedir nova conferência, reenviar PDF, inventar competência ou alterar férias/histórico. Correção idempotente com auditoria; registros manuais, inativos e alterações posteriores excluídos.
 
-- [x] Corrigir despacho da rota Lançar Férias (aba visível sem renderizador); teste de integração para RH e Administrador. Selecionar unidade carrega funcionários automaticamente.
-- [x] Preservar unidade, busca e seleção no lançamento; período, filtros e colunas do calendário ao trocar abas. Consultas de calendário/diretório reutilizadas em memória por até 30 segundos, com limite de 30 consultas, isolamento por acesso e invalidação nas alterações. Busca/consulta explícita e validações de férias consultam o servidor.
+- [x] Aba Lançar Férias exclusiva do RH institucional; retirada do administrador, inclusive ação de novo lançamento no calendário administrativo. Abas ocultas até identificar o operador.
+- [x] Preservar busca e página no lançamento; período, filtros e colunas do calendário ao trocar abas. Consultas de calendário/diretório reutilizadas em memória por até 30 segundos, com limite de 30 consultas, isolamento por acesso e invalidação nas alterações. Busca/consulta explícita e validações de férias consultam o servidor.
 
-- [x] Aba Lançar Férias ao lado do calendário, para administrador e RH; busca paginada de funcionários CNES e acesso direto ao formulário normativo, preservando identificação do operador e escopo da unidade.
+- [x] Lista de funcionários no lançamento, em ordem alfabética fixa antes da paginação, sem opções de reordenação; nome, cargo, CBO, equipe e carga horária, com botão por funcionário. Consulta leve independente do calendário; somente funcionários CNES ativos da unidade do RH.
 
 - [x] Calendário administrativo sem unidade selecionada automaticamente; UBS em ordem alfabética e Secretaria por último.
 - [x] Consulta mensal ou por datas, com CBO, cargo, equipe, modalidade e situação; filtros adicionais recolhidos. Intervalos de até 93 dias por consulta.

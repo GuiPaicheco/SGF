@@ -163,13 +163,13 @@
   }
   function renderWorkspaceNav() {
     if (!workspaceNav) return;
-    const show = state.session && state.profile?.role && !state.profile.must_change_password && !['change-password', 'set-password'].includes(state.route);
+    const show = state.session && state.profile?.role && !state.profile.must_change_password && (!state.activeContext?.institutional || Boolean(state.rhState?.operator)) && !['change-password', 'set-password'].includes(state.route);
     workspaceNav.classList.toggle('hidden', !show);
     if (!show) { workspaceNav.innerHTML = ''; return; }
     if(state.activeContext?.institutional){workspaceNav.innerHTML=[['rh-workspace','Calendário da Unidade'],['rh-launch','Lançar Férias']].map(([route,label])=>`<button type="button" data-go="${route}" ${state.route===route?'aria-current="page"':''}>${label}</button>`).join('');return;}
     const employee = state.profile?.role === 'servidor';
     const items = state.profile?.role === 'administrador'
-      ? [['rh-calendar', 'Calendário da Unidade'], ['rh-launch', 'Lançar Férias'], ['rh-accounts', 'Cadastro das unidades'], ['calendar-admin', 'Feriados']]
+      ? [['rh-calendar', 'Calendário da Unidade'], ['rh-accounts', 'Cadastro das unidades'], ['calendar-admin', 'Feriados']]
       : employee ? [['employee-dashboard', 'Registros anteriores'], ['quick', 'Simular']]
       : [['dashboard', 'Registros anteriores'], ['scale', 'Escala anterior'], ['audit-history', 'Histórico']];
     workspaceNav.innerHTML = `${state.accessContexts.length > 1 ? `<button type="button" data-go="choose-access" class="access-switch">${accessLabel(state.profile.role)} · ${esc(state.activeContext?.cnes_code || state.activeContext?.lotacao_name || 'Geral')} ▾</button>` : ''}${items.map(([route, label]) => `<button type="button" data-go="${route}" ${route === 'catalogs' ? ['catalogs', 'inclusions', 'inclusion-detail', 'profiles', 'profile-detail', 'employee-registry-detail', 'location-detail', 'reference-detail', 'calendar-admin', 'profile-create'].includes(state.route) ? 'aria-current="page"' : '' : state.route === route ? 'aria-current="page"' : ''}>${label}</button>`).join('')}`;
@@ -761,15 +761,14 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   async function renderRhAccounts(){if(state.profile?.role!=='administrador')return go('home');await SGFRhAccounts.mount({app,esc,request:rhRequest,isCurrent:captureView()});}
   async function renderRhWorkspace(){
     if(!state.activeContext?.institutional)return go('home');const current=captureView();
-    await SGFRhAccounts.workspace({app,esc,request:rhRequest,isCurrent:current,go,onState:value=>{state.rhState=value;renderHeaderUser();},
+    await SGFRhAccounts.workspace({app,esc,request:rhRequest,isCurrent:current,go,onState:value=>{state.rhState=value;renderHeaderUser();renderWorkspaceNav();},
       calendar:selection=>SGFRhCalendar.mount({app,esc,request:rhRequest,isCurrent:current,context:selection.context,viewState:rhView('calendar')})});
   }
   async function renderRhLaunch(){
-    const current=captureView(),admin=state.profile?.role==='administrador';
-    const launch=()=>SGFRhLaunch.mount({app,esc,request:rhRequest,isCurrent:current,admin,viewState:rhView('launch'),onBack:()=>go(admin?'rh-calendar':'rh-workspace')});
-    if(admin)return launch();
-    if(!state.activeContext?.institutional)return go('home');
-    await SGFRhAccounts.workspace({app,esc,request:rhRequest,isCurrent:current,go,destination:'rh-launch',onState:value=>{state.rhState=value;renderHeaderUser();},calendar:launch});
+    if(state.profile?.role!=='rh'||!state.activeContext?.institutional)return go('home');
+    const current=captureView();
+    const launch=()=>SGFRhLaunch.mount({app,esc,request:rhRequest,isCurrent:current,viewState:rhView('launch'),onBack:()=>go('rh-workspace')});
+    await SGFRhAccounts.workspace({app,esc,request:rhRequest,isCurrent:current,go,destination:'rh-launch',onState:value=>{state.rhState=value;renderHeaderUser();renderWorkspaceNav();},calendar:launch});
   }
   async function renderRhCalendar(){if(state.profile?.role!=='administrador')return go('home');await SGFRhCalendar.mount({app,esc,request:rhRequest,isCurrent:captureView(),admin:true,viewState:rhView('calendar')});}
   async function renderCnesImport() {
