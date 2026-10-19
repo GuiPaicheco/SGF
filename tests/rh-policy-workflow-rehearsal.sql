@@ -106,3 +106,51 @@ begin
  if before_history is distinct from after_history then raise exception 'BIRTHDAY_REWROTE_LEAVE';end if;
  if has_table_privilege('authenticated','private.rh_employee_birthdays','select') or has_function_privilege('authenticated','public.rh_save_employee_birthday(uuid,uuid,uuid,integer,integer,integer)','execute') then raise exception 'BIRTHDAY_DIRECT_ACCESS';end if;
 end $$;
+
+
+-- Alertas entre pessoas: critérios em interseção, equipes múltiplas e paginação.
+-- Toda esta fixture é executada em BEGIN/ROLLBACK.
+do $$
+declare actor uuid:='f6000000-0000-0000-0000-000000000001';unit_id uuid:='f6000000-0000-0000-0000-000000000100';
+ entry uuid;other_entry uuid;third_entry uuid;bond uuid;other_bond uuid;third_bond uuid;source jsonb;items jsonb;rev bigint;result jsonb;preview jsonb;second_leave uuid;
+ item jsonb:='{"entryMode":"simplified","type":"regulamentar","regime":"efetivo","acquisitionEnd":"2028-12-31","startDate":"2029-05-02","recognitionReference":"Fixture conflito","absenceCount":0,"familyLeaveDays":0,"personalLeaveDays":0,"spouseLeaveDays":0,"healthLeaveDays":0,"suspended":false,"cltLoss":false,"regularLicenseLoss":false,"split":"none"}';
+begin
+ select id,source_data into strict entry,source from private.cnes_registry_entries where cnes_unit_id=unit_id and source_id=repeat('e',64);
+ update private.cnes_registry_entries set source_data=source_data||'{"teams":[{"name":"EQUIPE A"},{"name":"EQUIPE B"}]}' where id=entry;
+ source:=source||'{"fullName":"ZZZ SEGUNDA PESSOA","cns":"900000000000002","teams":[{"name":"EQUIPE B"}]}';
+ items:=jsonb_build_array(jsonb_build_object('sourceId',repeat('2',64),'sourceHash',repeat('2',64),'sourceData',source),jsonb_build_object('sourceId',repeat('3',64),'sourceHash',repeat('3',64),'sourceData',source||'{"fullName":"ZZZ TERCEIRA PESSOA","cns":"900000000000003","cbo":"654321"}'));
+ select revision into rev from private.cnes_registry_state where cnes_unit_id=unit_id;
+ perform public.apply_cnes_reviewed(actor,unit_id,items,repeat('5',64),now(),'202701',rev,'[]',jsonb_build_array(repeat('2',64),repeat('3',64)),'{}');
+ select e.id,m.bond_id into other_entry,other_bond from private.cnes_registry_entries e join private.rh_registry_bonds m on m.entry_id=e.id where e.source_id=repeat('2',64);
+ select e.id,m.bond_id into third_entry,third_bond from private.cnes_registry_entries e join private.rh_registry_bonds m on m.entry_id=e.id where e.source_id=repeat('3',64);
+ select bond_id into bond from private.rh_registry_bonds where entry_id=entry;
+ for entry in select unnest(array[entry,other_entry,third_entry]) loop
+  preview:=public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item);
+  result:=public.rh_create_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item,pg_catalog.gen_random_uuid(),preview->>'digest');
+  if entry=other_entry then second_leave:=(result->>'id')::uuid;end if;
+ end loop;
+ -- A segunda pessoa está além da primeira página; o catálogo e o alerta a incluem.
+ insert into private.cnes_registry_entries(cnes_unit_id,source_id,source_hash,source_data)
+ select unit_id,md5('facet-'||g)||md5('facet-'||g),repeat('6',64),jsonb_build_object('fullName','AAA PESSOA '||g,'status','ativo','occupation','CARGO SEM FÉRIAS','cbo','000001','teams','[]'::jsonb) from generate_series(1,55) g;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"conflict_criteria":["cbo"]}');
+ if jsonb_array_length(result->'employees')<>50 or jsonb_array_length(result->'facets'->'full_name')<58 or not result->'facets'->'team' ? 'Não se aplica' then raise exception 'UNIT_FACETS_INCOMPLETE';end if;
+ if jsonb_array_length(result->'conflicts')<>2 or jsonb_array_length(result->'conflicts'->0->'bond_ids')<>2 then raise exception 'CBO_CONFLICT_WRONG';end if;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"conflict_criteria":["position","cbo","team"],"conflict_only":true}');
+ if result->>'total'<>'2' then raise exception 'CONFLICT_NOT_BEFORE_PAGINATION_OR_NOT_AND';end if;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"conflict_criteria":["team"],"conflict_only":true}');
+ if result->>'total'<>'3' then raise exception 'MULTITEAM_CONFLICT_LOST';end if;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'ZZZ SEGUNDA','{"conflict_criteria":["cbo"]}');
+ if result->>'total'<>'1' or jsonb_array_length(result->'conflicts'->0->'bond_ids')<>2 then raise exception 'SEARCH_HID_CONFLICT_PEER';end if;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"team":["EQUIPE A"],"cbo":["123456"]}');
+ if result->>'total'<>'1' then raise exception 'EXACT_MULTISELECT_TEAM_LOST';end if;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"team":["EQUIPE"]}');
+ if result->>'total'<>'0' then raise exception 'CHECKBOX_FILTER_NOT_EXACT';end if;
+ perform public.rh_close_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,second_leave,1,'cancelada','Fixture cancelamento conflito');
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"conflict_criteria":["cbo"]}');
+ if result->'conflicts'<>'[]'::jsonb then raise exception 'CANCELLED_LEAVE_CAUSED_CONFLICT';end if;
+ -- Dois vínculos da mesma pessoa não representam dois profissionais afastados.
+ update public.employment_bonds set servidor_id=(select servidor_id from public.employment_bonds where id=bond) where id=third_bond;
+ result:=public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"conflict_criteria":["position"]}');
+ if result->'conflicts'<>'[]'::jsonb then raise exception 'SAME_PERSON_COUNTED_TWICE';end if;
+ begin perform public.rh_calendar_window(actor,null,unit_id,'2029-05-02','2029-05-03',0,'','{"conflict_criteria":["invalid"]}');raise exception 'BAD_CRITERION_ALLOWED';exception when others then if sqlerrm<>'RH_INPUT_INVALID' then raise;end if;end;
+end $$;

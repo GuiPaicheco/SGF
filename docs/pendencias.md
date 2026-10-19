@@ -1,4 +1,4 @@
-# Pendências do SGF — revisão urgente de 18/10/2026
+# Pendências do SGF — revisão de 19/10/2026
 
 Esta é a única fila ativa. A orientação mais recente substitui a inclusão manual e a exigência de matrícula dos blocos anteriores. O [planejamento anterior](HISTORICO_PENDENCIAS_20261018_ANTES_PDF.md) fica como histórico; sua ordem não deve ser retomada automaticamente. Os blocos abaixo incorporam a pesquisa normativa de férias e a retirada de banco de horas.
 
@@ -7,7 +7,11 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] Aba RH renomeada para Férias e Cadastros: nome, profissão, Lançar Férias, Lançar Folga desativado e Visualizar cadastro. RH informa aniversário apenas como dia/mês; alteração auditada e versionada, restrita à própria unidade, sem sobrescrever CNES ou recalcular histórico.
 - [x] Lançar no calendário valida e grava numa única ação, com chave contra duplicação; redireciona para funcionário e intervalo incluindo retorno. Falhas exibem mensagem; envio sem confirmação pode ser repetido com a mesma chave.
 - [x] Campo Número do processo ou memorando; comunicação ao RH retirada. Data ausente permanece nula e prazo não é atestado automaticamente; conferência de antecedência fica no processo externo.
-- [x] Calendário sem Programar/Ações. Unidade, competência CNES e cabeçalhos fixos; competência ausente indicada sem inferir data. Visão longitudinal padrão por funcionário e nominal por período de afastamento, preservando configurações, CSV/PDF, modalidade e sobreposições. Retornos de intervalos separados não são unidos ficticiamente.
+- [x] Calendário sem Programar/Ações. Unidade, competência do período consultado e cabeçalhos fixos. Visão longitudinal padrão por funcionário e nominal por período de afastamento. Retiradas as colunas de aniversário e retorno previsto; aniversário aparece somente na célula correspondente dentro do período e retorno permanece como marca R. Competência da importação continua no cadastro da unidade.
+- [x] Filtros do calendário por checkbox de funcionários, cargos, CBOs e equipes efetivamente existentes na unidade, em ordem alfabética e independentes da página atual. Seleções dentro de cada filtro são alternativas; filtros diferentes são cruzados. Retirado o filtro Situação da interface. Equipe vazia é normalizada para Não se aplica, sem modificar a evidência CNES nem snapshots históricos.
+- [x] Conflitos entre duas ou mais pessoas afastadas no mesmo dia: critérios combináveis de mesmo cargo, CBO e equipe, exigindo coincidência em todos os critérios marcados. Alerta visual, sem bloquear lançamento, conforme decisão do usuário. Consulta de apenas funcionários com conflito; cálculo da unidade inteira antes de filtros de nomes/paginação, com equipes múltiplas, dias atribuídos do legado, cancelamentos excluídos e mesma pessoa com vários vínculos não contada duas vezes.
+- [x] Exportação direta de PDF A4 paisagem, todas as colunas funcionais e todos os funcionários filtrados, em faixas de até sete dias, com identificação, competência, cabeçalhos, legenda e numeração repetidos. Quebras verticais preservam as linhas; textos longos são quebrados dentro das células.
+- [x] Exportação XLSX substitui CSV na interface: calendário colorido, filtros, linhas/colunas congeladas, datas e cargas tipadas, CBO como texto e aba com detalhes dos afastamentos. Bibliotecas locais carregadas apenas ao exportar; dados não enviados a serviços de conversão.
 - [ ] Definir e documentar regra municipal do day-off de aniversário antes de descontá-lo da duração das férias. Aniversário é exibido quando informado; não equivale a folga concedida.
 - [ ] Implementar Lançar Folga em etapa futura; por enquanto o botão permanece inativo. As visões exibem os registros efetivamente existentes, inclusive os históricos, sem fabricar folgas de exemplo.
 
@@ -23,11 +27,11 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] Lista de funcionários no lançamento, em ordem alfabética fixa antes da paginação, sem opções de reordenação; nome, cargo, CBO, equipe e carga horária, com botão por funcionário. Consulta leve independente do calendário; somente funcionários CNES ativos da unidade do RH.
 
 - [x] Calendário administrativo sem unidade selecionada automaticamente; UBS em ordem alfabética e Secretaria por último.
-- [x] Consulta mensal ou por datas, com CBO, cargo, equipe, modalidade e situação; filtros adicionais recolhidos. Intervalos de até 93 dias por consulta.
+- [x] Consulta mensal ou por datas, com nomes, CBO, cargo, equipe e modalidade; filtros e critérios de conflito recolhidos. Intervalos de até 93 dias por consulta.
 - [x] Matrícula deixa de ser requisito para funcionários CNES; não fabricar matrícula. Coluna independente de carga horária, por exemplo `40h`.
 - [x] Cargo/ocupação vem da descrição CNES; equipes cruzadas por CNS/CBO, sem união por nome.
 - [x] Rolagem horizontal, ocultação e reorganização das colunas funcionais; calendário sem edição direta dos dados cadastrais.
-- [x] Exportação CSV de todos os funcionários filtrados e impressão/PDF com a mesma seleção de colunas, organizada por faixas de sete dias.
+- [x] Exportação XLSX e PDF de todos os funcionários filtrados, inclusive páginas posteriores, com todos os dados funcionais; ocultação de colunas continua sendo uma preferência de visualização da tela.
 - [x] Administração concentrada em Calendário, Cadastro das unidades e Feriados; antigas configurações retiradas das rotas atuais.
 - [x] Cadastro das unidades centraliza funcionários, importação, competência e autorização de operadores, com filtros e ordem alfabética.
 - [x] Redefinição de senha da unidade para `123456`, com confirmação e encerramento das sessões; não redefinir contas sem ação explícita do Administrador.
@@ -79,7 +83,14 @@ O leitor reconhece ficha completa textual no layout CNES ensaiado; PDFs digitali
 
 Dados necessários às regras de um afastamento que não existam no CNES continuam sendo conferidos no lançamento (admissão/exercício, aquisição, faltas, licenças e enquadramento jurídico), sem exigir cadastro manual do funcionário. Não inventar esses dados nem direitos.
 
-A revisão não é homologação normativa/institucional. Relatórios analíticos e estatísticas continuam futuros; CSV/PDF do calendário pertencem ao escopo urgente. Manual/treinamento continuam depois da funcionalidade real.
+A revisão não é homologação normativa/institucional. Relatórios analíticos e estatísticas continuam futuros; XLSX/PDF do calendário pertencem ao escopo urgente. Manual/treinamento continuam depois da funcionalidade real.
+
+### Calendário, conflitos e exportações — 19/10/2026
+
+- 433 testes Node aprovados, incluindo leitura de XLSX real e geração de PDF real. Build estático aprovado. Ensaio SQL com rollback cobre filtros exatos, catálogos completos, conflitos além da primeira página, cruzamento de critérios, múltiplas equipes, cancelamentos e identidade com vários vínculos; nenhum afastamento fictício persiste.
+- PDF renderizado com 42 funcionários fictícios, cargos extensos, visão nominal e 31 dias: 20 páginas A4 paisagem, com conteúdo e cores conferidos. XLSX reaberto, inspecionado e renderizado nas duas abas; datas, carga numérica, zeros iniciais do CBO, filtros e congelamento confirmados por leitura do arquivo.
+- Migração calendar_conflicts_and_facets e manage-rh v13 publicados. API autenticada conferida: catálogos da unidade, seleção exata por nome e pesquisa combinada de conflitos.
+- Próximo passo: ensaio acompanhado pelo RH do fluxo de lançamento, revisão, cancelamento e compartilhamento dos arquivos; registrar ajustes do uso real antes de retomar novas modalidades. Regra de day-off e governança continuam pendentes, sem concessão presumida.
 
 ## Governança e termo de ciência — pendente
 

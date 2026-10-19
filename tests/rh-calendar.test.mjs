@@ -7,7 +7,7 @@ import '../assets/access-policy.js';
 const source=readFileSync(new URL('../assets/rh-calendar-ui.js',import.meta.url),'utf8');
 const uuid='a0000000-0000-0000-0000-000000000001';
 const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
-function harness(){const nodes=new Map(),app={innerHTML:'',querySelector:selector=>{if(!nodes.has(selector))nodes.set(selector,{});return nodes.get(selector);}};const root={};runInNewContext(source,{globalThis:root,Date});return {app,nodes,api:root.SGFRhCalendar};}
+function harness(){const nodes=new Map(),app={innerHTML:'',querySelectorAll:selector=>nodes.get(selector)||[],querySelector:selector=>{if(!nodes.has(selector))nodes.set(selector,{});return nodes.get(selector);}};const root={};runInNewContext(source,{globalThis:root,Date});return {app,nodes,api:root.SGFRhCalendar};}
 test('consulta aceita mês delimitado e busca literal; rejeita páginas e entradas excessivas',()=>{
  assert.deepEqual(calendarQuery({month:'2026-11',page:0,search:'  UBS %  '}),{filter_json:{},target_month:'2026-11-01',page_index:0,search_text:'UBS %'});
  for(const patch of [{month:'2026-13'},{month:'2026-11-01'},{month:'2101-01'},{page:101},{page:-1},{page:'0'},{search:'x'.repeat(121)},{search:null}])assert.throws(()=>calendarQuery({month:'2026-11',page:0,search:'',...patch}),/RH_INPUT_INVALID/);
@@ -50,12 +50,12 @@ test('filtros delimitados e literais recusam campos e situações arbitrários',
 });
 
 test('consulta, paginação e limpeza preservam mês e enviam os filtros ao servidor',async()=>{
- const {api,app}=harness(),calls=[];const result={context:{cnes_name:'TESTE'},total:60,employees:[],absences:[],holidays:[]};
+ const {api,app,nodes}=harness(),calls=[];const result={context:{cnes_name:'TESTE'},total:60,employees:[],absences:[],holidays:[]};
  await api.mount({app,esc,isCurrent:()=>true,request:async p=>{calls.push(p);return result;}});
- app.querySelector('#rh-calendar-month').value='2027-03';app.querySelector('#rh-calendar-search').value='Fictício';
- for(const [key,value] of Object.entries({position:'Enfermeiro',cbo:'123456',team:'Equipe',review:'conferido',type:'banco_horas',status:'programada'}))app.querySelector('#rh-filter-'+key).value=value;
- app.querySelector('#rh-calendar-filter').onsubmit({preventDefault(){}});await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).filters.cbo,'123456');
- app.querySelector('#rh-calendar-next').onclick();await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).page,1);assert.equal(calls.at(-1).filters.team,'Equipe');
+ app.querySelector('#rh-calendar-month').value='2027-03';app.querySelector('#rh-filter-type').value='banco_horas';
+ nodes.set('[data-rh-filter="cbo"]:checked',[{value:'123456'}]);nodes.set('[data-rh-filter="team"]:checked',[{value:'Equipe'}]);nodes.set('[data-rh-conflict]:checked',[{dataset:{rhConflict:'team'}}]);
+ app.querySelector('#rh-calendar-filter').onsubmit({preventDefault(){}});await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).filters.cbo[0],'123456');assert.equal(calls.at(-1).filters.conflict_criteria[0],'team');
+ app.querySelector('#rh-calendar-next').onclick();await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).page,1);assert.equal(calls.at(-1).filters.team[0],'Equipe');
  app.querySelector('#rh-calendar-clear').onclick();await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).page,0);assert.equal(calls.at(-1).month,'2027-03');assert.equal(calls.at(-1).filters.status,'todos');assert.equal(calls.at(-1).search,'');
 });
 
@@ -76,7 +76,7 @@ test('visões nominal e longitudinal preservam registros e mostram sobreposiçõ
  const {api,app}=harness(),row={bond_id:uuid,full_name:'TESTE',birth_month_day:'01-20'},items=[{id:'ferias',origin:'rh',sequence:1,bond_id:uuid,type:'regulamentar',protocol:'F1',start_date:'2027-01-18',end_date:'2027-02-22',return_date:'2027-02-23'},{id:'folga',origin:'legado',sequence:1,bond_id:uuid,type:'banco_horas',protocol:'B1',start_date:'2027-01-16',end_date:'2027-01-25',return_date:'2027-01-26'}];
  assert.equal(api.calendarRows([row],items,'longitudinal').length,1);assert.equal(api.calendarRows([row],items,'nominal').length,2);assert.deepEqual(Array.from(api.returnDates(items)),['2027-02-23']);
  const saved={layout:'nominal'};await api.mount({app,esc,isCurrent:()=>true,viewState:saved,request:async()=>({context:{cnes_name:'UBS TESTE'},source_competence:'202610',employees:[row],absences:items,total:1,range_start:'2027-01-16',range_end:'2027-02-23'})});
- assert.match(app.innerHTML,/RH|F1/);assert.match(app.innerHTML,/B1/);assert.match(app.innerHTML,/! F/);assert.match(app.innerHTML,/! B/);assert.match(app.innerHTML,/Competência CNES: 10\/2026/);assert.doesNotMatch(app.innerHTML,/data-rh-new-leave|<th>Ações<\/th>|>Programar</);assert.match(app.innerHTML,/rh-calendar-meta/);
+ assert.match(app.innerHTML,/RH|F1/);assert.match(app.innerHTML,/B1/);assert.match(app.innerHTML,/! F/);assert.match(app.innerHTML,/! B/);assert.match(app.innerHTML,/Competência: 16\/01\/2027 a 23\/02\/2027/);assert.doesNotMatch(app.innerHTML,/Competência CNES|Retorno previsto<\/th>|>Aniversário<\/th>|data-rh-new-leave|<th>Ações<\/th>|>Programar</);assert.match(app.innerHTML,/rh-calendar-meta/);
  assert.equal(api.cellMark(row,'2027-01-20',[], 'longitudinal'),'A');assert.equal(api.cellMark(row,'2027-01-20',items,'longitudinal'),'F/B/A');assert.equal(api.cellMark(row,'2027-02-23',items,'longitudinal'),'R');
  const exported=api.csv([row],items,['2027-01-18'],undefined,'nominal');assert.match(exported,/F1/);assert.match(exported,/B1/);assert.equal(exported.split('\r\n').length,3);
 });
@@ -85,4 +85,16 @@ test('retornos separados não são apresentados como afastamento contínuo',()=>
 });
 test('após lançar, calendário abre intervalo salvo e limpa filtros anteriores',async()=>{
  const {api,app}=harness();let query;await api.mount({app,esc,isCurrent:()=>true,viewState:{focusRange:{month:'2027-01',start:'2027-01-18',end:'2027-02-23'}},request:async q=>(query=q,{context:{},employees:[],absences:[],total:0})});assert.equal(query.mode,'range');assert.equal(query.start,'2027-01-18');assert.equal(query.end,'2027-02-23');
+});
+
+test('checkboxes usam catálogo da unidade em ordem alfabética, sem situação ou campos livres',async()=>{
+ const {api,app}=harness();await api.mount({app,esc,isCurrent:()=>true,request:async()=>({context:{},total:0,employees:[],absences:[],facets:{full_name:['ZÉ','ANA'],position:['ZELADOR','ADMINISTRATIVO'],cbo:['999999','111111'],team:['EQUIPE Z','EQUIPE A','Não se aplica']},conflicts:[]})});
+ assert.ok(app.innerHTML.indexOf('value="ANA"')<app.innerHTML.indexOf('value="ZÉ"'));assert.ok(app.innerHTML.indexOf('value="EQUIPE A"')<app.innerHTML.indexOf('value="EQUIPE Z"'));assert.doesNotMatch(app.innerHTML,/rh-filter-status|rh-calendar-search|rh-col-birth_month_day|Retorno previsto<\/th>/);assert.match(app.innerHTML,/Exportar planilha \(XLSX\)/);
+});
+test('conflito de colega fora da página é marcado, sem inventar aniversário fora da competência',async()=>{
+ const {api,app}=harness(),r={bond_id:uuid,full_name:'ANA',birth_month_day:'12-20'};await api.mount({app,esc,isCurrent:()=>true,request:async()=>({context:{},range_start:'2027-01-20',range_end:'2027-01-20',total:1,employees:[r],absences:[{id:'a',bond_id:uuid,type:'regulamentar',start_date:'2027-01-20',end_date:'2027-01-20'}],conflicts:[{date:'2027-01-20',bond_ids:[uuid,'outra-pagina']}],facets:{}})});assert.match(app.innerHTML,/Afastamentos simultâneos na unidade/);assert.match(app.innerHTML,/! F/);assert.doesNotMatch(app.innerHTML,/20\/12|>A<\/td>/);
+});
+test('contrato aceita seleções exatas e rejeita listas ou critérios abusivos',()=>{
+ const base={month:'2027-01',page:0,search:''};assert.deepEqual(calendarQuery({...base,filters:{full_name:[' ANA ','ANA'],cbo:['001234'],conflict_criteria:['cbo','team'],conflict_only:true}}).filter_json,{full_name:['ANA'],cbo:['001234'],conflict_criteria:['cbo','team'],conflict_only:true});
+ for(const filters of [{conflict_criteria:['invalid']},{conflict_only:'true'},{team:[null]},{full_name:Array(201).fill('Ana')},{cbo:['']},{position:['x'.repeat(241)]}])assert.throws(()=>calendarQuery({...base,filters}),/RH_INPUT_INVALID/);
 });

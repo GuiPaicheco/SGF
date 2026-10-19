@@ -4,8 +4,14 @@ export function calendarQuery(payload) {
   ||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');
  const filters=payload.filters??{};if(!filters||typeof filters!=='object'||Array.isArray(filters))throw Error('RH_INPUT_INVALID');
  const allowed={position:null,cbo:null,team:null,review:['todos','pendente','conferido'],type:['todos','regulamentar','premio','banco_horas'],status:['todos','com_afastamento','sem_afastamento','programada','concluida','cancelada']};
- if(Object.entries(filters).some(([key,value])=>!Object.hasOwn(allowed,key)||typeof value!=='string'||value.length>120||(allowed[key]&&!allowed[key].includes(value))))throw Error('RH_INPUT_INVALID');
- const clean=Object.fromEntries(Object.entries(filters).map(([k,v])=>[k,v.trim()]));
+ const selections=['full_name','position','cbo','team'];
+ if(Object.entries(filters).some(([key,value])=>{
+  if(key==='conflict_only')return typeof value!=='boolean';
+  if(key==='conflict_criteria')return !Array.isArray(value)||value.length>3||value.some(v=>!['position','cbo','team'].includes(v));
+  if(selections.includes(key)&&Array.isArray(value))return value.length>200||value.some(v=>typeof v!=='string'||!v.trim()||v.length>240);
+  return !Object.hasOwn(allowed,key)||typeof value!=='string'||value.length>120||(allowed[key]&&!allowed[key].includes(value));
+ })||JSON.stringify(filters).length>24000)throw Error('RH_INPUT_INVALID');
+ const clean=Object.fromEntries(Object.entries(filters).map(([k,v])=>[k,Array.isArray(v)?[...new Set(v.map(x=>x.trim()))]:typeof v==='string'?v.trim():v]));
  return {filter_json:clean,target_month:payload.month+'-01',page_index:payload.page,search_text:payload.search.trim()};
 }
 

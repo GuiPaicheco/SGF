@@ -22,5 +22,5 @@ for (const entry of await readdir(path.join(root, 'assets'), { withFileTypes: tr
   }
 }
 await mkdir(path.join(output,'assets','vendor'),{recursive:true});
-for(const name of ['pdf.mjs','pdf.worker.mjs','pdfjs-LICENSE'])await copyFile(path.join(root,'assets','vendor',name),path.join(output,'assets','vendor',name));
+for(const name of ['pdf.mjs','pdf.worker.mjs','pdfjs-LICENSE','exceljs.min.js','exceljs-LICENSE','jspdf.umd.min.js','jspdf-LICENSE','jspdf.plugin.autotable.min.js','jspdf-autotable-LICENSE'])await copyFile(path.join(root,'assets','vendor',name),path.join(output,'assets','vendor',name));
 console.log('Site estático gerado em dist; documentos, SQL e funções não são publicados.');
