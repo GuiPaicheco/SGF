@@ -54,9 +54,9 @@ test('estrutura exclusiva do administrador; recursos de vínculo apenas RH e adm
   assert.equal(policy.SGFAccessPolicy.allowed('bond-resources','diretor',true),false);
   assert.equal(policy.SGFAccessPolicy.allowed('bond-resources','rh',true),false);
 });
-test('horas novas exigem matrícula, versão e chave; legado não aceita pessoa com vínculos',()=>{
+test('rota antiga de lançamento de horas foi encerrada, preservando histórico',()=>{
   const edge=read('supabase/functions/manage-operations/index.ts');
-  assert.match(edge,/target_bond:payload.bond_id/); assert.match(edge,/target_entry_key:payload.entry_key/); assert.match(edge,/if\(count\) return json/);
+  assert.match(edge,/action === 'time-bank'[^\n]+410/);assert.doesNotMatch(edge,/rpc\('manage_(?:bond_)?time_bank'/);
 });
 test('dados de admissão e direitos vêm da matrícula selecionada',()=>{
   const app=read('assets/app.js');assert.match(app,/state.request.admissionDate=resources.bond.admission_date/);

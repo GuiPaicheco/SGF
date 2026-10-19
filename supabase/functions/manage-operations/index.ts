@@ -130,22 +130,7 @@ Deno.serve(async request => {
       const {data,error}=await scoped.rpc('save_bond_registry',{actor_id:profile.id,target_bond:payload.bond_id,item:payload.item});
       if(error) throw error; return json({id:data});
     }
-    if (action === 'time-bank') {
-      if (!['rh', 'administrador'].includes(actorRole)) return json({ error: 'Somente RH ou administrador pode lancar saldo.' }, 403);
-      const minutes = Math.round(Number(payload.hours) * 60);
-      if (!Number.isFinite(minutes) || minutes === 0) return json({ error: 'Informe uma quantidade de horas diferente de zero.' }, 400);
-      if (payload.bond_id) {
-        const {data,error}=await scoped.rpc('manage_bond_time_bank',{actor_id:profile.id,target_bond:payload.bond_id,target_minutes:minutes,target_description:payload.description,target_date:payload.occurred_on || null,expected_version:payload.version,target_entry_key:payload.entry_key});
-        if(error) throw error; return json(data);
-      }
-      // Não permitir lançamentos por pessoa em cadastros que já têm matrículas.
-      const {count,error:bondError}=await admin.from('employment_bonds').select('id',{count:'exact',head:true}).eq('servidor_id',payload.servidor_id);
-      if(bondError) throw bondError;
-      if(count) return json({error:'Selecione a matrícula para lançar horas. O saldo não pode ser compartilhado entre vínculos.'},400);
-      if (!(await employeeInContext(String(payload.servidor_id || '')))) return json({ error: 'Servidor fora do contexto ativo.' }, 403);
-      const { data, error } = await scoped.rpc('manage_time_bank', { actor_id: profile.id, target_servidor_id: payload.servidor_id, target_minutes: minutes, target_description: payload.description, target_date: payload.occurred_on || null });
-      if (error) throw error; return json({ balance_minutes: data });
-    }
+    if (action === 'time-bank') return json({error:'Banco de horas encerrado no fluxo atual. O histórico permanece preservado.'},410);
     if (action === 'conflict-employees') {
       if (!['diretor','rh','administrador'].includes(actorRole)) return json({error:'Acesso indisponível.'},403);
       const {data,error} = await scoped.rpc('list_rejection_conflict_candidates',{actor_id:profile.id,target_request_id:payload.request_id});

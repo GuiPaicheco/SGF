@@ -42,7 +42,7 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ### Evidências desta entrega
 
-- 397 testes Node e Deno check de manage-rh aprovados.
+- 397 testes Node e Deno check de manage-rh e manage-operations aprovados. Rota antiga de créditos de horas encerrada com 410. CI integrado do núcleo (508184e) aprovado, incluindo banco vazio, ensaios e restauração sintética.
 - SQL normativo executado no PostgreSQL isolado e no Supabase com rollback: corte em 02/12/2025, 30/20 e 25/16, ponto facultativo, feriado, aniversário sem acréscimo, impedimentos, fracionamento CLT e prêmio.
 - Ensaio integrado no Supabase com rollback: importação sintética, programação, reenvio idempotente, operador e escopo, revisão, atualização/ausência/reativação sem perda de histórico; prêmio com prevenção de reutilização, cancelamento e nova prévia.
 - SQL e função manage-rh atualizados. Ensaios históricos de contratos encerrados são explicitamente separados dos cenários normativos atuais no CI.
