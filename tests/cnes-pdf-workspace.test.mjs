@@ -40,7 +40,7 @@ test('exportação CSV tem carga própria, protege fórmulas e marca afastamento
  const root={};vm.runInNewContext(readFileSync(new URL('../assets/rh-calendar-ui.js',import.meta.url),'utf8'),{globalThis:root,Date});
  const api=root.SGFRhCalendar,days=api.datesBetween('2027-02-28','2027-03-01');assert.equal(days.length,2);
  const csv=api.csv([{full_name:'=FÓRMULA',weekly_hours:40,bond_id:'b'}],[{bond_id:'b',type:'regulamentar',start_date:'2027-03-01',end_date:'2027-03-01'}],days);
- assert.match(csv,/"'=FÓRMULA"/);assert.match(csv,/"40h"/);assert.match(csv,/"F"/);assert.doesNotMatch(csv,/Matrícula/);
+ assert.match(csv,/"'=FÓRMULA"/);assert.match(csv,/"40h"/);assert.match(csv,/"I"/);assert.doesNotMatch(csv,/Matrícula/);
 });
 test('unidades colocam Secretaria por último e UBS em ordem alfabética',()=>{
  const root={};vm.runInNewContext(readFileSync(new URL('../assets/rh-units-ui.js',import.meta.url),'utf8'),{globalThis:root});

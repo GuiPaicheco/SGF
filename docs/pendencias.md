@@ -107,3 +107,12 @@ Próxima simplificação a avaliar: manter o regime jurídico já conferido por 
 - Próximo passo: pequenos ajustes visuais indicados pelo usuário e acompanhamento do uso do MVP pelo RH.
 
 - [x] Usar Cargo com nomes das profissões em lugar da seleção numérica de CBO no calendário; limpar filtros de CBO ao restaurar consultas anteriores.
+
+### Início das férias e cenário da UBS Amazonas — 19/10/2026
+
+- [x] Marcar o primeiro dia efetivo do período como I, em lugar de F/P naquele dia; dias seguintes mantêm F/P. Mesmo comportamento nas visões longitudinal/nominal, PDF e XLSX, sem acrescentar dias nem alterar concessões.
+- [x] Cenário visual de teste da UBS Amazonas, ativo inicialmente e com opção de ocultar: até 32 funcionários CNES com vínculo confirmado e 33 períodos simulados, entre outubro/2026 e janeiro/2027. Inclui férias regulamentares, prêmio, intervalos sobrepostos e conflitos intencionais; mesmo cargo/equipe selecionados inicialmente. Sem inserir férias, alterar saldos ou gerar concessões no banco.
+- [x] Identificação de SIMULAÇÃO na tela e nos títulos do PDF/XLSX; exportações preservam filtros, paginação e todos os períodos simulados. Funcionários, cargos, equipes e aniversários continuam vindo do cadastro autorizado.
+- [x] 439 testes Node aprovados e build estático aprovado; início I, preservação de datas, cenário determinístico, filtros, paginação, isolamento por unidade, ocultação e falha de autorização verificados.
+- Próximo passo: usuário conferir outubro/novembro de 2026 na UBS Amazonas, alternar nominal/longitudinal, pesquisar conflitos e testar PDF/XLSX. Ocultar o cenário para conferir somente os registros reais; retirar a simulação ao encerrar a homologação do MVP.
+
