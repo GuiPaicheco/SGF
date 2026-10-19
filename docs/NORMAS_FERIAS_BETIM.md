@@ -26,7 +26,7 @@ Pesquisa em fontes oficiais em **18/10/2026**. Esta matriz orienta a conferênci
 
 O CNES não fornece admissão/exercício certificado, aquisição, licenças, faltas, suspensão, saldo já gozado/indenizado/contado em dobro ou autorização administrativa. O RH informa a referência documental e confirma disponibilidade; o SGF verifica apenas a consistência declarada e os lançamentos conhecidos. Não gerar direitos com base em nome, CBO ou simples tempo decorrido.
 
-Na programação integral de prêmio, registrar as duas parcelas no mesmo lançamento. Para parcela remanescente de gozo fora do SGF, informar 30/60 dias históricos e a data inicial anterior; o restante deve ocorrer no ano subsequente. Não somar novamente parcelas já registradas no sistema. A API verifica consumo conhecido no mesmo quinquênio, preservando o bloqueio transacional existente contra concorrência.
+Na programação integral de prêmio, registrar as duas parcelas no mesmo lançamento. Para parcela remanescente de gozo fora do SGF, informar 30/60 dias históricos e a data inicial anterior; o restante deve ocorrer em ano posterior. Não é imposto prazo de caducidade de um ano: o art. 77 não estabelece prazo para exercer o direito. Não somar novamente parcelas já registradas no sistema. A API verifica consumo conhecido no mesmo quinquênio, preservando o bloqueio transacional existente contra concorrência.
 
 Retorno é calculado em dia útil após o fim. Aniversário não é descontado da duração: a pesquisa não fundamenta aumentar férias pela coincidência com day-off. Feriados cadastrados são usados; a completude do calendário municipal deve ser conferida pelo Administrador. Pontos facultativos continuam identificáveis, mas não são feriados para esse cálculo.
 

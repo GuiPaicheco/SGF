@@ -43,5 +43,6 @@ begin
   ('{"prizeCycle":8}'::jsonb,'RH_LEAVE_ACQUISITION_INVALID'),('{"secondStartDate":"2027-09-01"}'::jsonb,'RH_LEAVE_PRIZE_YEAR_INVALID'))v(a,b)loop
   begin perform private.rh_make_leave_plan(r,i||patch);raise exception 'PRIZE_BLOCK_MISSING_%',expected;exception when others then if sqlerrm<>expected then raise;end if;end;
  end loop;
+ p:=private.rh_make_leave_plan(r,i||'{"secondStartDate":"2029-03-01"}');if p->'periods'->1->>'start_date'<>'2029-03-01' then raise exception 'PRIZE_EXPIRY_INVENTED';end if;
  p:=private.rh_make_leave_plan(r,i||'{"split":"none","historicalUsedDays":60,"previousPrizeStart":"2026-03-01"}');if p->>'vacation_days'<>'30' then raise exception 'REMAINING_FAILED';end if;
 end $$;
