@@ -4,6 +4,10 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ## Requisitos prioritários e implementação
 
+- [x] Lançamento simplificado: perguntar o fim do período aquisitivo, calcular o início de 12 meses / quinquênio no servidor e usar admissão apenas se já conhecida. Explicação recolhida com exemplo inclusivo; férias já gozadas não reiniciam o ciclo. Manter os limites, saldos e impedimentos normativos.
+- [x] Corrigir digitação do fim aquisitivo: não reconstruir formulário em eventos de edição da data; atualizar apenas opções de fracionamento ao sair do campo. Observações opcionais recolhidas.
+- [x] Retirar aceites repetidos do lançamento e da prévia, registrando que a ciência não foi coletada no SGF, sem marcar consentimento ou conferência como verdadeiros. Preservar o contrato e os registros históricos anteriores.
+
 - [x] Corrigir integração incompleta da importação administrativa antiga: os 40 funcionários CNES da UBS Amazonas foram integrados a partir da importação já realizada pelo administrador, sem pedir nova conferência, reenviar PDF, inventar competência ou alterar férias/histórico. Correção idempotente com auditoria; registros manuais, inativos e alterações posteriores excluídos.
 
 - [x] Aba Lançar Férias exclusiva do RH institucional; retirada do administrador, inclusive ação de novo lançamento no calendário administrativo. Abas ocultas até identificar o operador.
@@ -69,3 +73,12 @@ O leitor reconhece ficha completa textual no layout CNES ensaiado; PDFs digitali
 Dados necessários às regras de um afastamento que não existam no CNES continuam sendo conferidos no lançamento (admissão/exercício, aquisição, faltas, licenças e enquadramento jurídico), sem exigir cadastro manual do funcionário. Não inventar esses dados nem direitos.
 
 A revisão não é homologação normativa/institucional. Relatórios analíticos e estatísticas continuam futuros; CSV/PDF do calendário pertencem ao escopo urgente. Manual/treinamento continuam depois da funcionalidade real.
+
+## Governança e termo de ciência — pendente
+
+- [ ] Elaborar formulário para assinatura dos operadores do sistema: ciência sobre tratamento de dados, confidencialidade, acesso autorizado e deveres funcionais. Definir quem assina, quando, versão do texto, guarda e revogação de acesso.
+- [ ] Descrever a conferência das normativas, do direito e do saldo pelo RH, com anuências e documentos de concessão mantidos no processo administrativo externo; definir procedimento para divergências e atualização normativa.
+- [ ] Definir responsáveis pelo controle de dados dentro e fora do SGF, finalidade e base legal do tratamento, minimização, compartilhamento, retenção, atendimento aos titulares e incidentes, com encarregado de dados e assessoria jurídica. Evitar consentimento genérico como base automática para tratamento público.
+- [ ] Submeter o termo à assessoria jurídica e ao encarregado. A assinatura distribui deveres e documenta ciência; não presumir exclusão das responsabilidades legais da Prefeitura/DAPS ou dos agentes de tratamento. Não substituir concessão de férias por termo de uso.
+
+Próxima simplificação a avaliar: manter o regime jurídico já conferido por vínculo (separado do CNES) e mostrar perguntas de faltas/licenças apenas conforme a modalidade; não inferir regime de CBO ou descrição CNES.

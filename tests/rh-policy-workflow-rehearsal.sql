@@ -64,3 +64,18 @@ begin
  begin perform public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,prize);raise exception 'KNOWN_BALANCE_IGNORED';exception when others then if sqlerrm<>'RH_LEAVE_RIGHT_INVALID' then raise;end if;end;
  begin perform public.rh_calendar_window(actor,null,unit_id,'2027-01-01','2028-01-01',0,'','{}');raise exception 'UNBOUNDED_RANGE';exception when others then if sqlerrm<>'RH_INPUT_INVALID' then raise;end if;end;
 end $$;
+
+-- Criação e reprogramação simplificadas passam pelas mesmas transações e saldos.
+do $$
+declare actor uuid:='f6000000-0000-0000-0000-000000000001';unit_id uuid:='f6000000-0000-0000-0000-000000000100';entry uuid;preview jsonb;result jsonb;leave_id uuid;
+item jsonb:='{"entryMode":"simplified","type":"regulamentar","regime":"efetivo","acquisitionEnd":"2026-12-31","startDate":"2028-03-01","protocolDate":"2026-01-01","recognitionReference":"Processo sintético simplificado","absenceCount":0,"familyLeaveDays":0,"personalLeaveDays":0,"spouseLeaveDays":0,"healthLeaveDays":0,"suspended":false,"cltLoss":false,"regularLicenseLoss":false,"split":"none"}';
+begin
+ select id into strict entry from private.cnes_registry_entries where cnes_unit_id=unit_id and source_id=repeat('e',64);
+ preview:=public.rh_preview_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item);
+ result:=public.rh_create_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,entry,item,'fa000000-0000-0000-0000-000000000004',preview->>'digest');leave_id:=(result->>'id')::uuid;
+ if not exists(select 1 from private.rh_leaves where id=leave_id and plan->>'acquisition_start'='2026-01-01' and plan->'admission_date'='null'::jsonb and plan->>'confirmation_collection'='not_collected_in_sgf') then raise exception 'SIMPLIFIED_CREATE_INVENTED_DATA';end if;
+ item:=item||'{"startDate":"2028-05-02"}';
+ preview:=public.rh_preview_leave_revision(actor,'fa000000-0000-0000-0000-000000000100',unit_id,leave_id,1,item);
+ perform public.rh_revise_leave(actor,'fa000000-0000-0000-0000-000000000100',unit_id,leave_id,1,item,'fa000000-0000-0000-0000-000000000005',preview->>'digest','Reprogramação sintética simplificada');
+ if not exists(select 1 from private.rh_leave_revisions where private.rh_leave_revisions.leave_id=(result->>'id')::uuid and version=1 and plan->'eligibility_confirmed'='null'::jsonb) then raise exception 'SIMPLIFIED_REVISION_LOST_HISTORY';end if;
+end $$;

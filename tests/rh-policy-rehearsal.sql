@@ -46,3 +46,18 @@ begin
  p:=private.rh_make_leave_plan(r,i||'{"secondStartDate":"2029-03-01"}');if p->'periods'->1->>'start_date'<>'2029-03-01' then raise exception 'PRIZE_EXPIRY_INVENTED';end if;
  p:=private.rh_make_leave_plan(r,i||'{"split":"none","historicalUsedDays":60,"previousPrizeStart":"2026-03-01"}');if p->>'vacation_days'<>'30' then raise exception 'REMAINING_FAILED';end if;
 end $$;
+
+-- Contrato simplificado não pressupõe admissão ou assinatura de termos.
+do $$
+declare i jsonb;p jsonb;
+begin
+ i:='{"entryMode":"simplified","type":"regulamentar","regime":"efetivo","acquisitionEnd":"2025-12-31","startDate":"2027-03-01","protocolDate":"2026-01-01","recognitionReference":"TESTE SINTETICO","absenceCount":0,"familyLeaveDays":0,"personalLeaveDays":0,"spouseLeaveDays":0,"healthLeaveDays":0,"suspended":false,"cltLoss":false,"regularLicenseLoss":false,"split":"none"}';
+ p:=private.rh_make_leave_plan('{}',i);
+ if p->>'acquisition_start'<>'2025-01-01' or p->'admission_date'<>'null'::jsonb or p->'eligibility_confirmed'<>'null'::jsonb or p->>'confirmation_collection'<>'not_collected_in_sgf' then raise exception 'SIMPLIFIED_FABRICATED_IDENTITY_OR_CONSENT';end if;
+ if p->'legal'->'evidence' ?| array['eligibilityConfirmed','managerConsent','employeeConsent'] then raise exception 'CONSENT_INVENTED';end if;
+ p:=private.rh_make_leave_plan('{}',i||'{"acquisitionEnd":"2025-02-28"}');if p->>'acquisition_start'<>'2024-03-01' then raise exception 'LEAP_START_INVALID';end if;
+ p:=private.rh_make_leave_plan('{}',i||'{"acquisitionEnd":"2024-02-28"}');if p->>'acquisition_start'<>'2023-02-28' then raise exception 'LEAP_CLAMP_INVALID';end if;
+ p:=private.rh_make_leave_plan('{}',i||'{"type":"premio","prizeCycle":1,"historicalUsedDays":0,"acquisitionEnd":"2024-12-31","split":"30-60","secondStartDate":"2028-06-01"}');if p->>'acquisition_start'<>'2020-01-01' or p->>'days'<>'90' then raise exception 'PRIZE_DERIVATION_INVALID';end if;
+ begin perform private.rh_make_leave_plan('{"admission_date":"2025-02-01"}',i);raise exception 'KNOWN_ADMISSION_IGNORED';exception when others then if sqlerrm<>'RH_LEAVE_ACQUISITION_INVALID' then raise;end if;end;
+ begin perform private.rh_make_leave_plan('{}',i||'{"absenceCount":10,"split":"10-15","secondStartDate":"2027-06-01"}');raise exception 'REDUCTION_RULE_BYPASSED';exception when others then if sqlerrm<>'RH_LEAVE_SPLIT_INVALID' then raise;end if;end;
+end $$;

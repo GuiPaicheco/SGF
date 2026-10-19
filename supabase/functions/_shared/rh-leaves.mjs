@@ -3,16 +3,18 @@ const fail=()=>{throw Error('RH_LEAVE_INPUT_INVALID');};
 const day=value=>{if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))fail();const date=new Date(value+'T12:00:00Z');if(!Number.isFinite(date.valueOf())||date.toISOString().slice(0,10)!==value)fail();return value;};
 export function leaveItem(item){
  if(!item||typeof item!=='object'||Array.isArray(item))fail();
- const fields=new Set(['type','dateMode','returnDate','startDate','secondStartDate','thirdStartDate','admissionDate','acquisitionStart','acquisitionEnd','split','parts','regime','absenceCount','familyLeaveDays','personalLeaveDays','spouseLeaveDays','healthLeaveDays','suspended','cltLoss','prizeCycle','historicalUsedDays','previousPrizeStart','recognitionReference','protocolDate','managerConsent','employeeConsent','eligibilityConfirmed','rightId','notes','scheduleConfirmed','regularLicenseLoss']);
+ const fields=new Set(['entryMode','type','dateMode','returnDate','startDate','secondStartDate','thirdStartDate','admissionDate','acquisitionStart','acquisitionEnd','split','parts','regime','absenceCount','familyLeaveDays','personalLeaveDays','spouseLeaveDays','healthLeaveDays','suspended','cltLoss','prizeCycle','historicalUsedDays','previousPrizeStart','recognitionReference','protocolDate','managerConsent','employeeConsent','eligibilityConfirmed','rightId','notes','scheduleConfirmed','regularLicenseLoss']);
  if(Object.keys(item).some(key=>!fields.has(key))||!['regulamentar','premio'].includes(item.type))throw Error('RH_LEAVE_MODALITY_DISABLED');
- if(item.eligibilityConfirmed!==true||item.managerConsent!==true)throw Error('RH_LEAVE_CONFIRMATION_REQUIRED');
+ const simplified=item.entryMode==='simplified';if(item.entryMode!==undefined&&!simplified)fail();
+ if(!simplified&&(item.eligibilityConfirmed!==true||item.managerConsent!==true))throw Error('RH_LEAVE_CONFIRMATION_REQUIRED');
  if(!['efetivo','comissionado','contratado_estatutario','acs_ace_estatutario','celetista','especial'].includes(item.regime))throw Error('RH_LEAVE_REGIME_REQUIRED');
  const mode=item.dateMode??'start';if(!['start','return'].includes(mode))fail();
  if((mode==='return'&&item.startDate)||(mode==='start'&&item.returnDate))fail();
  const result={type:item.type,regime:item.regime,dateMode:mode,...(mode==='return'?{returnDate:day(item.returnDate)}:{startDate:day(item.startDate)}),eligibilityConfirmed:true,managerConsent:true,employeeConsent:item.employeeConsent===true,scheduleConfirmed:item.scheduleConfirmed===true,split:item.split??'none',notes:item.notes??''};
  if(typeof result.notes!=='string'||result.notes.length>1000||typeof item.recognitionReference!=='string'||item.recognitionReference.trim().length<3||item.recognitionReference.length>300)throw Error('RH_LEAVE_EVIDENCE_REQUIRED');
  result.recognitionReference=item.recognitionReference.trim();
- for(const k of ['admissionDate','acquisitionStart','acquisitionEnd','protocolDate'])result[k]=day(item[k]);
+ if(simplified){result.entryMode='simplified';delete result.eligibilityConfirmed;delete result.managerConsent;delete result.employeeConsent;for(const k of ['acquisitionEnd','protocolDate'])result[k]=day(item[k]);for(const k of ['admissionDate','acquisitionStart'])if(item[k])result[k]=day(item[k]);}
+ else for(const k of ['admissionDate','acquisitionStart','acquisitionEnd','protocolDate'])result[k]=day(item[k]);
  for(const k of ['secondStartDate','thirdStartDate','previousPrizeStart'])if(item[k])result[k]=day(item[k]);
  for(const k of ['absenceCount','familyLeaveDays','personalLeaveDays','spouseLeaveDays','healthLeaveDays','prizeCycle','historicalUsedDays']){
   const v=item[k]??0;if(!Number.isInteger(v)||v<0||v>3000)fail();result[k]=v;

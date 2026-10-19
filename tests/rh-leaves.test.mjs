@@ -37,3 +37,11 @@ test('retorno envia apenas a data ativa e rejeita contextos internos de revisão
  const {startDate,...rest}=regular;assert.equal(leaveItem({...rest,dateMode:'return',returnDate:'2027-03-09'}).startDate,undefined);
  for(const patch of [{dateMode:'outro'},{returnDate:'2027-02-30'},{startDate:'2027-03-01'},{revision:true},{_revisionLeave:id}])assert.throws(()=>leaveItem({...rest,dateMode:'return',returnDate:'2027-03-09',...patch}),/RH_LEAVE_/);
 });
+
+test('modo simplificado aceita só fim aquisitivo e não fabrica aceites nem admissão',()=>{
+ const {admissionDate,acquisitionStart,eligibilityConfirmed,managerConsent,...simple}=regular;
+ const result=leaveItem({...simple,entryMode:'simplified'});assert.equal(result.acquisitionEnd,regular.acquisitionEnd);
+ for(const field of ['admissionDate','acquisitionStart','eligibilityConfirmed','managerConsent','employeeConsent'])assert.equal(result[field],undefined);
+ assert.throws(()=>leaveItem({...simple,entryMode:'outro'}),/RH_LEAVE_INPUT_INVALID/);
+ assert.throws(()=>leaveItem({...simple,entryMode:'simplified',acquisitionEnd:'2025-02-30'}),/RH_LEAVE_INPUT_INVALID/);
+});

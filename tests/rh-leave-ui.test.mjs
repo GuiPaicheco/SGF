@@ -34,7 +34,7 @@ async function form(ui,request,editing){await ui.api.open({app:ui.app,esc,reques
  for(const node of ui.app.querySelector('#rh-leave-form').querySelectorAll('[name]'))if(node.type==='checkbox')node.checked=true;
 }
 test('formulário não oferece banco, horas extras, matrícula ou nascimento obrigatório',async()=>{
- const ui=harness();await form(ui,async()=>resources);assert.doesNotMatch(ui.app.innerHTML,/value="banco_horas"|availableHours|extraHours|Matrícula|name="birthDate"/);assert.match(ui.app.innerHTML,/CNES não comprova/);assert.ok(ui.app.querySelector('#rh-leave-acquisitionStart'));
+ const ui=harness();await form(ui,async()=>resources);assert.doesNotMatch(ui.app.innerHTML,/value="banco_horas"|availableHours|extraHours|Matrícula|name="birthDate"/);assert.match(ui.app.innerHTML,/O que é período aquisitivo/);assert.equal(ui.app.querySelector('#rh-leave-acquisitionStart'),null);assert.equal(ui.app.querySelector('#rh-leave-admissionDate'),null);assert.doesNotMatch(ui.app.innerHTML,/name="managerConsent"|name="employeeConsent"|name="eligibilityConfirmed"/);
 });
 test('prévia normativa mostra base e confirmação antes da gravação',async()=>{
  const ui=harness(),calls=[];const request=async p=>{calls.push(p);return p.action==='leave-resources'?resources:preview;};await form(ui,request);await ui.submit('#rh-leave-form');assert.match(ui.app.innerHTML,/Lei 7.989\/2025/);assert.match(ui.app.innerHTML,/Processo sintético/);assert.ok(ui.app.querySelector('#rh-leave-confirm'));assert.equal(calls[1].item.regime,'efetivo');assert.equal(calls[1].item.availableHours,undefined);assert.equal(calls.filter(x=>x.action==='create-leave').length,0);
@@ -54,7 +54,7 @@ test('resposta tardia não sobrescreve outra tela',async()=>{
 });
 test('retorno e revisão preservam contexto e obrigam reconferência',async()=>{
  const ui=harness();let received;const editing={id,version:3,plan:{...plan,date_mode:'return',requested_return:'2027-04-05',admission_date:'2020-01-01',acquisition_start:'2025-01-01',acquisition_end:'2025-12-31',legal:{...plan.legal,evidence:{regime:'efetivo',regularLicenseLoss:false}}}};
- await ui.api.open({app:ui.app,esc,isCurrent:()=>true,entryId:id,editing,onBack:()=>{},request:async p=>{if(p.action==='leave-resources')return resources;received=p;return preview;}});assert.equal(ui.app.querySelector('#rh-leave-startDate'),null);assert.equal(ui.app.querySelector('#rh-leave-returnDate').value,'2027-04-05');ui.set('#rh-leave-reason','Reprogramação conferida');await ui.submit('#rh-leave-form');assert.equal(received.item.startDate,undefined);assert.equal(received.version,3);assert.equal(received.item.eligibilityConfirmed,false);
+ await ui.api.open({app:ui.app,esc,isCurrent:()=>true,entryId:id,editing,onBack:()=>{},request:async p=>{if(p.action==='leave-resources')return resources;received=p;return preview;}});assert.equal(ui.app.querySelector('#rh-leave-startDate'),null);assert.equal(ui.app.querySelector('#rh-leave-returnDate').value,'2027-04-05');ui.set('#rh-leave-reason','Reprogramação conferida');await ui.submit('#rh-leave-form');assert.equal(received.item.startDate,undefined);assert.equal(received.version,3);assert.equal(received.item.eligibilityConfirmed,undefined);assert.equal(received.item.entryMode,'simplified');
 });
 test('folga histórica continua consultável e cancelável, sem nova programação',async()=>{
  const ui=harness();const data={id,status:'programada',snapshot:resources,plan:{...plan,type:'banco_horas'},created_at:'2026-10-18T12:00:00Z'};await ui.api.detail({app:ui.app,esc,isCurrent:()=>true,leaveId:id,onBack:()=>{},request:async()=>data});assert.equal(ui.app.querySelector('#rh-detail-edit'),null);assert.ok(ui.app.querySelector('#rh-close-form'));
@@ -69,4 +69,15 @@ test('conflito ao encerrar recarrega a versão atual sem repetir a ação automa
   if(p.action==='close-leave'){closes++;throw Object.assign(Error('Versão alterada'),{code:'RH_VERSION_CONFLICT'});}
  };
  await ui.api.detail({app:ui.app,esc,isCurrent:()=>true,leaveId:id,onBack(){},request});ui.set('#rh-close-reason','Motivo sintético');await ui.submit('#rh-close-form');assert.equal(reads,2);assert.equal(closes,1);assert.match(ui.app.innerHTML,/Versão 2/);assert.match(ui.app.innerHTML,/outra sessão/);assert.equal(ui.app.querySelector('#rh-close-reason').value,'Motivo sintético');
+});
+
+test('digitar fim aquisitivo não reconstrói o formulário nem perde foco',async()=>{
+ const ui=harness();await form(ui,async()=>resources);const control=ui.app.querySelector('#rh-leave-acquisitionEnd'),html=ui.app.innerHTML;
+ assert.equal(control.listeners.change,undefined);assert.equal(control.listeners.input,undefined);
+ for(const value of ['0002-01-01','0020-01-01','0202-01-01','2025-12-31']){control.value=value;assert.equal(ui.app.querySelector('#rh-leave-acquisitionEnd'),control);}
+ control.listeners.blur();assert.equal(ui.app.innerHTML,html);assert.equal(control.value,'2025-12-31');assert.match(ui.app.querySelector('#rh-leave-split').innerHTML,/10 \+ 15 dias úteis/);
+});
+test('formulário simplificado envia fim aquisitivo sem fabricar admissão, início ou aceites',async()=>{
+ const ui=harness();let sent;await form(ui,async p=>p.action==='leave-resources'?resources:(sent=p,preview));await ui.submit('#rh-leave-form');
+ assert.equal(sent.item.acquisitionEnd,'2025-12-31');for(const field of ['admissionDate','acquisitionStart','eligibilityConfirmed','managerConsent','employeeConsent'])assert.equal(sent.item[field],undefined);assert.equal(sent.item.entryMode,'simplified');
 });

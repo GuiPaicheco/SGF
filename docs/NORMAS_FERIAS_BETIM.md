@@ -43,3 +43,9 @@ A pesquisa incluiu o histórico de alterações do Estatuto, inclusive Leis 8.01
 - Ensaios SQL normativos cobrem transição, faltas, fracionamento, impedimentos e parcelas prêmio; ensaio integrado usa apenas profissionais sintéticos com rollback.
 - Ensaios históricos de contratos anteriores são isolados por transação e explicitamente restauram as antigas funções apenas durante esses testes. Não representam modalidades disponíveis em produção.
 - Aceite cadastral real, conferência dos documentos pela SARH e teste institucional permanecem pendentes; nenhuma concessão real foi efetuada automaticamente.
+
+## Simplificação do lançamento em 19/10/2026
+
+O formulário atual usa o fim do período aquisitivo reconhecido pelo RH e deriva o início de um ciclo anual ou quinquênio no servidor. Exemplo anual inclusivo: exercício em 15/03/2025, sem interrupções, período de 15/03/2025 a 14/03/2026; completa 12 meses em 15/03/2026. Gozo anterior não redefine a aquisição. A admissão conhecida continua limitando o início; quando desconhecida permanece nula, sem usar a aquisição como admissão fictícia. Reprogramação conserva o início histórico se o fim não mudou.
+
+Aceites repetidos foram retirados: novos planos registram `confirmation_collection=not_collected_in_sgf` e `eligibility_confirmed=null`, preservando planos e versões anteriores. Isso não afirma anuência, assinatura ou concessão. A conferência administrativa externa segue necessária; o futuro termo de ciência e a governança LGPD estão nas pendências. Regime, faltas, impedimentos, saldo conhecido, fracionamento e prazos continuam validados.
