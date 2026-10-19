@@ -33,6 +33,17 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ## Limites e continuidade
 
+## Blocos para consolidar o lançamento de férias
+
+- [x] Ajuste de acesso: login com indicação neutra, sem sugerir `admin`; retirada da troca de operador do calendário e da visualização alternativa. A identificação continua no início da sessão; para outro operador, sair e entrar novamente.
+- [ ] **Bloco 1 — Base cadastral e acesso:** validar com o responsável a importação real, competência, cargo/CBO/carga/equipe e operadores autorizados; conferir isolamento entre unidades e preservação de férias após reimportação. A estrutura está implementada; falta o aceite real.
+- [ ] **Bloco 2 — Lançamento de férias no calendário:** revisar o fluxo já existente de selecionar funcionário, modalidade, datas e prévia; conferir regras de férias regulamentares e prêmio, fracionamento, feriados, retorno e sobreposições. Tratar dados que o CNES não fornece no lançamento, sem inventar direitos ou saldos.
+- [ ] **Bloco 3 — Folgas e banco de horas informado:** validar horas declaradas no lançamento, jornada, cálculo e insuficiência. Permitir exceção confirmada com justificativa e auditoria; não manter banco de horas como saldo permanente no cadastro.
+- [ ] **Bloco 4 — Manutenção e comprovante:** validar edição e cancelamento sem apagar histórico, atualização do calendário e comprovante com CBO, carga e equipe; conferir PDF e planilha nos equipamentos usados pelas unidades.
+- [ ] **Bloco 5 — Ensaio completo e piloto:** executar acesso, seleção inicial do operador, lançamento, edição, cancelamento, reimportação e exportação; conferir permissões, duplicidades e uso simultâneo antes do teste institucional.
+
+Próximo trabalho técnico: Bloco 1. Os blocos consolidam e validam o que já existe; não significam que o lançamento de férias precise ser refeito do zero. Relatórios analíticos, estatísticas e treinamento ficam para depois desse ciclo funcional.
+
 O leitor reconhece ficha completa textual no layout CNES ensaiado; PDFs digitalizados ou de outro layout são recusados, sem incorporação parcial silenciosa. PDF sem competência explícita exige mês informado pelo Administrador. Data de emissão não prova competência nem atualização da fonte.
 
 Dados necessários às regras de um afastamento que não existam no CNES continuam sendo conferidos no lançamento (por exemplo nascimento/day-off e admissão), sem exigir cadastro manual do funcionário. Não inventar esses dados nem direitos.

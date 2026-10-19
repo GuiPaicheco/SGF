@@ -20,6 +20,6 @@ test('tela inicial autenticada devolve o usuário ao trabalho operacional',()=>{
 });
 test('login orienta acesso institucional sem oferecer senha provisória ou autocadastro',()=>{
   const {html}=view('renderLogin','  async function login');
-  assert.match(html,/UBS AMAZONAS ou admin/);assert.match(html,/operador autorizado/);
+  assert.match(html,/placeholder="Digite seu login"/);assert.doesNotMatch(html,/UBS AMAZONAS ou admin/);assert.match(html,/operador autorizado/);
   assert.doesNotMatch(html,/123456|Solicitar acesso|data-go="access-request"/);
 });
