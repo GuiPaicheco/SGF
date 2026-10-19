@@ -115,4 +115,3 @@ Próxima simplificação a avaliar: manter o regime jurídico já conferido por 
 - [x] Identificação de SIMULAÇÃO na tela e nos títulos do PDF/XLSX; exportações preservam filtros, paginação e todos os períodos simulados. Funcionários, cargos, equipes e aniversários continuam vindo do cadastro autorizado.
 - [x] 439 testes Node aprovados e build estático aprovado; início I, preservação de datas, cenário determinístico, filtros, paginação, isolamento por unidade, ocultação e falha de autorização verificados.
 - Próximo passo: usuário conferir outubro/novembro de 2026 na UBS Amazonas, alternar nominal/longitudinal, pesquisar conflitos e testar PDF/XLSX. Ocultar o cenário para conferir somente os registros reais; retirar a simulação ao encerrar a homologação do MVP.
-
