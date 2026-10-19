@@ -4,6 +4,9 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 
 ## Requisitos prioritários e implementação
 
+- [x] Corrigir despacho da rota Lançar Férias (aba visível sem renderizador); teste de integração para RH e Administrador. Selecionar unidade carrega funcionários automaticamente.
+- [x] Preservar unidade, busca e seleção no lançamento; período, filtros e colunas do calendário ao trocar abas. Consultas de calendário/diretório reutilizadas em memória por até 30 segundos, com limite de 30 consultas, isolamento por acesso e invalidação nas alterações. Busca/consulta explícita e validações de férias consultam o servidor.
+
 - [x] Aba Lançar Férias ao lado do calendário, para administrador e RH; busca paginada de funcionários CNES e acesso direto ao formulário normativo, preservando identificação do operador e escopo da unidade.
 
 - [x] Calendário administrativo sem unidade selecionada automaticamente; UBS em ordem alfabética e Secretaria por último.

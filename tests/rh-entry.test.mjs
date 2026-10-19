@@ -23,3 +23,14 @@ test('login orienta acesso institucional sem oferecer senha provisória ou autoc
   assert.match(html,/placeholder="Digite seu login"/);assert.doesNotMatch(html,/UBS AMAZONAS ou admin/);assert.match(html,/operador autorizado/);
   assert.doesNotMatch(html,/123456|Solicitar acesso|data-go="access-request"/);
 });
+
+test('rota Lançar Férias despacha a tela correta em administrador e RH institucional',()=>{
+ const start=source.indexOf('function render() {'),end=source.indexOf("  document.addEventListener('click'",start);
+ const body=source.slice(start,end);
+ for(const institutional of [false,true]){
+  let launches=0,home=0;const role=institutional?'rh':'administrador';
+  const context={state:{route:'rh-launch',session:{},profile:{role},activeContext:{institutional}},SGFAccessPolicy:{resolve:r=>r},client:{},sessionAction:{classList:{toggle(){}}},renderHeaderUser(){},renderWorkspaceNav(){},app:{focus(){}},renderRhLaunch(){launches++;},renderHome(){home++;}};
+  for(const name of body.matchAll(/:\s*(render\w+)/g))if(!context[name[1]])context[name[1]]=()=>{};
+  vm.runInNewContext(body+';render();',context);assert.equal(launches,1);assert.equal(home,0);
+ }
+});

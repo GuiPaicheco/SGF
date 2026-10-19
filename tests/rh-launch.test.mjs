@@ -37,3 +37,14 @@ test('consulta concluída após navegação não substitui a outra tela',async()
  current=false;h.app.innerHTML='Outra tela';finish({employees:[employee],total:1});await pending;assert.equal(h.app.innerHTML,'Outra tela');
 });
 
+
+test('trocar unidade carrega funcionários e retornar à aba preserva unidade e seleção',async()=>{
+ const h=harness(),saved={},calls=[];
+ const request=async q=>{calls.push(q);return q.action==='directory'?{units:[{cnes:'1',login:'UBS A'}]}:{employees:[employee],total:1};};
+ await h.mount({app:h.app,esc:String,isCurrent:()=>true,admin:true,request,viewState:saved});
+ h.app.querySelector('#rh-launch-name').value='Ana';h.app.querySelector('#rh-launch-unit').onchange({target:{value:'1'}});await tick();
+ h.app.querySelector('#rh-launch-employee').onchange({target:{value:employee.entry_id}});
+ assert.equal(saved.unit,'1');assert.equal(saved.search,'Ana');assert.equal(saved.selected,employee.entry_id);
+ await h.mount({app:h.app,esc:String,isCurrent:()=>true,admin:true,request,viewState:saved});
+ assert.equal(calls.at(-1).cnes,'1');assert.equal(calls.at(-1).search,'Ana');assert.match(h.app.innerHTML,/value="entry-1" selected/);
+});

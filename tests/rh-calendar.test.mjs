@@ -65,3 +65,9 @@ test('sobreposição de registros distintos ganha aviso textual; repetição do 
  await api.mount({app,esc,isCurrent:()=>true,request});assert.match(app.innerHTML,/rh-conflict/);assert.match(app.innerHTML,/Possível sobreposição/);
  await api.mount({app,esc,isCurrent:()=>true,request:async()=>({...await request(),absences:[absence,{...absence}]})});assert.doesNotMatch(app.innerHTML,/class="rh-day rh-conflict"/);
 });
+
+test('calendário restaura período, filtros e colunas ao voltar à aba',async()=>{
+ const {api,app}=harness(),viewState={month:'2027-03',mode:'range',start:'2027-03-01',end:'2027-03-20',search:'Ana',unit:'1',page:1,colOpen:false,filters:{position:'Enfermeiro',cbo:'123',team:'Equipe A',review:'todos',type:'todos',status:'todos'},cols:[['full_name','Nome'],['cbo','CBO']],hidden:['cbo']};let query;
+ await api.mount({app,esc,isCurrent:()=>true,viewState,request:async q=>(query=q,{employees:[],absences:[],records:[],holidays:[],total:51,range_start:'2027-03-01',range_end:'2027-03-20'})});
+ assert.equal(query.mode,'range');assert.equal(query.start,'2027-03-01');assert.equal(query.search,'Ana');assert.equal(query.page,1);assert.equal(query.filters.team,'Equipe A');assert.match(app.innerHTML,/value="2027-03-20"/);
+});

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 
-const source = readFileSync(new URL('../assets/access-policy.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../assets/rh-query-cache.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/access-policy.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
 
 test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas', async () => {
   const listeners = {};
