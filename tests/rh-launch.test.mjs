@@ -27,7 +27,7 @@ test('admin escolhe unidade antes de buscar, sem selecionar Amazonas automaticam
 test('RH mantém escopo do servidor e não permite vínculo sem conferência',async()=>{
  const h=harness(),calls=[];
  await h.mount({app:h.app,esc:String,isCurrent:()=>true,request:async q=>{calls.push(q);return {employees:[{...employee,binding_confirmed:false}],total:51};}});
- assert.equal(Object.hasOwn(calls[0],'cnes'),false);assert.match(h.app.innerHTML,/Aguardando conferência CNES/);
+ assert.equal(Object.hasOwn(calls[0],'cnes'),false);assert.match(h.app.innerHTML,/Aguardando conferência CNES/);assert.match(h.app.innerHTML,/administrador precisa conferir e aplicar a importação CNES/);
  h.app.querySelector('#rh-launch-employee').value='entry-1';h.nodes.get('#rh-launch-form').onsubmit({preventDefault(){}});assert.equal(h.opened.length,0);
  h.nodes.get('#rh-launch-next').onclick();await tick();assert.equal(calls[1].page,1);
 });
