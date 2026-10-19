@@ -53,8 +53,8 @@ test('consulta, paginação e limpeza preservam mês e enviam os filtros ao serv
  const {api,app,nodes}=harness(),calls=[];const result={context:{cnes_name:'TESTE'},total:60,employees:[],absences:[],holidays:[]};
  await api.mount({app,esc,isCurrent:()=>true,request:async p=>{calls.push(p);return result;}});
  app.querySelector('#rh-calendar-month').value='2027-03';
- nodes.set('[data-rh-filter="cbo"]:checked',[{value:'123456'}]);nodes.set('[data-rh-filter="team"]:checked',[{value:'Equipe'}]);nodes.set('[data-rh-conflict]:checked',[{dataset:{rhConflict:'team'}}]);
- app.querySelector('#rh-calendar-filter').onsubmit({preventDefault(){}});await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).filters.cbo[0],'123456');assert.equal(calls.at(-1).filters.conflict_criteria[0],'team');
+ nodes.set('[data-rh-filter="position"]:checked',[{value:'Enfermeiro'}]);nodes.set('[data-rh-filter="team"]:checked',[{value:'Equipe'}]);nodes.set('[data-rh-conflict]:checked',[{dataset:{rhConflict:'team'}}]);
+ app.querySelector('#rh-calendar-filter').onsubmit({preventDefault(){}});await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).filters.position[0],'Enfermeiro');assert.equal(calls.at(-1).filters.cbo.length,0);assert.equal(calls.at(-1).filters.conflict_criteria[0],'team');
  app.querySelector('#rh-calendar-next').onclick();await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).page,1);assert.equal(calls.at(-1).filters.team[0],'Equipe');
  app.querySelector('#rh-calendar-clear').onclick();await new Promise(r=>setImmediate(r));assert.equal(calls.at(-1).page,0);assert.equal(calls.at(-1).month,'2027-03');assert.equal(calls.at(-1).filters.status,'todos');assert.equal(calls.at(-1).search,'');
 });
@@ -89,7 +89,7 @@ test('após lançar, calendário abre intervalo salvo e limpa filtros anteriores
 
 test('checkboxes usam catálogo da unidade em ordem alfabética, sem situação ou campos livres',async()=>{
  const {api,app}=harness();await api.mount({app,esc,isCurrent:()=>true,request:async()=>({context:{},total:0,employees:[],absences:[],facets:{full_name:['ZÉ','ANA'],position:['ZELADOR','ADMINISTRATIVO'],cbo:['999999','111111'],team:['EQUIPE Z','EQUIPE A','Não se aplica']},conflicts:[]})});
- assert.ok(app.innerHTML.indexOf('value="ANA"')<app.innerHTML.indexOf('value="ZÉ"'));assert.ok(app.innerHTML.indexOf('value="EQUIPE A"')<app.innerHTML.indexOf('value="EQUIPE Z"'));assert.doesNotMatch(app.innerHTML,/rh-filter-type|rh-filter-status|rh-calendar-search|rh-col-birth_month_day|Retorno previsto<\/th>/);assert.match(app.innerHTML,/Exportar planilha \(XLSX\)/);
+ assert.ok(app.innerHTML.indexOf('value="ANA"')<app.innerHTML.indexOf('value="ZÉ"'));assert.ok(app.innerHTML.indexOf('value="EQUIPE A"')<app.innerHTML.indexOf('value="EQUIPE Z"'));assert.doesNotMatch(app.innerHTML,/data-rh-filter="cbo"|rh-filter-type|rh-filter-status|rh-calendar-search|rh-col-birth_month_day|Retorno previsto<\/th>/);assert.match(app.innerHTML,/Exportar planilha \(XLSX\)/);
 });
 test('conflito de colega fora da página é marcado, sem inventar aniversário fora da competência',async()=>{
  const {api,app}=harness(),r={bond_id:uuid,full_name:'ANA',birth_month_day:'12-20'};await api.mount({app,esc,isCurrent:()=>true,request:async()=>({context:{},range_start:'2027-01-20',range_end:'2027-01-20',total:1,employees:[r],absences:[{id:'a',bond_id:uuid,type:'regulamentar',start_date:'2027-01-20',end_date:'2027-01-20'}],conflicts:[{date:'2027-01-20',bond_ids:[uuid,'outra-pagina']}],facets:{}})});assert.match(app.innerHTML,/Afastamentos simultâneos na unidade/);assert.match(app.innerHTML,/! F/);assert.doesNotMatch(app.innerHTML,/20\/12|>A<\/td>/);

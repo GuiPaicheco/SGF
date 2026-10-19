@@ -8,7 +8,7 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] Lançar no calendário valida e grava numa única ação, com chave contra duplicação; redireciona para funcionário e intervalo incluindo retorno. Falhas exibem mensagem; envio sem confirmação pode ser repetido com a mesma chave.
 - [x] Campo Número do processo ou memorando; comunicação ao RH retirada. Data ausente permanece nula e prazo não é atestado automaticamente; conferência de antecedência fica no processo externo.
 - [x] Calendário sem Programar/Ações. Unidade, competência do período consultado e cabeçalhos fixos. Visão longitudinal padrão por funcionário e nominal por período de afastamento. Retiradas as colunas de aniversário e retorno previsto; aniversário aparece somente na célula correspondente dentro do período e retorno permanece como marca R. Competência da importação continua no cadastro da unidade.
-- [x] Filtros do calendário por checkbox de funcionários, cargos, CBOs e equipes efetivamente existentes na unidade, em ordem alfabética e independentes da página atual. Seleções dentro de cada filtro são alternativas; filtros diferentes são cruzados. Retirados os filtros Situação e Modalidade da interface; o calendário consulta todas as modalidades existentes. Equipe vazia é normalizada para Não se aplica, sem modificar a evidência CNES nem snapshots históricos.
+- [x] Filtros do calendário por checkbox de funcionários, cargos e equipes efetivamente existentes na unidade, em ordem alfabética e independentes da página atual. Seleções dentro de cada filtro são alternativas; filtros diferentes são cruzados. Retirados os filtros Situação e Modalidade da interface; o calendário consulta todas as modalidades existentes. Equipe vazia é normalizada para Não se aplica, sem modificar a evidência CNES nem snapshots históricos.
 - [x] Conflitos entre duas ou mais pessoas afastadas no mesmo dia: critérios combináveis de mesmo cargo, CBO e equipe, exigindo coincidência em todos os critérios marcados. Alerta visual, sem bloquear lançamento, conforme decisão do usuário. Consulta de apenas funcionários com conflito; cálculo da unidade inteira antes de filtros de nomes/paginação, com equipes múltiplas, dias atribuídos do legado, cancelamentos excluídos e mesma pessoa com vários vínculos não contada duas vezes.
 - [x] Exportação direta de PDF A4 paisagem, todas as colunas funcionais e todos os funcionários filtrados, em faixas de até sete dias, com identificação, competência, cabeçalhos, legenda e numeração repetidos. Quebras verticais preservam as linhas; textos longos são quebrados dentro das células.
 - [x] Exportação XLSX substitui CSV na interface: calendário colorido, filtros, linhas/colunas congeladas, datas e cargas tipadas, CBO como texto e aba com detalhes dos afastamentos. Bibliotecas locais carregadas apenas ao exportar; dados não enviados a serviços de conversão.
@@ -27,7 +27,7 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] Lista de funcionários no lançamento, em ordem alfabética fixa antes da paginação, sem opções de reordenação; nome, cargo, CBO, equipe e carga horária, com botão por funcionário. Consulta leve independente do calendário; somente funcionários CNES ativos da unidade do RH.
 
 - [x] Calendário administrativo sem unidade selecionada automaticamente; UBS em ordem alfabética e Secretaria por último.
-- [x] Consulta mensal ou por datas, com nomes, CBO, cargo e equipe; filtros e critérios de conflito recolhidos. Intervalos de até 93 dias por consulta.
+- [x] Consulta mensal ou por datas, com nomes, cargo e equipe; filtros e critérios de conflito recolhidos. Intervalos de até 93 dias por consulta.
 - [x] Matrícula deixa de ser requisito para funcionários CNES; não fabricar matrícula. Coluna independente de carga horária, por exemplo `40h`.
 - [x] Cargo/ocupação vem da descrição CNES; equipes cruzadas por CNS/CBO, sem união por nome.
 - [x] Rolagem horizontal, ocultação e reorganização das colunas funcionais; calendário sem edição direta dos dados cadastrais.
@@ -105,3 +105,5 @@ Próxima simplificação a avaliar: manter o regime jurídico já conferido por 
 
 - [x] Retirar o filtro Modalidade do calendário e consultar todas as modalidades, inclusive ao restaurar uma visualização anterior.
 - Próximo passo: pequenos ajustes visuais indicados pelo usuário e acompanhamento do uso do MVP pelo RH.
+
+- [x] Usar Cargo com nomes das profissões em lugar da seleção numérica de CBO no calendário; limpar filtros de CBO ao restaurar consultas anteriores.
