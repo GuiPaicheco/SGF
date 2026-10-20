@@ -111,7 +111,16 @@ Próxima simplificação a avaliar: manter o regime jurídico já conferido por 
 ### Início das férias e cenário da UBS Amazonas — 19/10/2026
 
 - [x] Marcar o primeiro dia efetivo do período como I, em lugar de F/P naquele dia; dias seguintes mantêm F/P. Mesmo comportamento nas visões longitudinal/nominal, PDF e XLSX, sem acrescentar dias nem alterar concessões.
-- [x] Cenário visual de teste da UBS Amazonas, ativo inicialmente e com opção de ocultar: até 32 funcionários CNES com vínculo confirmado e 33 períodos simulados, entre outubro/2026 e janeiro/2027. Inclui férias regulamentares, prêmio, intervalos sobrepostos e conflitos intencionais; mesmo cargo/equipe selecionados inicialmente. Sem inserir férias, alterar saldos ou gerar concessões no banco.
+- [x] Cenário visual da UBS Amazonas utilizado para testar até 32 funcionários e 33 períodos simulados, sem gravar concessões. Retirado integralmente após os testes, por solicitação do responsável para iniciar uso real.
 - [x] Identificação de SIMULAÇÃO na tela e nos títulos do PDF/XLSX; exportações preservam filtros, paginação e todos os períodos simulados. Funcionários, cargos, equipes e aniversários continuam vindo do cadastro autorizado.
 - [x] 439 testes Node aprovados e build estático aprovado; início I, preservação de datas, cenário determinístico, filtros, paginação, isolamento por unidade, ocultação e falha de autorização verificados.
-- Próximo passo: usuário conferir outubro/novembro de 2026 na UBS Amazonas, alternar nominal/longitudinal, pesquisar conflitos e testar PDF/XLSX. Ocultar o cenário para conferir somente os registros reais; retirar a simulação ao encerrar a homologação do MVP.
+- Etapa encerrada: cenário retirado para uso real; arquivos e controles de simulação não integram a publicação atual.
+
+### Preparação para uso real — 19/10/2026
+
+- [x] Retirar módulo, inclusão no HTML, controles, aviso e estilos do cenário de teste. Manter o marcador I e as exportações do calendário real.
+- [x] Limpeza única autorizada pelo responsável: removidos 1 lançamento RH, 3 solicitações antigas (2 férias e 1 folga), seus períodos/dependências e 2 movimentos com 1 conta do banco de horas antigo. Sem migração destrutiva que possa ser repetida automaticamente.
+- [x] Ensaiar a limpeza com rollback e depois executar em transação; abortar caso as contagens previamente conferidas mudem. Comparar integralmente 22 conjuntos cadastrais antes/depois e preservar auditoria da operação.
+- [x] Conferência após gravação: zero lançamentos RH, solicitações antigas, períodos, revisões e movimentos de banco de horas; preservados 46 perfis, 43 funcionários/vínculos, 40 entradas CNES, 42 contas RH, 4 autorizações de operadores e 11 feriados. Dados cadastrais não alterados.
+- [x] 434 testes Node e build aprovados após retirar os testes exclusivos do cenário; regra do primeiro dia I continua verificada.
+- Próximo passo: iniciar o uso real com os cadastros existentes e acompanhar os primeiros lançamentos do RH.
