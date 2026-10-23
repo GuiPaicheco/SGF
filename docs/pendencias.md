@@ -6,7 +6,7 @@
 2. [x] Aniversário (dia/mês) confirmado pelo RH gera day-off anual, excluído da contagem de férias regulamentares úteis; início e quantidade preservados, fim e retorno ajustados. Não é exigida solicitação anual; data de nascimento legada sem confirmação do RH não concede day-off. Não muda férias em dias corridos.
 3. [x] Cadastro/alteração/remoção de aniversário RH e cadastro/cancelamento de day-off datado recalculam férias úteis programadas do vínculo, com versões e auditoria; bloqueio atômico em conflito com outro afastamento/parcela. Day-off e férias não geram falso alerta de sobreposição na mesma data.
 4. [x] Testes de período anual, calendário e comprovante; ensaio SQL sintético de prévia, gravação, recálculo, cancelamento, idempotência, histórico e conflito executado com rollback.
-5. [ ] Publicar migration, função e site; conferir testes completos e deploy.
+5. [x] Migration 20261023134116 e manage-rh v15 publicados; site publicado no Vercel (da43adb, READY). 444 testes Node e 4 Python passaram, além dos ensaios SQL com rollback e consulta real do ano completo com 40 profissionais.
 
 ## Bloco atual — API CNES, consulta e operações RH
 
@@ -24,7 +24,7 @@ Esta seção prevalece sobre os itens históricos abaixo: atualização não rem
 10. [x] CI completo aprovado (Node/Python, banco vazio, ensaios SQL e restauração); versão incorporada à main e deploy Vercel pronto. Verificação local adicional: 441 testes Node e 4 Python; proteção contra duplicação do payload CNES no envio.
 11. [ ] Conferência acompanhada no navegador com admin e RH antes do uso institucional; manter governança/aceite pendentes.
 
-Contrato e procedimentos: [Atualização CNES](ATUALIZACAO_CNES.md). A data de consulta não é competência. Aniversário informado não é day-off concedido.
+Contrato e procedimentos: [Atualização CNES](ATUALIZACAO_CNES.md). A data de consulta não é competência. Aniversário confirmado pelo RH gera day-off anual; data de nascimento legada sem confirmação permanece informativa.
 
 ## Registro das etapas anteriores (19/10)
 
