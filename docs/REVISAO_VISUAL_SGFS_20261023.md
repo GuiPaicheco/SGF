@@ -31,6 +31,8 @@ Console sem erros/avisos na consulta realizada. Suite Node: 456 aprovados, zero 
 
 ## Limites e próximo passo
 
-A Administração autenticada aguarda login do responsável na aba Chrome de revisão: a senha foi alterada na base recebida do GitHub. Não declarar suas telas como visualmente verificadas nesta revisão. Também não foram repetidos lançamentos, cancelamentos, importações CNES ou alteração de acessos no banco real. A revisão é visual; não representa ensaio de carga ou medição de latência do backend.
+Após o responsável fornecer o acesso, a Administração foi conferida em produção: calendário sem unidade pré-selecionada, consulta por intervalo, diretório das unidades, cadastro CNES com 40 profissionais e feriados com abrangência geral/específica. Inspeção em desktop de 1920 px e celular de 390 px. O diretório recebeu cartões móveis para manter o botão de acesso visível. Não foram repetidos lançamentos, cancelamentos, importações CNES ou alteração de acessos no banco real. A revisão é visual; não representa ensaio de carga ou medição de latência do backend.
 
-Próximo passo: concluir a inspeção administrativa autenticada e receber o retorno visual do piloto, preservando os registros reais.
+Publicação Vercel confirmada para o commit visual; início e login SGFS conferidos no endereço público. Captura de evidência sem dados pessoais mantida localmente em `.tools/evidencias/sgfs-inicio-publicado.jpg`.
+
+Próximo passo: receber o retorno visual do piloto e conferir impressos nos equipamentos da unidade, preservando os registros reais.

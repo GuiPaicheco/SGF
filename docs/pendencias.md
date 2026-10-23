@@ -18,7 +18,7 @@ Esta é a lista atual. Itens concluídos foram transferidos para o [histórico](
 ## 02. Acompanhamento do piloto
 
 - [x] Atualizar a base com o GitHub e revisar identidade SGFS, início, login, cabeçalho, rodapé, navegação, filtros e apresentação dos formulários; conferir visualmente desktop, tablet e celular. [Relatório visual](REVISAO_VISUAL_SGFS_20261023.md).
-- [ ] Completar a conferência visual autenticada da Administração após login do responsável na aba de revisão. A credencial administrativa atual não está disponível nesta sessão.
+- [x] Conferência visual autenticada da Administração em produção: calendário mensal/intervalo, diretório, cadastro CNES e feriados; desktop e celular.
 
 1. [ ] RH responsável executar cenário real autorizado: férias, folga, afastamento com/sem retorno, alteração, cancelamento e consulta do histórico.
 2. [ ] Conferir impressão/assinaturas do comprovante nos equipamentos institucionais e exportações no software utilizado pela unidade.

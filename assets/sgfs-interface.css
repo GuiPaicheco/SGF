@@ -163,6 +163,15 @@
   .rh-calendar .rh-col-position,.rh-calendar .rh-col-team { min-width:150px; }
   .rh-launch-card td:last-child { min-width:0; }
   .rh-launch-card td .button { margin:0; font-size:.84rem; min-height:44px; }
+  .table-wrap:has([data-unit-open]) { overflow:visible; border:0; }
+  .table-wrap:has([data-unit-open]) table { display:block; min-width:0; width:100%; }
+  .table-wrap:has([data-unit-open]) thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  .table-wrap:has([data-unit-open]) tbody { display:grid; gap:.75rem; }
+  .table-wrap:has([data-unit-open]) tr { display:grid; padding:1rem; border:1px solid var(--line); border-radius:10px; background:#fafcf9; }
+  .table-wrap:has([data-unit-open]) td,.table-wrap:has([data-unit-open]) th { display:block; padding:0; border:0; background:transparent; white-space:normal; }
+  .table-wrap:has([data-unit-open]) td:nth-child(2) { margin:.35rem 0 .8rem; color:var(--muted); font-size:.8rem; }
+  .table-wrap:has([data-unit-open]) td:nth-child(2)::before { content:'CNES '; }
+  .table-wrap [data-unit-open] { width:100%; }
   .footer-copy { font-size:.67rem; }
   .site-footer { padding:1rem; }
 }
