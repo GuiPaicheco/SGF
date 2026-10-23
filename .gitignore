@@ -10,3 +10,6 @@ supabase/.temp/
 .sgf-imports/
 tmp/pdfs/
 output/pdf/
+__pycache__/
+.pytest_cache/
+.venv/

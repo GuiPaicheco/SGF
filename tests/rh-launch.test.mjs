@@ -17,7 +17,7 @@ test('lista mostra funcionários e abre lançamento por linha, sem seleção de 
  const h=harness(),calls=[];
  await h.mount({app:h.app,esc,isCurrent:()=>true,request:async q=>{calls.push(q);return {employees:[employee,{...employee,entry_id:'entry-2',full_name:'Zélia'}],total:2};}});
  assert.equal(calls[0].action,'launch-employees');assert.equal(Object.hasOwn(calls[0],'cnes'),false);assert.equal(Object.hasOwn(calls[0],'month'),false);
- assert.ok(h.app.innerHTML.indexOf('Ana')<h.app.innerHTML.indexOf('Zélia'));assert.match(h.app.innerHTML,/Ordem alfabética/);assert.match(h.app.innerHTML,/Lançar Folga/);assert.match(h.app.innerHTML,/Visualizar cadastro/);assert.doesNotMatch(h.app.innerHTML,/40h/);assert.doesNotMatch(h.app.innerHTML,/<select|Ordenar|rh-launch-unit/);
+ assert.ok(h.app.innerHTML.indexOf('Ana')<h.app.innerHTML.indexOf('Zélia'));assert.match(h.app.innerHTML,/Ordem alfabética/);assert.match(h.app.innerHTML,/Lançar Folga/);assert.match(h.app.innerHTML,/Cadastrar dayoff/);assert.doesNotMatch(h.app.innerHTML,/40h/);assert.doesNotMatch(h.app.innerHTML,/<select|Ordenar|rh-launch-unit/);
  h.nodes.get('entry-1').onclick();assert.equal(h.opened[0].entryId,'entry-1');assert.equal(h.opened[0].cnes,null);
 });
 test('registro indisponível não cria botão nem contorna validação do servidor',async()=>{

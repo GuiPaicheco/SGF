@@ -4,6 +4,7 @@
   "installCommand": "",
   "buildCommand": "node scripts/build-static.mjs",
   "outputDirectory": "dist",
+  "functions": { "api/cnes.py": { "maxDuration": 150, "includeFiles": "{cnes_service/**,config/rh-units.json}" } },
   "headers": [
     {
       "source": "/(.*)",
