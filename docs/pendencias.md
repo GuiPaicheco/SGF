@@ -8,7 +8,7 @@
 4. [x] Feriados gerais ou específicos para uma/várias unidades, com classificação federal/estadual/municipal/institucional. Dados antigos ficam gerais, sem inventar classificação normativa.
 5. [x] Excluir feriado fisicamente, com confirmação, versão e auditoria; recálculo atômico das férias úteis afetadas e isolamento dos calendários por unidade. Conflito impede gravação parcial.
 6. [x] Ensaios SQL sintéticos com rollback: isolamento, grupo de unidades, mesma data em escopos diferentes, exclusão física, auditoria e concorrência. Testes da interface/login adicionados.
-7. [ ] Publicar migration, funções e site; concluir testes completos e CI.
+7. [x] Publicados migration 20261023164729, manage-catalogs v12 e manage-cnes v7; Vercel READY (c6c493e). Aprovados 447 testes Node, 4 Python, CI de banco vazio, ensaios SQL e restauração com comparação de integridade. Preservados os 11 feriados, sem alteração de senhas.
 8. [ ] Decidir política de senhas: recomendadas senhas iniciais aleatórias por unidade, troca obrigatória e redefinição administrativa. Padrão atual de redefinição continua 123456; nenhuma credencial foi alterada neste bloco.
 9. [ ] Conferência visual acompanhada com administrador/RH, incluindo grupo de unidades, login e ficha CNES após a primeira atualização pela API.
 
@@ -26,7 +26,7 @@ Esta seção prevalece sobre os itens históricos abaixo: atualização não rem
 
 1. [x] Base obtida de origin/main b355215 em worktree isolada, preservando alterações locais anteriores.
 2. [x] Consulta Python autenticada no próprio SGF; adaptação para a conferência CNES existente, sem CPF/matrícula ou login de profissional.
-3. [x] Atualizar CNES com prévia; preservar ausentes e remoções explícitas, IDs, informações RH e afastamentos. Alternativa PDF também retém ausentes.
+3. [x] Atualizar CNES com prévia; preservar ausentes e remoções explícitas, IDs, informações RH e afastamentos. Fluxo alternativo PDF foi encerrado no bloco de unidades/login/feriados acima.
 4. [x] Ver CNES com estabelecimento, profissionais, equipes e dados RH separados; coletas e histórico em schema privado.
 5. [x] Remoção explícita pelo admin, com justificativa e versão, sem apagar histórico ou permitir reativação pela atualização.
 6. [x] Cadastrar dayoff substitui Visualizar cadastro; Lançar Folga registra autorização externa, sem banco de horas ou concessão automática.

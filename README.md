@@ -4,7 +4,7 @@ Sistema auxiliar da Prefeitura de Betim para consulta de cadastros públicos do 
 
 ## Fluxo e acessos
 
-- **Administrador:** Atualizar CNES, conferir correções/inclusões, Ver CNES, remover funcionário do uso ativo com histórico preservado, gerenciar operadores e consultar calendários.
+- **Administrador:** Atualizar CNES, conferir correções/inclusões, Acessar CNES, remover funcionário do uso ativo com histórico preservado, gerenciar operadores, feriados gerais/específicos e consultar calendários.
 - **RH da unidade:** identificar operador autorizado e lançar férias, folgas e day-offs da própria unidade.
 - **Consulta pública:** simulação de férias sem dados pessoais.
 
@@ -12,7 +12,9 @@ O cadastro profissional é importado do CNES, sem exigir CPF, matrícula ou logi
 
 RH/Diretor é uma denominação histórica encontrada em tabelas, testes e documentos anteriores, não um acesso cadastral adicional no fluxo atual. Contas/estruturas legadas permanecem por compatibilidade; não devem ser usadas para criar novos cadastros.
 
-Regras e documentos do RH são independentes do cadastro CNES. Um aniversário informado não constitui concessão de day-off. Folgas/day-offs registram autorização externa e não criam saldo de banco de horas. O sistema não substitui o processo administrativo nem a homologação institucional.
+Regras e documentos do RH são independentes do cadastro CNES. O aniversário confirmado pelo RH gera day-off anual e não consome dias de férias úteis; data de nascimento legada não confirmada continua informativa. Folgas registram autorização externa e não criam saldo de banco de horas. O sistema não substitui o processo administrativo nem a homologação institucional.
+
+O login permite selecionar um dos 42 estabelecimentos ou Administração do SGF. As senhas continuam individuais e não são incluídas no catálogo público.
 
 ## Executar localmente
 
@@ -72,6 +74,7 @@ A consulta completa fica em schema privado, separada dos cadastros operacionais.
 
 ## Documentação
 
+- [Feriados por unidade, cadastro CNES e login](docs/FERIADOS_UNIDADES.md)
 - [Atualização CNES e operações RH](docs/ATUALIZACAO_CNES.md)
 - [Pendências atuais](docs/pendencias.md)
 - [Operação](docs/OPERACAO.md)
