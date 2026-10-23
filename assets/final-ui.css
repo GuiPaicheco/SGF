@@ -27,3 +27,7 @@
 @media(max-width:600px){#rh-launch-search{flex-direction:column;align-items:stretch}#rh-launch-search .button{width:100%}}
 
 @media(max-width:600px){.form-grid{grid-template-columns:minmax(0,1fr)}.form-grid>*{min-width:0}.field-full{min-width:0}}
+
+@media(min-width:761px) and (max-width:1000px){.header-inner{flex-wrap:wrap}.header-user{order:3;width:100%;max-width:none;text-align:left}.brand-copy{min-width:180px}.header-inner>.button{flex-shrink:0}}
+
+@media(max-width:600px){.occurrence-calendar-head{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}.occurrence-calendar-head>label{grid-column:1/-1;grid-row:1}.occurrence-calendar-head>button{grid-row:2;min-width:44px;justify-self:start}.occurrence-calendar-head>button:last-child{justify-self:end}.occurrence-days>span{padding:.35rem 0;font-size:.75rem;min-width:0}}
