@@ -82,3 +82,13 @@ test('formulário simplificado envia fim aquisitivo sem fabricar admissão, iní
  const ui=harness();let sent;await form(ui,async p=>p.action==='leave-resources'?resources:(sent=p,preview));await ui.submit('#rh-leave-form');
  assert.equal(sent.item.acquisitionEnd,'2025-12-31');for(const field of ['admissionDate','acquisitionStart','eligibilityConfirmed','managerConsent','employeeConsent'])assert.equal(sent.item[field],undefined);assert.equal(sent.item.entryMode,'simplified');
 });
+
+test('afastamento em aberto não mostra dias nulos e permite atualizar retorno somente no RH',async()=>{
+ const ui=harness();let opened=null;ui.root.SGFRhOccurrence={updateReturn:options=>{opened=options;}};
+ const data={id,entry_id:id,version:1,status:'programada',snapshot:resources,plan:{type:'afastamento',days:null,periods:[{sequence:1,start_date:'2030-01-01',end_date:null,return_date:null,days:null,counting_mode:'corridos'}]},created_at:'2026-10-23T12:00:00Z',operator_name:'OPERADOR',history:[]};
+ await ui.api.detail({app:ui.app,esc,request:async()=>data,isCurrent:()=>true,cnes:null,leaveId:id,onBack:()=>{}});
+ assert.match(ui.app.innerHTML,/Sem previsão de término/);assert.match(ui.app.innerHTML,/Duração em aberto/);assert.doesNotMatch(ui.app.innerHTML,/null dia/);
+ ui.app.querySelector('#rh-detail-return').onclick();assert.equal(opened.data.id,id);
+ const admin=harness();await admin.api.detail({app:admin.app,esc,request:async()=>data,isCurrent:()=>true,cnes:'6305245',leaveId:id,onBack:()=>{}});
+ assert.equal(admin.app.querySelector('#rh-detail-return'),null);
+});

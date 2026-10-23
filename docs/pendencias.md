@@ -11,9 +11,9 @@
 7. [x] Folga e Afastamento: calendário clicável com dias não consecutivos; afastamento contínuo com início e retorno opcional; alteração posterior de retorno com versão, justificativa e histórico.
 8. [x] Calendário, consulta CNES e comprovante reconhecem afastamento sem previsão sem fabricar uma data final; detecção de sobreposição, idempotência, escopo e autoria no servidor.
 9. [x] Textos voltados ao RH e administrador, com orientações de uso e minimização de dados sensíveis.
-10. [x] 452 testes Node, 4 Python, build e ensaios SQL com rollback aprovados. Regressões de calendário anual/day-off, feriados por unidade e programação/revisão de férias aprovadas.
+10. [x] 453 testes Node, 4 Python, build e ensaios SQL com rollback aprovados. Regressões de calendário anual/day-off, feriados por unidade e programação/revisão de férias aprovadas.
 11. [x] Supabase atualizado: migration 20261023171909, manage-rh v16 e manage-catalogs v13. Nenhuma senha alterada.
-12. [ ] Publicação GitHub/Vercel e conferência visual da versão publicada: administrador, importação, feriados, RH, lançamentos, calendário e comprovante. Registrar os limites dos testes sem confundir teste técnico com aceite institucional.
+12. [x] GitHub/Vercel atualizados e conferência visual da versão publicada com administrador e RH: login, operador, CNES/consulta API, feriados, formulários de férias/day-off, prévias de folga/afastamento, calendário e comprovante. Corrigidos agrupamentos de campos, rótulos, alinhamentos e legenda. Gravações/exclusões verificadas com fixtures e rollback, sem alterar atos reais no navegador. Evidências e limites em [Conferência final](CONFERENCIA_FINAL_20261023.md).
 
 ## Ajustes atuais — unidades, login e feriados por abrangência
 
@@ -25,7 +25,7 @@
 6. [x] Ensaios SQL sintéticos com rollback: isolamento, grupo de unidades, mesma data em escopos diferentes, exclusão física, auditoria e concorrência. Testes da interface/login adicionados.
 7. [x] Publicados migration 20261023164729, manage-catalogs v12 e manage-cnes v7; Vercel READY (c6c493e). Aprovados 447 testes Node, 4 Python, CI de banco vazio, ensaios SQL e restauração com comparação de integridade. Preservados os 11 feriados, sem alteração de senhas.
 8. [ ] Decidir política de senhas: recomendadas senhas iniciais aleatórias por unidade, troca obrigatória e redefinição administrativa. Padrão atual de redefinição continua 123456; nenhuma credencial foi alterada neste bloco.
-9. [ ] Conferência visual acompanhada com administrador/RH, incluindo grupo de unidades, login e ficha CNES após a primeira atualização pela API.
+9. [x] Conferência visual técnica com administrador e RH no site publicado; grupo de unidades, login, ficha CNES e consulta real da API conferidos. Aceite institucional permanece separado.
 
 ## Ajustes atuais — calendário anual e day-off
 
