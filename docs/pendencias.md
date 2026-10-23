@@ -13,14 +13,14 @@ Esta seção prevalece sobre os itens históricos abaixo: atualização não rem
 7. [x] Calendário/comprovante/exportações distinguem D/L; idempotência, versão, operador, escopo e conflitos preservados.
 8. [x] Ensaios sintéticos com rollback e testes de contrato/autorizações; consulta real sem gravação.
 9. [x] Migração 20261023124526 aplicada; manage-cnes v6 e manage-rh v14 publicados. Preservados 40 registros CNES, 42 contas RH e o lançamento existente.
-10. [ ] Confirmar CI completo e deploy Vercel pronto.
+10. [x] CI completo aprovado (Node/Python, banco vazio, ensaios SQL e restauração); versão incorporada à main e deploy Vercel pronto. Verificação local adicional: 441 testes Node e 4 Python; proteção contra duplicação do payload CNES no envio.
 11. [ ] Conferência acompanhada no navegador com admin e RH antes do uso institucional; manter governança/aceite pendentes.
 
 Contrato e procedimentos: [Atualização CNES](ATUALIZACAO_CNES.md). A data de consulta não é competência. Aniversário informado não é day-off concedido.
 
 ## Registro das etapas anteriores (19/10)
 
-Esta é a única fila ativa. A orientação mais recente substitui a inclusão manual e a exigência de matrícula dos blocos anteriores. O [planejamento anterior](HISTORICO_PENDENCIAS_20261018_ANTES_PDF.md) fica como histórico; sua ordem não deve ser retomada automaticamente. Os blocos abaixo incorporam a pesquisa normativa de férias e a retirada de banco de horas.
+Registro histórico, subordinado ao bloco atual acima. A orientação mais recente substitui a inclusão manual e a exigência de matrícula dos blocos anteriores. O [planejamento anterior](HISTORICO_PENDENCIAS_20261018_ANTES_PDF.md) fica como histórico; sua ordem não deve ser retomada automaticamente. Os blocos abaixo incorporam a pesquisa normativa de férias e a retirada de banco de horas.
 
 ## Requisitos prioritários e implementação
 
@@ -33,7 +33,7 @@ Esta é a única fila ativa. A orientação mais recente substitui a inclusão m
 - [x] Exportação direta de PDF A4 paisagem, todas as colunas funcionais e todos os funcionários filtrados, em faixas de até sete dias, com identificação, competência, cabeçalhos, legenda e numeração repetidos. Quebras verticais preservam as linhas; textos longos são quebrados dentro das células.
 - [x] Exportação XLSX substitui CSV na interface: calendário colorido, filtros, linhas/colunas congeladas, datas e cargas tipadas, CBO como texto e aba com detalhes dos afastamentos. Bibliotecas locais carregadas apenas ao exportar; dados não enviados a serviços de conversão.
 - [ ] Definir e documentar regra municipal do day-off de aniversário antes de descontá-lo da duração das férias. Aniversário é exibido quando informado; não equivale a folga concedida.
-- [ ] Implementar Lançar Folga em etapa futura; por enquanto o botão permanece inativo. As visões exibem os registros efetivamente existentes, inclusive os históricos, sem fabricar folgas de exemplo.
+- [x] Lançar Folga implementado no bloco de 23/10: período explícito e referência da autorização externa, com auditoria e conflitos; sem fabricar folgas ou saldo de banco de horas.
 
 - [x] Lançamento simplificado: perguntar o fim do período aquisitivo, calcular o início de 12 meses / quinquênio no servidor e usar admissão apenas se já conhecida. Explicação recolhida com exemplo inclusivo; férias já gozadas não reiniciam o ciclo. Manter os limites, saldos e impedimentos normativos.
 - [x] Corrigir digitação do fim aquisitivo: não reconstruir formulário em eventos de edição da data; atualizar apenas opções de fracionamento ao sair do campo. Observações opcionais recolhidas.
