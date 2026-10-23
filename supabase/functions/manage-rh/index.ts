@@ -26,6 +26,7 @@ const messages:Record<string,string>={
  RH_LEAVE_PREVIEW_REQUIRED:'Confira a prévia antes de programar o afastamento.',RH_LEAVE_PREVIEW_CHANGED:'Cadastro, operador ou calendário mudou. Gere e confira uma nova prévia.',
  RH_LEAVE_IDEMPOTENCY_CONFLICT:'Este envio já foi usado para outro lançamento. Confira o registro antes de iniciar outro.',
  RH_LEAVE_RATE_LIMIT:'Muitos lançamentos em sequência nesta conta. Aguarde um minuto para continuar.',
+ RH_DAYOFF_RECALC_CONFLICT:'O day-off alteraria as férias e criaria sobreposição com outro afastamento ou parcela. Ajuste os períodos antes de salvar. Nenhuma alteração foi gravada.',
  RH_LEAVE_OVERLAP:'Este vínculo já tem afastamento ou pedido ativo nessas datas. Confira o calendário antes de continuar.',
  RH_LEAVE_CYCLE_IN_USE:'Já existe afastamento ativo para este vínculo e período aquisitivo.',RH_LEAVE_RIGHT_INVALID:'O direito ou saldo conhecido não corresponde a este vínculo e período, ou os dias já utilizados impedem nova programação.',
  RH_LEAVE_SPLIT_INVALID:'Confira as condições de fracionamento e o início do segundo período.',RH_LEAVE_NOT_FOUND:'Lançamento não encontrado nesta unidade.',

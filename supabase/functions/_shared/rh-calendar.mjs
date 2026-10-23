@@ -31,7 +31,8 @@ export function calendarWindow(payload){
  let start,end;
  if(payload.mode==='range'){start=payload.start;end=payload.end;}
  else {start=base.target_month;const d=new Date(start+'T12:00:00Z');d.setUTCMonth(d.getUTCMonth()+1);d.setUTCDate(0);end=d.toISOString().slice(0,10);}
- if(!valid(start)||!valid(end)||end<start||(Date.parse(end)-Date.parse(start))/86400000>92)throw Error('RH_INPUT_INVALID');
+ const anniversary=new Date(start+'T12:00:00Z');if(valid(start)){const year=anniversary.getUTCFullYear()+1,month=anniversary.getUTCMonth(),date=anniversary.getUTCDate();anniversary.setUTCFullYear(year,month,1);anniversary.setUTCDate(Math.min(date,new Date(Date.UTC(year,month+1,0)).getUTCDate()));}
+ if(!valid(start)||!valid(end)||end<start||Date.parse(end+'T12:00:00Z')>=anniversary.valueOf())throw Error('RH_INPUT_INVALID');
  return {range_start:start,range_end:end,page_index:base.page_index,search_text:base.search_text,filter_json:base.filter_json};
 }
 

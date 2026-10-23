@@ -6,7 +6,7 @@ function sourceView(data,esc){
  const fields=identity?Object.entries(identity).map(([key,value])=>'<dt>'+esc(key.replaceAll('_',' '))+'</dt><dd>'+(value===null?'Não informado':typeof value==='object'?raw(value):esc(value))+'</dd>').join(''):'';
  return '<h2>Ver CNES</h2><p>Dados da fonte separados dos lançamentos do RH. A consulta não modifica cadastros.</p>'+
  (payload?'<h3>Estabelecimento</h3><dl>'+fields+'</dl><p>Consulta: '+esc(data.source.collected_at)+' · Competência: '+esc(payload.metadados.competencia||'Não informada pela fonte')+'</p><details><summary>Ficha e módulos publicados</summary>'+raw({estabelecimento:payload.estabelecimento,modulos:payload.modulos,equipes:payload.equipes,metadados:payload.metadados})+'</details>':'<p role="status">A importação anterior contém profissionais, mas não contém a ficha do estabelecimento. Use Atualizar CNES para consultá-la.</p>')+
- '<h3>Informações registradas pelo RH</h3><details><summary>Aniversários cadastrados (não são concessões de day-off)</summary>'+raw(data.dayoffs||[])+'</details><details><summary>Day-offs e folgas lançados no calendário</summary>'+raw(data.occurrences||[])+'</details>';
+ '<h3>Informações registradas pelo RH</h3><details><summary>Day-offs de aniversário cadastrados pelo RH (dia/mês)</summary>'+raw(data.dayoffs||[])+'</details><details><summary>Day-offs e folgas lançados no calendário</summary>'+raw(data.occurrences||[])+'</details>';
 }
 async function open({app,esc,request,isCurrent,cnes,onBack}){
  let page=0,data=null,list=null,busy=false,error='';

@@ -1,5 +1,13 @@
 # Pendências do SGF — revisão de 23/10/2026
 
+## Ajustes atuais — calendário anual e day-off
+
+1. [x] Consulta do calendário ampliada para até 12 meses na interface, API e banco, incluindo anos bissextos e exportações sem truncamento em 93 dias.
+2. [x] Aniversário (dia/mês) confirmado pelo RH gera day-off anual, excluído da contagem de férias regulamentares úteis; início e quantidade preservados, fim e retorno ajustados. Não é exigida solicitação anual; data de nascimento legada sem confirmação do RH não concede day-off. Não muda férias em dias corridos.
+3. [x] Cadastro/alteração/remoção de aniversário RH e cadastro/cancelamento de day-off datado recalculam férias úteis programadas do vínculo, com versões e auditoria; bloqueio atômico em conflito com outro afastamento/parcela. Day-off e férias não geram falso alerta de sobreposição na mesma data.
+4. [x] Testes de período anual, calendário e comprovante; ensaio SQL sintético de prévia, gravação, recálculo, cancelamento, idempotência, histórico e conflito executado com rollback.
+5. [ ] Publicar migration, função e site; conferir testes completos e deploy.
+
 ## Bloco atual — API CNES, consulta e operações RH
 
 Esta seção prevalece sobre os itens históricos abaixo: atualização não remove ausentes; somente o admin altera cadastros. RH lança férias, folgas e day-off.
@@ -32,7 +40,7 @@ Registro histórico, subordinado ao bloco atual acima. A orientação mais recen
 - [x] Conflitos entre duas ou mais pessoas afastadas no mesmo dia: critérios combináveis de mesmo cargo, CBO e equipe, exigindo coincidência em todos os critérios marcados. Alerta visual, sem bloquear lançamento, conforme decisão do usuário. Consulta de apenas funcionários com conflito; cálculo da unidade inteira antes de filtros de nomes/paginação, com equipes múltiplas, dias atribuídos do legado, cancelamentos excluídos e mesma pessoa com vários vínculos não contada duas vezes.
 - [x] Exportação direta de PDF A4 paisagem, todas as colunas funcionais e todos os funcionários filtrados, em faixas de até sete dias, com identificação, competência, cabeçalhos, legenda e numeração repetidos. Quebras verticais preservam as linhas; textos longos são quebrados dentro das células.
 - [x] Exportação XLSX substitui CSV na interface: calendário colorido, filtros, linhas/colunas congeladas, datas e cargas tipadas, CBO como texto e aba com detalhes dos afastamentos. Bibliotecas locais carregadas apenas ao exportar; dados não enviados a serviços de conversão.
-- [ ] Definir e documentar regra municipal do day-off de aniversário antes de descontá-lo da duração das férias. Aniversário é exibido quando informado; não equivale a folga concedida.
+- [x] Política funcional definida pelo responsável em 23/10: aniversário confirmado pelo RH é day-off anual e não conta nas férias regulamentares úteis, sem desconto duplicado em feriado/fim de semana. Férias corridas não foram alteradas; alcance normativo institucional permanece sujeito ao aceite do RH Central.
 - [x] Lançar Folga implementado no bloco de 23/10: período explícito e referência da autorização externa, com auditoria e conflitos; sem fabricar folgas ou saldo de banco de horas.
 
 - [x] Lançamento simplificado: perguntar o fim do período aquisitivo, calcular o início de 12 meses / quinquênio no servidor e usar admissão apenas se já conhecida. Explicação recolhida com exemplo inclusivo; férias já gozadas não reiniciam o ciclo. Manter os limites, saldos e impedimentos normativos.

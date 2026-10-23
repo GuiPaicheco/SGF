@@ -27,7 +27,7 @@ test('conciliação por CNS/CBO preserva a identidade quando formato do vínculo
  const rejected=reviewedItems(incoming,snapshot,[{sourceId:prior.sourceId,accept:false}]);assert.equal(rejected.items[0].sourceHash,prior.sourceHash);assert.equal(rejected.present.length,0);
  const accepted=reviewedItems(incoming,snapshot,[{sourceId:prior.sourceId,accept:true}]);assert.equal(accepted.present.length,1);
 });
-test('intervalo real aceita cruzar meses e rejeita datas impossíveis ou mais de 93 dias',()=>{
+test('intervalo real aceita cruzar meses e rejeita datas impossíveis ou mais de 12 meses',()=>{
  assert.equal(calendarWindow({mode:'range',start:'2027-02-25',end:'2027-03-10',page:0,search:'',filters:{cbo:'123'}}).range_end,'2027-03-10');
  for(const [start,end] of [['2027-02-30','2027-03-10'],['2027-03-10','2027-03-01'],['2027-01-01','2028-01-01']])assert.throws(()=>calendarWindow({mode:'range',start,end,page:0,search:''}));
 });
