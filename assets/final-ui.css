@@ -22,3 +22,8 @@
  .rh-launch-card tbody td:last-child{display:grid;gap:.5rem;margin-bottom:0}
  .rh-launch-card tbody td .button{width:100%;min-height:44px;margin:0}
 }
+
+#rh-launch-search{display:flex;align-items:flex-end;gap:.75rem;padding:0;margin:1rem 0}#rh-launch-search>.field{flex:1;margin:0}#rh-launch-search>.actions{margin:0;flex:0 0 auto}
+@media(max-width:600px){#rh-launch-search{flex-direction:column;align-items:stretch}#rh-launch-search .button{width:100%}}
+
+@media(max-width:600px){.form-grid{grid-template-columns:minmax(0,1fr)}.form-grid>*{min-width:0}.field-full{min-width:0}}
