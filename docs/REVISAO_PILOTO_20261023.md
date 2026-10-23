@@ -2,7 +2,7 @@
 
 ## Escopo e método
 
-Base: origin/main b4218cc, em worktree limpa antes desta revisão. Inspeção de 64 arquivos próprios de execução (JS/MJS/TS/CSS/HTML, sem fornecedores), revisão dos fluxos críticos, testes automatizados e consultas de integridade/permissão no Supabase. Não equivale a uma prova formal de cada caminho possível nem a um pentest independente.
+Base: origin/main b4218cc, em worktree limpa antes desta revisão. Inspeção de 64 arquivos próprios de execução (JS/MJS/TS/CSS/HTML, sem fornecedores), revisão da API Python e das dependências fixadas, revisão dos fluxos críticos, testes automatizados e consultas de integridade/permissão no Supabase. Não equivale a uma prova formal de cada caminho possível nem a um pentest independente.
 
 A revisão preserva o cadastro público CNES, o histórico e a divisão entre Administração e RH da unidade. Não há novo cadastro por CPF ou matrícula, concessão automática, alteração de regime jurídico ou reconstrução destrutiva do banco.
 
@@ -35,9 +35,12 @@ A consulta de logs agregada apontou sete erros PostgreSQL na janela padrão de 2
 ## Verificação
 
 - 456 testes Node e quatro testes Python.
-- Build estático e verificação de links/contratos; nenhum segredo administrativo no conteúdo público.
-- CI de banco vazio, ensaios integrados e restauração devem terminar aprovados para considerar a publicação validada.
-- Testes em navegador e medidas de viewport registrados após publicação; sem conceder férias fictícias nem alterar aniversários reais.
+- Build estático e verificação de links/contratos; nenhum padrão de chave privilegiada ou chave privada encontrado nos 33 arquivos públicos inspecionados; isso não substitui análise de todos os possíveis segredos.
+- CI completo aprovado para a implementação: testes, banco vazio, ensaios integrados e restauração. Publicação Vercel READY. Correções visuais incrementais mantêm a mesma cobertura.
+- Navegador: login novo e cabeçalho administrativo confirmados; DAPS penúltima e Administração última; home/login/operador e lista RH em 390 px; grade de folgas sem ultrapassar a página em 320 px; cabeçalho e formulários em 768 px; desktop restaurado. Não concedidas férias fictícias nem alterados aniversários reais.
+- Corrigidos após inspeção: navegação com nomes cortados, botões RH fora do campo visível, largura mínima do formulário em 320 px, seletor de mês compacto, dias da semana, cabeçalho comprimido em tablet e alinhamento dos campos de calendário/busca.
+- Logs Vercel de erro/fatal consultados na janela de 30 minutos sem registros retornados; console do navegador conferido nas telas visitadas.
+- Exclusão dos dois testes sem lixeira na interface; dados anteriores permanecem na auditoria para eventual restauração administrativa.
 
 ## Limites operacionais do piloto
 

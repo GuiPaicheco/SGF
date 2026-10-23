@@ -13,7 +13,7 @@ Esta é a lista atual. Itens concluídos foram transferidos para o [histórico](
 7. [x] Conferir integridade e permissões: 55 tabelas com RLS, 324 restrições validadas, vínculos CNES sem órfãos e afastamentos na unidade correta. Estruturas históricas preservadas.
 8. [x] Melhorar navegação móvel e lista RH: abas sem nomes cortados; funcionários em cartões nas telas pequenas e tabela no desktop.
 9. [x] Testes Node/Python e build; funções access-auth v16 e manage-cnes v8 publicadas.
-10. [ ] Confirmar publicação da interface e CI final; conferir celular, tablet e desktop após publicação. Atualizar [relatório do piloto](REVISAO_PILOTO_20261023.md).
+10. [x] Interface publicada e CI completo aprovado; conferidos login/cabeçalho administrativo, celular (320/390 px), tablet (768 px), desktop e lista RH. Últimos ajustes de grade, seletor de mês e alinhamento registrados no [relatório do piloto](REVISAO_PILOTO_20261023.md).
 
 ## 02. Acompanhamento do piloto
 
