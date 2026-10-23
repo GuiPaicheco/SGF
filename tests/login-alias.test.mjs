@@ -53,8 +53,8 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
   });
   await new Promise(resolve => setImmediate(resolve));
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'login' } } : null } });
-  assert.match(app.innerHTML, /Estabelecimento \/ acesso/);
-  const button = { disabled: false, textContent: 'Entrar no SGF' };
+  assert.match(app.innerHTML, /Unidade ou administração/);
+  const button = { disabled: false, textContent: 'Entrar no SGFS' };
   await listeners.submit({ target: { id: 'login-form' }, submitter: button, preventDefault() {} });
   assert.deepEqual(loginPayload, { action: 'login', identifier: 'admin', password: 'senha-segura' });
   assert.equal(saved.get('sgf-access-role'), 'administrador');

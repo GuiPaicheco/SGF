@@ -5,12 +5,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description"
-    content="Sistema de Gestão de Funcionários da Prefeitura Municipal de Betim. Apoio ao RH e às chefias, com controle de férias e folgas.">
+    content="SGFS — Sistema de Gestão de Funcionários da Saúde. Calendário, férias e afastamentos das equipes da Prefeitura Municipal de Betim.">
   <meta name="theme-color" content="#123c2f">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data:; connect-src 'self' https://ijhvbzomakbbxverqfqh.supabase.co wss://ijhvbzomakbbxverqfqh.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
-  <title>SGF — Sistema de Gestão de Funcionários | Prefeitura de Betim</title>
+  <title>SGFS — Sistema de Gestão de Funcionários da Saúde | Prefeitura de Betim</title>
   <link rel="icon" href="logo.png">
   <link rel="stylesheet" href="assets/app.css?v=20261014-block8-3">
   <link rel="stylesheet" href="assets/calendar.css?v=20260930-1">
@@ -38,6 +38,7 @@
   <script defer src="assets/rh-calendar-export.js?v=20261019-1"></script>
   <script defer src="assets/rh-calendar-ui.js?v=20261018-1"></script>
   <script defer src="assets/rh-accounts-ui.js?v=20261017-2"></script>
+  <link rel="stylesheet" href="assets/sgfs-interface.css?v=20261023-1">
   <script defer src="assets/app.js?v=20261017-calendar-2"></script>
 </head>
 
@@ -47,22 +48,21 @@
     <div class="header-inner">
       <button class="brand-home" type="button" data-go="home" aria-label="Ir para a tela inicial"><img src="logo.png"
           alt="Prefeitura Municipal de Betim" class="brand-logo"></button>
-      <div class="brand-copy"><strong>SGF</strong><span>Sistema de Gestão de Funcionários</span></div>
+      <div class="brand-copy"><strong>SGFS</strong><span>Sistema de Gestão de Funcionários da Saúde</span></div>
       <div id="header-user" class="header-user hidden" aria-live="polite"></div>
       <button id="home-action" class="button button-ghost" type="button" data-go="home">Tela inicial</button>
       <button id="session-action" class="button button-ghost hidden" type="button">Sair</button>
     </div>
   </header>
   <div id="progress" class="progress" aria-live="polite"></div>
-  <nav id="workspace-nav" class="workspace-nav hidden" aria-label="Navegação do SGF"></nav>
+  <nav id="workspace-nav" class="workspace-nav hidden" aria-label="Navegação do SGFS"></nav>
   <main id="app" class="app" tabindex="-1">
     <section class="card loading-card" aria-busy="true">
       <div class="spinner"></div>
       <p>Preparando o sistema…</p>
     </section>
   </main>
-  <footer class="site-footer"><span>Diretoria IV de Atenção Primária à Saúde</span><span>—</span><span>Prefeitura
-      Municipal de Betim</span></footer>
+  <footer class="site-footer"><div class="footer-inner"><span class="footer-mark" aria-hidden="true">SGFS</span><div class="footer-copy"><strong>Diretoria IV de Atenção Primária à Saúde</strong><span>Prefeitura Municipal de Betim</span></div></div></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 

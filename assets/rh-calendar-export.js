@@ -17,8 +17,8 @@ function downloadBlob(buffer,type,name){const url=URL.createObjectURL(new Blob([
 function prepared(o){return {...o,rows:root.SGFRhCalendar.calendarRows(o.rows,o.items,o.layout),criteria:o.criteria||[],conflicts:o.conflicts||[],holidays:o.holidays||[]};}
 async function xlsx(options){
  await script('exceljs.min.js',()=>!!root.ExcelJS);
- const o=prepared(options),book=new root.ExcelJS.Workbook();book.creator='SGF Betim';book.created=new Date();
- const sheet=book.addWorksheet('Calendário',{views:[{state:'frozen',xSplit:o.columns.length+(o.layout==='nominal'?1:0),ySplit:6}],pageSetup:{paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,printTitlesRow:'1:6'},headerFooter:{oddFooter:'&L SGF Betim &R Página &P de &N'}});
+ const o=prepared(options),book=new root.ExcelJS.Workbook();book.creator='SGFS Betim';book.created=new Date();
+ const sheet=book.addWorksheet('Calendário',{views:[{state:'frozen',xSplit:o.columns.length+(o.layout==='nominal'?1:0),ySplit:6}],pageSetup:{paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,printTitlesRow:'1:6'},headerFooter:{oddFooter:'&L SGFS Betim &R Página &P de &N'}});
  const headers=[...o.columns.map(c=>c[1]),...(o.layout==='nominal'?['Registro']:[]),...o.days.map(date)],fixed=headers.length-o.days.length;
  const title=(row,text)=>{sheet.mergeCells(row,1,row,Math.min(headers.length,fixed+7));sheet.getCell(row,1).value=text;sheet.getRow(row).height=row===1?29:23;sheet.getCell(row,1).alignment={wrapText:true,vertical:'middle'};};
  title(1,o.unit);title(2,'Competência: '+o.competence);title(3,'Conflitos: '+(o.criteria.map(k=>labels[k]).join(' + ')||'critérios não selecionados'));title(4,legend);
