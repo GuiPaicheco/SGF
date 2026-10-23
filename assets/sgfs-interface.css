@@ -93,6 +93,11 @@
   .rh-calendar-card>form.form-grid label { font-size:.77rem; }
   .rh-calendar-card .rh-filter-grid { gap:.8rem; }
   .rh-calendar-card>.actions { padding-block:.25rem; margin-top:1rem; }
+  .rh-calendar-card #rh-column-settings[open] { flex:1 1 100%; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.65rem 1rem; padding:1rem; background:#f5f8f5; border:1px solid var(--line); border-radius:10px; }
+  .rh-calendar-card #rh-column-settings[open]>summary { grid-column:1/-1; }
+  .rh-calendar-card #rh-column-settings[open]>.field { grid-column:1/-1; width:100%; max-width:360px; }
+  .rh-calendar-card #rh-column-settings[open]>div:not(.field) { display:flex; align-items:center; gap:.4rem; font-size:.82rem; }
+  .rh-calendar-card #rh-column-settings .text-button { min-width:32px; min-height:32px; }
   .rh-calendar-meta { background:#174733; }
   .rh-calendar-wrap { border-radius:10px; max-height:68vh; }
   .rh-calendar { font-size:.79rem; }
@@ -156,6 +161,7 @@
   .rh-calendar-card>form.form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding:.85rem; }
   .rh-calendar-card>form>.field-full:first-child { grid-column:1/-1; }
   .rh-calendar-card .rh-filter-grid { grid-template-columns:1fr; }
+  .rh-calendar-card #rh-column-settings[open] { grid-template-columns:1fr; }
   .rh-calendar-card>.actions>.button { flex:1 1 auto; }
   .rh-calendar-card>.actions>details { flex:1 1 100%; }
   .rh-calendar-wrap { max-height:65vh; }
