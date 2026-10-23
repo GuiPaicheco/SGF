@@ -1,0 +1,13 @@
+(function(root){
+'use strict';
+async function open({app,esc,request,isCurrent,entryId,type,onBack}){
+ const key=crypto.randomUUID();let data=null,busy=false,error='',saved=false;
+ let draft={start:'',end:'',reference:'',notes:''};
+ const capture=()=>{const form=app.querySelector('#occurrence-form');if(form)draft=Object.fromEntries(new FormData(form));};
+ function draw(){if(!isCurrent())return;app.innerHTML='<section class="card"><h2>'+esc(type==='dayoff'?'Cadastrar dayoff':'Lançar folga')+'</h2>'+(data?'<p>'+esc(data.full_name)+'</p>':'')+'<p>Registre uma autorização já conferida pelo RH. Não cria direito automático nem desconta banco de horas. Aniversário informado não é uma folga concedida.</p>'+(error?'<p role="alert">'+esc(error)+'</p>':'')+(saved?'<p role="status">Registro incluído no calendário.</p>':'')+(busy?'<p role="status">Conferindo / salvando…</p>':'')+(!saved&&data?'<form id="occurrence-form" class="form-grid">'+[['start',type==='dayoff'?'Data do day-off':'Início da folga','date'],...(type==='folga'?[['end','Fim da folga','date']]:[]),['reference','Processo, memorando ou referência da autorização','text'],['notes','Observações (opcional)','text']].map(([k,t,input])=>'<div class="field"><label for="occurrence-'+k+'">'+t+'</label><input class="control" id="occurrence-'+k+'" name="'+k+'" type="'+input+'" value="'+esc(draft[k]||'')+'" '+(k==='notes'?'maxlength="1000"':'required')+' '+(k==='reference'?'minlength="3" maxlength="300"':'')+' '+(busy?'disabled':'')+'></div>').join('')+'<label class="field-full"><input type="checkbox" required '+(busy?'disabled':'')+'> Conferi a autorização deste afastamento.</label><button class="button button-primary" '+(busy?'disabled':'')+'>Adicionar ao calendário</button></form>':'')+'<button id="occurrence-back" class="button button-secondary" '+(busy?'disabled':'')+'>Voltar</button></section>';
+ app.querySelector('#occurrence-back').onclick=()=>{if(!busy)onBack();};const form=app.querySelector('#occurrence-form');if(form)form.onsubmit=async e=>{e.preventDefault();if(busy)return;capture();busy=true;error='';draw();try{await request({action:'create-occurrence',entryId,requestKey:key,type,...draft,end:type==='dayoff'?draft.start:draft.end});saved=true;}catch(e){error=e.message;}finally{busy=false;draw();}};
+ }
+ busy=true;draw();try{data=await request({action:'leave-resources',entryId});}catch(e){error=e.message;}finally{busy=false;draw();}
+}
+root.SGFRhOccurrence={open};
+})(globalThis);

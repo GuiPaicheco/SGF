@@ -90,6 +90,8 @@
 .rh-calendar .rh-record-col{min-width:210px;max-width:270px;white-space:normal;}
 .rh-calendar .rh-type-premio{background:#e2d8f4;color:#392758;}
 .rh-calendar .rh-type-banco_horas{background:#d6e7fa;color:#163b65;}
+.rh-calendar .rh-type-dayoff{background:#ffe5b4;color:#674200;font-weight:700;}
+.rh-calendar .rh-type-folga{background:#cce9f6;color:#123e51;font-weight:700;}
 .rh-calendar .rh-return{background:#eef8eb;color:#245521;font-weight:700;}
 .rh-calendar .rh-birthday{background:#fff4df;color:#75520b;font-weight:700;}
 .rh-filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem;align-items:start;}

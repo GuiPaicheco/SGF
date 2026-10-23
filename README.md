@@ -1,164 +1,85 @@
 # SGF — Sistema de Gestão de Funcionários
 
-Sistema auxiliar para o RH, as chefias e os servidores da Prefeitura Municipal de Betim. Centraliza cadastros funcionais, vínculos por matrícula, unidades de atuação e processos de gestão de pessoal.
+Sistema auxiliar da Prefeitura de Betim para consulta de cadastros públicos do CNES e controle de afastamentos pelo RH das unidades.
 
-O módulo atual contempla férias, folgas e planejamento de escala. Essas funcionalidades fazem parte do SGF, mas não limitam seu escopo.
+## Fluxo e acessos
 
-**Estado:** piloto em desenvolvimento, ainda sem homologação institucional definitiva. O ambiente publicado está em [sgfbetim.vercel.app](https://sgfbetim.vercel.app/). As pendências e evidências de validação estão em [docs/pendencias.md](docs/pendencias.md).
+- **Administrador:** Atualizar CNES, conferir correções/inclusões, Ver CNES, remover funcionário do uso ativo com histórico preservado, gerenciar operadores e consultar calendários.
+- **RH da unidade:** identificar operador autorizado e lançar férias, folgas e day-offs da própria unidade.
+- **Consulta pública:** simulação de férias sem dados pessoais.
 
-## Funcionalidades
+O cadastro profissional é importado do CNES, sem exigir CPF, matrícula ou login do funcionário. A atualização nunca remove/desativa ausentes nem reativa quem o admin removeu explicitamente. Informações não disponíveis na fonte não são inventadas.
 
-- Identificação por CPF ou e-mail e múltiplos vínculos por matrícula.
-- CNES/unidades autorizadoras e equipe por unidade, com opção “Não se aplica”.
-- Simulação de períodos e envio/acompanhamento de solicitações autenticadas.
-- Distribuição diária entre unidades e análise independente por CNES/lotação.
-- Aprovação, recusa justificada e inclusão explícita no calendário.
-- Calendário nominal, escala mínima, filtros e conflitos de planejamento.
-- Direitos e banco de horas por vínculo.
-- Feriados, recálculo de períodos, notificações e histórico de ações.
-- Administração de estrutura organizacional, cadastros e acessos.
+RH/Diretor é uma denominação histórica encontrada em tabelas, testes e documentos anteriores, não um acesso cadastral adicional no fluxo atual. Contas/estruturas legadas permanecem por compatibilidade; não devem ser usadas para criar novos cadastros.
 
-Simulações e comprovantes não autorizam, por si só, o afastamento. As regras dependem da validação institucional e da decisão administrativa.
-
-## Perfis e escopos
-
-| Perfil | Responsabilidade |
-| --- | --- |
-| Servidor | Solicitar e acompanhar os próprios pedidos no vínculo selecionado. |
-| RH/Diretor | Gerenciar somente o CNES/lotação escolhido entre os escopos concedidos. |
-| Administrador | Administrar estrutura, permissões e cadastros, com visão global. |
-
-Uma conta pode possuir mais de um perfil e contexto. RH/Diretor usa o código interno `rh`; o valor antigo `diretor` é preservado para compatibilidade e histórico, não como um quarto perfil operacional. Diretorias que compartilham um CNES continuam separadas pela lotação interna.
-
-## Tecnologia
-
-- Frontend estático em HTML, CSS e JavaScript, sem framework ou bundler.
-- Supabase Auth, PostgreSQL com RLS e Edge Functions.
-- Edge Functions em TypeScript/Deno.
-- Testes locais com o runner nativo do Node.js.
-- Publicação atual no Vercel, a partir da branch `main`.
-
-A biblioteca `@supabase/supabase-js` está fixada em `2.117.2` no frontend e nas funções.
+Regras e documentos do RH são independentes do cadastro CNES. Um aniversário informado não constitui concessão de day-off. Folgas/day-offs registram autorização externa e não criam saldo de banco de horas. O sistema não substitui o processo administrativo nem a homologação institucional.
 
 ## Executar localmente
 
-Requisitos:
-
-- Git para obter o repositório.
-- Node.js 24 para testes e geração do site estático.
-- Um navegador moderno e um servidor HTTP estático.
-- Acesso ao backend Supabase configurado para os fluxos conectados.
-
-Na raiz do projeto, uma opção de servidor local é Python 3:
+Requer Node.js 24 e Python 3.14. Na raiz:
 
 ```bash
+python -m pip install -r requirements.txt
 python -m http.server 8080
 ```
 
-Abra `http://localhost:8080`. Não é necessário executar `npm install` para o frontend. Evite abrir `index.html` por `file://`.
+O servidor estático permite testar a interface, mas não executa a função Python. A consulta autenticada `/api/cnes` precisa da emulação Vercel ou de proxy local para `python -m uvicorn api.cnes:app` (uvicorn é ferramenta opcional de desenvolvimento).
 
-**Atenção:** servir a interface localmente não cria um banco isolado. O frontend chama o projeto Supabase definido em `assets/app.js`. Não execute testes destrutivos ou cadastros fictícios indiscriminadamente contra uma base institucional.
+**Atenção:** servir a interface localmente não cria um banco isolado. Os endereços configurados podem apontar para o banco compartilhado. Não executar fixtures ou limpeza contra dados reais.
 
 ## Configuração
 
-### Frontend
+O frontend usa `SUPABASE_URL` e `SUPABASE_KEY` publicáveis em `assets/app.js` e não carrega automaticamente arquivos `.env`. Chave publicável não concede autorização administrativa.
 
-As constantes `SUPABASE_URL` e `SUPABASE_KEY`, em `assets/app.js`, identificam o backend e sua chave publicável. Essa chave pode ser enviada ao navegador; não substitui autenticação, RLS ou autorização por contexto.
+Nunca coloque `SUPABASE_SERVICE_ROLE_KEY`, senhas ou tokens no frontend, GitHub, relatórios ou logs. As Edge Functions usam variáveis seguras do Supabase. A função Python verifica o token no Auth e o perfil via RLS, sem chave privilegiada; `SUPABASE_URL` pode definir o destino do backend Python. Ao trocar de projeto, alinhar frontend, função Python, CSP e URLs de recuperação.
 
-Ao mudar de projeto/domínio, revise também:
-
-- `connect-src` em `index.html` e nos cabeçalhos de `vercel.json`;
-- URLs de autenticação e recuperação no Supabase;
-- configuração de recuperação nas Edge Functions;
-- `netlify.toml`, somente se esse destino alternativo for utilizado.
-
-Este frontend não carrega automaticamente arquivos `.env`. Criar um `.env` sem mudar o mecanismo de configuração não altera as constantes publicadas.
-
-### Backend
-
-As funções leem suas configurações do ambiente seguro do Supabase:
-
-| Variável | Uso |
-| --- | --- |
-| `SUPABASE_URL` | Endereço do projeto. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Operações privilegiadas, exclusivamente no servidor. |
-| `SUPABASE_ANON_KEY` | Fluxos de autenticação que a utilizam. |
-| `SGF_RECOVERY_URLS` | Retornos adicionais de recuperação, quando configurados. |
-
-Nunca coloque `SUPABASE_SERVICE_ROLE_KEY`, senhas ou tokens no frontend, no GitHub ou em relatórios. Arquivos de ambiente, diretórios privados de ensaio e configurações locais de hospedagem são ignorados pelo Git.
+A consulta é restrita aos códigos de `config/rh-units.json`. Coleta CNES pode falhar ou retornar parcialmente; nesses casos, não há incorporação. Competência não é inferida da data da consulta.
 
 ## Testes e build
 
-Na raiz do repositório:
-
 ```bash
-node --check assets/app.js
 node --test tests/*.test.mjs
+python -m unittest discover -s tests -p 'test_cnes*.py'
 node scripts/build-static.mjs
 ```
 
-O build copia `index.html`, `logo.png` e os arquivos JS/CSS de `assets/` para `dist/`. Não publica documentos internos, SQL, scripts de ensaio nem Edge Functions. `dist/` é uma saída gerada e não deve ser editada como fonte.
+O build gera `dist/` com assets públicos versionados. Não editar `dist/` como fonte. A função Python é empacotada pelo Vercel a partir de `api/cnes.py`, separadamente dos arquivos estáticos.
 
-Os testes cobrem lógica, contratos de acesso, validações, fluxos e regressões. Testes que inspecionam código ou SQL não comprovam execução real no navegador ou no banco.
+CI executa testes Node/Python, reconstrução do banco e ensaios SQL isolados. Testes de contrato não comprovam todas as interações de navegador; um deploy pronto não significa que todos os testes de CI passaram.
 
-O workflow em `.github/workflows/tests.yml` executa testes locais, reconstrução do banco, ensaios SQL e restauração sintética em ambiente isolado. Consulte o resultado do workflow da versão que será publicada; um deploy pronto não significa que todos os testes de CI passaram.
-
-Scripts de ensaio remoto podem gravar dados. Leia as instruções e os guardas de cada script antes de executá-lo; eles não fazem parte da inicialização normal do projeto.
+`tests/cnes-api-rehearsal.sql` só pode ser executado dentro de BEGIN/ROLLBACK. Scripts de ensaio podem gravar: conferir seu destino antes de executá-los.
 
 ## Estrutura
 
 | Caminho | Conteúdo |
 | --- | --- |
-| `index.html` | Entrada da aplicação, metadados e carregamento de recursos. |
-| `assets/` | Interface, estilos e módulos de regras/navegação. |
-| `supabase/functions/` | Autenticação, solicitações e operações administrativas. |
-| `supabase/functions/_shared/` | Validação de contexto e regras compartilhadas no backend. |
-| `supabase/migrations/` | Evolução versionada do banco. |
-| `supabase/config.toml` | Configuração do projeto Supabase local. |
-| `tests/` | Testes automatizados e cenários SQL. |
-| `scripts/` | Build e ferramentas de verificação/ensaio. |
-| `docs/` | Manual, implantação, validações e pendências. |
-| `vercel.json` | Build, diretório publicado e cabeçalhos HTTP atuais. |
-| `netlify.toml` | Configuração de hospedagem alternativa/histórica. |
+| `assets/` e `index.html` | Interface, calendário, consulta e exportações. |
+| `api/cnes.py` | Consulta Python protegida no próprio site. |
+| `cnes_service/` | Núcleo reaproveitado da API-CNES, com validação reforçada. |
+| `supabase/functions/` | Autenticação, conferência e operações autorizadas. |
+| `supabase/migrations/` | Evolução versionada, inclusive histórico CNES privado. |
+| `config/` | Catálogo das unidades autorizadas. |
+| `tests/` e `scripts/` | Testes, build e ensaios. |
+| `docs/` | Operação, contratos, evidências e pendências. |
 
 ## Implantação e manutenção
 
-O destino atual é Vercel:
+O destino atual é Vercel, projeto `sgfbetim`, com build `node scripts/build-static.mjs` e saída `dist`. Dependências Python fixadas em `requirements.txt`. A hospedagem estática alternativa Netlify não executa `api/cnes.py`.
 
-- Comando de build: `node scripts/build-static.mjs`.
-- Diretório publicado: `dist`.
-- Integração Git: branch `main`.
+Publicar migrações aditivas e Edge Functions compatíveis antes da interface. Não usar reset ou limpeza automática no banco compartilhado. Para instalações novas, aplicar a cadeia integral de migrações.
 
-O backend é implantado separadamente no Supabase. Para uma instalação nova, prepare um projeto autorizado, aplique a cadeia completa de migrations e publique as funções correspondentes. Para uma base existente, confira o histórico aplicado antes de executar alterações; não reaplique migrations já registradas nem use reset contra o banco compartilhado.
-
-Mudanças devem manter frontend, schema e funções compatíveis. Confira testes, build, migrações, configuração de autenticação e publicação do commit correto. Ao alterar JS/CSS publicados, atualize as referências versionadas dos recursos quando necessário.
-
-Procedimentos e limites estão em [docs/HOSPEDAGEM.md](docs/HOSPEDAGEM.md). Não conecte o frontend legado ao banco atual.
-
-## Segurança e uso institucional
-
-- RH/Diretor opera apenas no contexto concedido; Administrador possui acesso global.
-- O backend valida identidade, perfil e escopo; as restrições não dependem apenas de esconder botões.
-- Dados funcionais e pessoais não devem ser usados em demonstrações públicas.
-- Testes devem usar dados fictícios e ter destino, autorização e encerramento definidos.
-- Backup, retenção, proteção de senhas e preparação operacional permanecem sujeitos às pendências institucionais.
-- Não descarte histórico nem redefina credenciais como preparação automática de testes.
-
-O piloto compartilhado não representa separação definitiva entre desenvolvimento, homologação e produção. Regras e aceite do RH Central serão tratados ao final das mudanças, antes do uso institucional definitivo.
+A consulta completa fica em schema privado, separada dos cadastros operacionais. Updates preservam IDs, autorizações, informações RH e histórico de afastamentos. Não excluir estruturas antigas sem análise de dependências e migração explícita.
 
 ## Documentação
 
-- [Manual de uso](docs/MANUAL_USO.md)
-- [Hospedagem e configuração](docs/HOSPEDAGEM.md)
-- [Pendências ativas](docs/pendencias.md)
-- [Auditoria técnica e correções](docs/AUDITORIA_TECNICA_20261014.md)
-- [Guia de homologação](docs/GUIA_HOMOLOGACAO.md)
-- [Homologação das regras](docs/HOMOLOGACAO_REGRAS.md)
-- [Auditoria e retenção](docs/AUDITORIA_RETENCAO.md)
-- [Ponto de retomada](docs/RETOMADA_20261014.md)
+- [Atualização CNES e operações RH](docs/ATUALIZACAO_CNES.md)
+- [Pendências atuais](docs/pendencias.md)
+- [Operação](docs/OPERACAO.md)
+- [Hospedagem](docs/HOSPEDAGEM.md)
+- [Normas de férias](docs/NORMAS_FERIAS_BETIM.md)
 
-Materiais de treinamento e registros históricos ficam em `docs/`, separados desta documentação de entrada. Capturas e slides anteriores podem não representar a interface atual.
+Documentos e capturas anteriores podem descrever fluxos já retirados. O contrato de atualização de 23/10 prevalece sobre as instruções antigas de cadastro manual.
 
 ## Licença
 
-Software proprietário para uso institucional. Consulte [LICENSE](LICENSE) para os termos de uso, manutenção e distribuição.
+Software proprietário para uso institucional. Consulte [LICENSE](LICENSE).

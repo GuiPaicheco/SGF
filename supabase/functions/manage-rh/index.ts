@@ -68,6 +68,12 @@ Deno.serve(async request=>{
    if(payload.action==='launch-employees'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_launch_employees',{page_index:payload.page,search_text:payload.search.trim()}));}
    if(payload.action==='employee-profile'){if(!uuid.test(payload.entryId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_employee_profile',{target_entry:payload.entryId}));}
    if(payload.action==='save-birthday')return json(await rpc('rh_save_employee_birthday',birthdayInput(payload)));
+   if(payload.action==='create-occurrence') {
+    const day=(v:unknown)=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
+    if(!uuid.test(payload.entryId||'')||!uuid.test(payload.requestKey||'')||!['dayoff','folga'].includes(payload.type)||!day(payload.start)||!day(payload.end)
+      ||typeof payload.reference!=='string'||typeof (payload.notes??'')!=='string')throw Error('RH_INPUT_INVALID');
+    return json(await rpc('rh_create_occurrence',{target_entry:payload.entryId,request_key:payload.requestKey,occurrence_type:payload.type,start_day:payload.start,end_day:payload.end,reference:payload.reference.trim(),notes:payload.notes||''}));
+   }
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
    if(payload.action==='calendar')return json(await rpc('rh_calendar_window',{target_cnes:null,...calendarWindow(payload)}));
    if(isLeaveAction){const operation=leaveOperation(payload);return json(await rpc(operation.name,{target_cnes:null,...operation.args}));}

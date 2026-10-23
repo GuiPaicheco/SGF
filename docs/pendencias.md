@@ -1,4 +1,24 @@
-# Pendências do SGF — revisão de 19/10/2026
+# Pendências do SGF — revisão de 23/10/2026
+
+## Bloco atual — API CNES, consulta e operações RH
+
+Esta seção prevalece sobre os itens históricos abaixo: atualização não remove ausentes; somente o admin altera cadastros. RH lança férias, folgas e day-off.
+
+1. [x] Base obtida de origin/main b355215 em worktree isolada, preservando alterações locais anteriores.
+2. [x] Consulta Python autenticada no próprio SGF; adaptação para a conferência CNES existente, sem CPF/matrícula ou login de profissional.
+3. [x] Atualizar CNES com prévia; preservar ausentes e remoções explícitas, IDs, informações RH e afastamentos. Alternativa PDF também retém ausentes.
+4. [x] Ver CNES com estabelecimento, profissionais, equipes e dados RH separados; coletas e histórico em schema privado.
+5. [x] Remoção explícita pelo admin, com justificativa e versão, sem apagar histórico ou permitir reativação pela atualização.
+6. [x] Cadastrar dayoff substitui Visualizar cadastro; Lançar Folga registra autorização externa, sem banco de horas ou concessão automática.
+7. [x] Calendário/comprovante/exportações distinguem D/L; idempotência, versão, operador, escopo e conflitos preservados.
+8. [x] Ensaios sintéticos com rollback e testes de contrato/autorizações; consulta real sem gravação.
+9. [x] Migração 20261023124526 aplicada; manage-cnes v6 e manage-rh v14 publicados. Preservados 40 registros CNES, 42 contas RH e o lançamento existente.
+10. [ ] Confirmar CI completo e deploy Vercel pronto.
+11. [ ] Conferência acompanhada no navegador com admin e RH antes do uso institucional; manter governança/aceite pendentes.
+
+Contrato e procedimentos: [Atualização CNES](ATUALIZACAO_CNES.md). A data de consulta não é competência. Aniversário informado não é day-off concedido.
+
+## Registro das etapas anteriores (19/10)
 
 Esta é a única fila ativa. A orientação mais recente substitui a inclusão manual e a exigência de matrícula dos blocos anteriores. O [planejamento anterior](HISTORICO_PENDENCIAS_20261018_ANTES_PDF.md) fica como histórico; sua ordem não deve ser retomada automaticamente. Os blocos abaixo incorporam a pesquisa normativa de férias e a retirada de banco de horas.
 

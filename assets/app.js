@@ -753,7 +753,10 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   }
   async function renderUnits(){
     const current=captureView();
-    await SGFRhUnits.mount({app,esc,request:rhRequest,isCurrent:current,cnesRequest:async payload=>{
+    await SGFRhUnits.mount({app,esc,request:rhRequest,isCurrent:current,collect:async code=>{
+      const response=await fetch('/api/cnes?cnes='+encodeURIComponent(code),{headers:sessionHeaders(state.session)});
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw Error(body.detail||'Não foi possível consultar o CNES. Nenhum cadastro alterado.');return body;
+    },cnesRequest:async payload=>{
       const response=await fetch(SUPABASE_URL+'/functions/v1/manage-cnes',{method:'POST',headers:{...sessionHeaders(state.session),'x-sgf-role':'administrador'},body:JSON.stringify(payload)});
       const body=await response.json().catch(()=>({}));if(!response.ok)throw Error(body.error||'Não foi possível atualizar o CNES.');if(payload.action!=='list')rhQueries.clear();return body;
     }});
