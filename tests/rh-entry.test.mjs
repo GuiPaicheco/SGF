@@ -5,7 +5,8 @@ import vm from 'node:vm';
 const source=readFileSync(new URL('../assets/app.js',import.meta.url),'utf8');
 function view(name,next,state={}) {
   const app={innerHTML:''}, destinations=[];
-  const context={app,state,setProgress(){},go:route=>destinations.push(route),accessHome:role=>role==='administrador'?'rh-calendar':'rh-workspace',applyLoginCooldown(){}};
+  const context={app,state,esc:String,setProgress(){},go:route=>destinations.push(route),accessHome:role=>role==='administrador'?'rh-calendar':'rh-workspace',applyLoginCooldown(){}};
+  vm.runInNewContext(readFileSync(new URL('../assets/unit-login.js',import.meta.url),'utf8'),context);
   vm.runInNewContext(source.slice(source.indexOf(`  function ${name}()`),source.indexOf(next,source.indexOf(`  function ${name}()`)))+`;${name}();`,context);
   return {html:app.innerHTML,destinations};
 }
@@ -20,7 +21,7 @@ test('tela inicial autenticada devolve o usuário ao trabalho operacional',()=>{
 });
 test('login orienta acesso institucional sem oferecer senha provisória ou autocadastro',()=>{
   const {html}=view('renderLogin','  async function login');
-  assert.match(html,/placeholder="Digite seu login"/);assert.doesNotMatch(html,/UBS AMAZONAS ou admin/);assert.match(html,/operador autorizado/);
+  assert.match(html,/<select[^>]+id="access-identifier"/);assert.equal((html.match(/CNES /g)||[]).length,42);assert.doesNotMatch(html,/UBS AMAZONAS ou admin/);assert.match(html,/operador autorizado/);
   assert.doesNotMatch(html,/123456|Solicitar acesso|data-go="access-request"/);
 });
 

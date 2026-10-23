@@ -72,6 +72,7 @@ Deno.serve(async request=>{
       if(typeof payload.entryId!=='string'||!Number.isInteger(payload.version)||typeof payload.reason!=='string') throw Error('CNES_LOCAL_DATA_INVALID');
       return json(await rpc('archive_cnes_employee',{target_entry:payload.entryId,expected_version:payload.version,target_reason:payload.reason.trim()}));
     }
+    if(['preview','apply'].includes(payload.action))return json({error:'Atualização por arquivo encerrada. Utilize Atualizar CNES pela API.'},410);
     let normalized;
     const apiAction=['api-preview','api-apply'].includes(payload.action);
     if(apiAction) normalized=await normalizeCollection(apiCollection(payload.sourceData,payload.cnes),allowedCodes);

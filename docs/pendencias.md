@@ -1,5 +1,17 @@
 # Pendências do SGF — revisão de 23/10/2026
 
+## Ajustes atuais — unidades, login e feriados por abrangência
+
+1. [x] Lista das unidades com apenas Acessar CNES; ficha completa, atualização principal via API, profissionais e day-off dentro da unidade, junto das ações administrativas.
+2. [x] Retirar envio PDF da interface e bloquear preview/apply de arquivos na API administrativa. Preservar parsers e migrations históricos sem oferecer o fluxo encerrado.
+3. [x] Login por seleção dos 42 estabelecimentos, com opção separada Administração; identificador correto enviado à autenticação e senhas atuais preservadas.
+4. [x] Feriados gerais ou específicos para uma/várias unidades, com classificação federal/estadual/municipal/institucional. Dados antigos ficam gerais, sem inventar classificação normativa.
+5. [x] Excluir feriado fisicamente, com confirmação, versão e auditoria; recálculo atômico das férias úteis afetadas e isolamento dos calendários por unidade. Conflito impede gravação parcial.
+6. [x] Ensaios SQL sintéticos com rollback: isolamento, grupo de unidades, mesma data em escopos diferentes, exclusão física, auditoria e concorrência. Testes da interface/login adicionados.
+7. [ ] Publicar migration, funções e site; concluir testes completos e CI.
+8. [ ] Decidir política de senhas: recomendadas senhas iniciais aleatórias por unidade, troca obrigatória e redefinição administrativa. Padrão atual de redefinição continua 123456; nenhuma credencial foi alterada neste bloco.
+9. [ ] Conferência visual acompanhada com administrador/RH, incluindo grupo de unidades, login e ficha CNES após a primeira atualização pela API.
+
 ## Ajustes atuais — calendário anual e day-off
 
 1. [x] Consulta do calendário ampliada para até 12 meses na interface, API e banco, incluindo anos bissextos e exportações sem truncamento em 93 dias.

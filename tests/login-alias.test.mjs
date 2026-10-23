@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 
-const source = readFileSync(new URL('../assets/rh-query-cache.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/access-policy.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../assets/unit-login.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/rh-query-cache.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/access-policy.js', import.meta.url), 'utf8') + '\n' + readFileSync(new URL('../assets/app.js', import.meta.url), 'utf8');
 
 for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo sem CPF funciona no esquema ${schema}`, async () => {
   const listeners = {};
@@ -53,7 +53,7 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
   });
   await new Promise(resolve => setImmediate(resolve));
   await listeners.click({ target: { closest: selector => selector === '[data-go]' ? { dataset: { go: 'login' } } : null } });
-  assert.match(app.innerHTML, /CPF ou e-mail/);
+  assert.match(app.innerHTML, /Estabelecimento \/ acesso/);
   const button = { disabled: false, textContent: 'Entrar no SGF' };
   await listeners.submit({ target: { id: 'login-form' }, submitter: button, preventDefault() {} });
   assert.deepEqual(loginPayload, { action: 'login', identifier: 'admin', password: 'senha-segura' });

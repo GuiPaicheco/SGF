@@ -39,6 +39,7 @@ test('mutação cadastral CNES não possui acesso direto anônimo/autenticado',(
 });
 test('confirmação envia a coleta uma única vez para respeitar o limite do corpo',()=>{
  const ui=readFileSync(new URL('../assets/rh-units-ui.js',import.meta.url),'utf8');
- assert.match(ui,/collection\.apiData\?\{sourceData:collection\.apiData\}:\{collection\}/);
+ assert.match(ui,/action:'api-apply',sourceData:collection\.apiData,cnes:unit/);
+ assert.equal((ui.match(/sourceData:collection\.apiData/g)||[]).length,1);
  assert.doesNotMatch(ui,/sourceData:collection\.apiData\}:\{\}\),collection/);
 });

@@ -30,7 +30,7 @@ Deno.serve(async request => {
     const scoped = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers: { ...contextHeaders(context), 'x-sgf-actor': identity.user.id } } });
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
-    if(!['calendar-list','calendar-save'].includes(action))return json({error:'Esta configuração foi retirada. Utilize Cadastro das unidades para atualizar pelo CNES.'},410);
+    if(!['calendar-list','calendar-save','calendar-delete'].includes(action))return json({error:'Esta configuração foi retirada. Utilize Cadastro das unidades para atualizar pelo CNES.'},410);
     if(!actionAllowed('catalogs',action,context.role)) return json({error:'Seu perfil não permite executar esta ação.'},403);
     const scopeIds = context.global ? [] : [context.lotacaoId!];
     const employeesInContext = async () => {
@@ -64,23 +64,19 @@ Deno.serve(async request => {
       if(error) throw error;
       return json({id:data});
     }
-    if (action === 'calendar-list') {
-      if (actorRole !== 'administrador') return json({ error: 'Acesso exclusivo do administrador.' }, 403);
-      const { data, error } = await admin.from('calendar_events').select('id,event_date,type,name,active,version').order('event_date', { ascending: false }).limit(150);
-      if (error) throw error;
-      return json({ events: data || [] });
+    if(action==='calendar-list'){
+      const [events,units]=await Promise.all([admin.from('calendar_events').select('id,event_date,type,name,active,version,scope,unit_ids,jurisdiction').order('event_date',{ascending:false}).limit(2001),admin.from('cnes_units').select('id,code,name').eq('active',true).order('name')]);
+      if(events.error||units.error)throw events.error||units.error;
+      if(events.data.length>2000)return json({error:'Há mais de 2000 datas. Solicite uma consulta segmentada à TI.'},400);
+      return json({events:events.data,units:units.data});
     }
-    if (action === 'calendar-save') {
-      if (actorRole !== 'administrador') return json({ error: 'Acesso exclusivo do administrador.' }, 403);
-      const eventDate = String(payload.event_date || ''), type = String(payload.type || ''), name = String(payload.name || '').trim();
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || !Number.isFinite(Date.parse(eventDate)) || new Date(eventDate).toISOString().slice(0,10) !== eventDate || !['feriado', 'ponto_facultativo'].includes(type) || !name || name.length>200) return json({ error: 'Informe uma data válida, tipo e nome do evento (até 200 caracteres).' }, 400);
-      const { data, error } = await scoped.rpc('save_planning_calendar_event', {
-        actor_id: identity.user.id, target_id: payload.id || null, target_date: eventDate,
-        target_type: type, target_name: name, target_active: payload.active !== false,
-        expected_version: payload.version || null,
-      });
-      if (error) throw error;
-      return json({ id: data.id });
+    if(action==='calendar-save'){
+      const eventDate=payload.event_date,name=payload.name;
+      if(typeof eventDate!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(eventDate)||!Number.isFinite(Date.parse(eventDate))||new Date(eventDate).toISOString().slice(0,10)!==eventDate||typeof name!=='string'||!name.trim()||name.length>200)return json({error:'Informe data válida e nome de até 200 caracteres.'},400);
+    }
+    if(['calendar-save','calendar-delete'].includes(action)){
+      const {data,error}=await scoped.rpc('manage_scoped_calendar_event',{actor_id:identity.user.id,operation:action==='calendar-delete'?'delete':'save',target_id:payload.id||null,expected_version:payload.version||null,item:payload});
+      if(error)throw error;return json(data);
     }
 
     if (action === 'list') {
@@ -149,6 +145,9 @@ Deno.serve(async request => {
     if (message.includes('TEAM_DUPLICATED')) return json({error:'Esta equipe já existe no CNES selecionado.'},409);
     if (/ALLOCATION_IN_USE|SECRETARIAT_IN_USE|TEAM_IN_USE/.test(message)) return json({error:'Esta alteração invalidaria atuações existentes. Regularize os vínculos antes de mudar a estrutura.'},409);
     if (/INTERNAL_ALLOCATION_REQUIRES_SECRETARIAT|PARENT_CYCLE|PARENT_NOT_FOUND|TEAM_TYPE_INVALID|INVALID_RESPONSIBLE/.test(message)) return json({error:'Confira Secretaria superior, hierarquia, tipo de equipe e responsáveis ativos.'},400);
+    if (/CALENDAR_INPUT_INVALID|CALENDAR_SCOPE_INVALID/.test(message)) return json({error:'Confira a data, a classificação, a abrangência e as unidades selecionadas.'},400);
+    if (message.includes('RH_DAYOFF_RECALC_CONFLICT'))return json({error:'A alteração criaria conflito entre afastamentos ou parcelas. Ajuste a programação antes de salvar; nenhuma alteração foi gravada.'},409);
+    if (message.includes('CALENDAR_NOT_FOUND'))return json({error:'Data não encontrada. Atualize a lista.'},404);
     if (message.includes('CALENDAR_VERSION_CONFLICT')) return json({ error: 'Outro administrador alterou esta data. Atualize o calendário antes de salvar.' }, 409);
     if (message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o perfil e o local de atuação.' }, 403);
     if (message.includes('duplicate key')) return json({ error: 'Já existe um cadastro com estes dados.' }, 409);

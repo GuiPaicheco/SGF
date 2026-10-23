@@ -16,7 +16,7 @@ begin
  -- Cenário sintético controlado, revertido pela transação externa.
  update public.calendar_events set active=false where event_date between '2027-03-01' and '2027-03-10';
  insert into public.calendar_events(event_date,type,name,active) values('2027-03-04','feriado','FERIADO FICTÍCIO',true)
- on conflict(event_date,type) do update set active=true;
+ on conflict(event_date,type,scope,unit_ids) do update set active=true;
  data:='{"type":"banco_horas","dateMode":"return","returnDate":"2027-03-09","days":2,"availableHours":15,"dailyHours":7.5,"birthDate":"1990-03-05","eligibilityConfirmed":true}';
  preview:=public.rh_preview_leave(profile,session_id,null,entry_id,data);
  if preview->'plan'->'periods'->0->>'start_date'<>'2027-03-03' or preview->'plan'->'periods'->0->>'return_date'<>'2027-03-09'
@@ -28,7 +28,7 @@ begin
  end loop;
  if public.rh_preview_leave(profile,session_id,null,entry_id,data||'{"availableHours":0}')->'plan'->>'can_save'<>'false' then raise exception 'RETURN_SHORTAGE_LOST';end if;
  begin
-  insert into public.calendar_events(event_date,type,name,active) values('2027-03-03','feriado','OUTRO FERIADO FICTÍCIO',true) on conflict(event_date,type) do update set active=true;
+  insert into public.calendar_events(event_date,type,name,active) values('2027-03-03','feriado','OUTRO FERIADO FICTÍCIO',true) on conflict(event_date,type,scope,unit_ids) do update set active=true;
   perform public.rh_create_leave(profile,session_id,null,entry_id,data,'fa000000-0000-0000-0000-000000000009',preview->>'digest');raise exception 'RETURN_STALE_CALENDAR';
  exception when others then if sqlerrm<>'RH_LEAVE_PREVIEW_CHANGED' then raise;end if;end;
  result:=public.rh_create_leave(profile,session_id,null,entry_id,data,'fa000000-0000-0000-0000-000000000001',preview->>'digest');leave_id:=(result->>'id')::uuid;
