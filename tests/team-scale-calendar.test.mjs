@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('equipe participa dos cadastros e pode receber Não se aplica', async () => {
+test('histórico das equipes preserva Não se aplica sem reabrir o autocadastro', async () => {
   const [app, auth, catalogs, migration, multiMigration] = await Promise.all([
     read('assets/app.js'), read('supabase/functions/access-auth/index.ts'),
     read('supabase/functions/manage-catalogs/index.ts'),
@@ -14,8 +14,8 @@ test('equipe participa dos cadastros e pode receber Não se aplica', async () =>
   assert.match(app, /class="control access-team-type"/);
   assert.match(app, /<option value="nao_se_aplica">Não se aplica<\/option>/);
   assert.match(app, /team\.cnes_unit_id === cnesId && team\.type_code === type/);
-  assert.match(auth, /requested_team: team/);
-  assert.match(auth, /submit_multi_bond_access_request/);
+  assert.match(auth, /autocadastro foi encerrado/);
+  assert.doesNotMatch(auth, /if \(action === 'request-access'\)/);
   assert.match(catalogs, /target_team:/);
   assert.match(migration, /team_name text not null default 'Não se aplica'/);
   assert.match(migration, /previous_team text/);

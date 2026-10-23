@@ -19,14 +19,13 @@ test("pedido de acesso armazena vários vínculos e CNES de forma atômica", asy
   }
 });
 
-test("formulário público adiciona vínculos e CNES e filtra equipes", async () => {
+test("formulário histórico mantém vínculos e equipes, mas o autocadastro público permanece encerrado", async () => {
   const [app, auth] = await Promise.all([
     read("assets/app.js"),
     read("supabase/functions/access-auth/index.ts"),
   ]);
-  assert.match(auth, /action === 'registration-catalogs'/);
-  assert.match(auth, /cnesUnits:/);
-  assert.match(auth, /teams:/);
+  assert.match(auth, /\['request-access','registration-catalogs','locations'\]\.includes\(action\)/);
+  assert.doesNotMatch(auth, /if \(action === 'registration-catalogs'\)/);
   assert.match(app, /data-access-add-bond/);
   assert.match(app, /data-access-add-unit/);
   assert.match(app, /pole_cnes_unit_id/);

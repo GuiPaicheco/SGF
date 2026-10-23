@@ -4,8 +4,8 @@ Sistema auxiliar da Prefeitura de Betim para consulta de cadastros públicos do 
 
 ## Fluxo e acessos
 
-- **Administrador:** Atualizar CNES, conferir correções/inclusões, Acessar CNES, remover funcionário do uso ativo com histórico preservado, gerenciar operadores, feriados gerais/específicos e consultar calendários.
-- **RH da unidade:** identificar operador autorizado e lançar férias, folgas e day-offs da própria unidade.
+- **Administração do SGF:** Atualizar CNES, conferir correções/inclusões, Acessar CNES, remover funcionário do uso ativo com histórico preservado, gerenciar operadores, feriados gerais/específicos e consultar calendários.
+- **RH da unidade:** identificar operador autorizado e lançar férias, folgas, afastamentos e day-offs da própria unidade.
 - **Consulta pública:** simulação de férias sem dados pessoais.
 
 O cadastro profissional é importado do CNES, sem exigir CPF, matrícula ou login do funcionário. A atualização nunca remove/desativa ausentes nem reativa quem o admin removeu explicitamente. Informações não disponíveis na fonte não são inventadas.
@@ -14,7 +14,7 @@ RH/Diretor é uma denominação histórica encontrada em tabelas, testes e docum
 
 Regras e documentos do RH são independentes do cadastro CNES. O aniversário confirmado pelo RH gera day-off anual e não consome dias de férias úteis; data de nascimento legada não confirmada continua informativa. Folgas registram autorização externa e não criam saldo de banco de horas. O sistema não substitui o processo administrativo nem a homologação institucional.
 
-O login permite selecionar um dos 42 estabelecimentos ou Administração do SGF. As senhas continuam individuais e não são incluídas no catálogo público.
+O login apresenta as UBS em ordem alfabética, DAPS na penúltima opção e Administração do SGF na última. São 42 estabelecimentos e um acesso administrativo. As senhas continuam individuais e não são incluídas no catálogo público.
 
 ## Executar localmente
 
@@ -74,6 +74,8 @@ A consulta completa fica em schema privado, separada dos cadastros operacionais.
 
 ## Documentação
 
+- [Guia operacional atual](docs/GUIA_OPERACOES_FINAIS.md)
+- [Revisão da versão piloto](docs/REVISAO_PILOTO_20261023.md)
 - [Feriados por unidade, cadastro CNES e login](docs/FERIADOS_UNIDADES.md)
 - [Atualização CNES e operações RH](docs/ATUALIZACAO_CNES.md)
 - [Pendências atuais](docs/pendencias.md)

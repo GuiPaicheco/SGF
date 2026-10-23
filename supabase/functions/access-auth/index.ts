@@ -67,29 +67,6 @@ Deno.serve(async request => {
     const payload = await request.json();
     const action = String(payload.action ?? 'login');
     if(['request-access','registration-catalogs','locations'].includes(action))return json({error:'O autocadastro foi encerrado. O acesso é gerenciado pelo Administrador.'},410);
-    if (action === 'locations') {
-      const { data, error } = await admin.from('lotacoes').select('code,name').eq('active', true).not('code', 'is', null).order('name').limit(300);
-      if (error) throw error;
-      return json({ locations: data || [] });
-    }
-    if (action === 'registration-catalogs') {
-      const [unitsResult, teamsResult, typesResult, positionsResult, allocationsResult] = await Promise.all([
-        admin.from('cnes_units').select('id,code,name').eq('active', true).order('name').limit(500),
-        admin.from('teams').select('id,cnes_unit_id,type_code,team_number,ine_code,name,needs_review').eq('active', true).order('name').limit(1000),
-        admin.from('team_types').select('code,name').eq('active', true).neq('code', 'nao_se_aplica').order('name'),
-        admin.from('cargos').select('id,name').order('name').limit(500),
-        admin.from('lotacoes').select('id,name,parent_id,lotacao_cnes_units(cnes_unit_id)').eq('active', true).eq('is_internal_allocation', true).order('name').limit(500),
-      ]);
-      const error = unitsResult.error || teamsResult.error || typesResult.error || positionsResult.error || allocationsResult.error;
-      if (error) throw error;
-      return json({
-        cnesUnits: unitsResult.data || [],
-        teams: teamsResult.data || [],
-        teamTypes: typesResult.data || [],
-        positions: positionsResult.data || [],
-        internalAllocations: allocationsResult.data || [],
-      });
-    }
     if (action === 'contexts') {
       const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
       if (!token) return json({ error: 'Sessão inválida.' }, 401);
@@ -171,55 +148,6 @@ Deno.serve(async request => {
     const acceptAttempts = async () => {
       if (attempts.length) await admin.from('submission_attempts').update({ accepted: true }).in('id', attempts);
     };
-
-    if (action === 'request-access') {
-      const cpf = digits(payload.cpf);
-      const fullName = String(payload.name ?? '').trim();
-      const birthDate = String(payload.birthDate ?? '');
-      const email = String(payload.email ?? '').trim().toLowerCase();
-      if (Array.isArray(payload.bonds)) {
-        if (!fullName || !validCpf(cpf) || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) ||
-          !/^[^\s@]+@betim\.mg\.gov\.br$/.test(email) || !payload.bonds.length || payload.bonds.length > 10) {
-          return json({ error: 'Confira os dados pessoais e os vínculos da solicitação.' }, 400);
-        }
-        const { data, error } = await admin.rpc('submit_multi_bond_access_request', {
-          target_full_name: fullName,
-          target_cpf: cpf,
-          target_birth_date: birthDate,
-          target_email: email,
-          target_bonds: payload.bonds,
-        });
-        if (error) {
-          if (error.message.includes('ALREADY_PENDING') || error.code === '23505') {
-            return json({ error: 'Já existe uma solicitação pendente para este CPF, e-mail ou matrícula.' }, 409);
-          }
-          if (error.message.includes('TEAM_OUT_OF_CNES')) return json({ error: 'A equipe escolhida não pertence ao CNES informado.' }, 400);
-          if (error.message.includes('ALLOCATION')) return json({ error: 'A lotação interna não pertence à Secretaria/CNES selecionados.' }, 400);
-          if (error.message.includes('ACCESS_')) return json({ error: 'Confira os vínculos, CNES, equipes e cargas horárias informados.' }, 400);
-          throw error;
-        }
-        await acceptAttempts();
-        return json({ ok: true, id: data }, 202);
-      }
-      const registration = String(payload.registration ?? '').trim().toUpperCase();
-      const position = String(payload.position ?? '').trim();
-      const unit = String(payload.unit ?? '').trim();
-      const team = String(payload.team ?? '').trim() || 'Não se aplica';
-      if (!fullName || !registration || !position || !unit || team.length > 120 || !validCpf(cpf) ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || !/^[^\s@]+@betim\.mg\.gov\.br$/.test(email)) {
-        return json({ error: 'Confira os dados da solicitação de acesso.' }, 400);
-      }
-      const { error } = await admin.from('access_requests').insert({
-        full_name: fullName, registration, cpf, birth_date: birthDate, email,
-        requested_identifier: registration.toLowerCase(), requested_position: position, requested_unit: unit, requested_team: team,
-      });
-      if (error) {
-        if (error.code === '23505') return json({ error: 'Já existe uma solicitação de acesso pendente para estes dados.' }, 409);
-        throw error;
-      }
-      await acceptAttempts();
-      return json({ ok: true }, 202);
-    }
 
     if (action === 'recover') {
       if(configuredUnit || /^rh-\d{7}$/.test(identifier)) return json({ok:true,message:'Para recuperar o acesso institucional, procure o Administrador.'});

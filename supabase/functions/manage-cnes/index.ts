@@ -13,7 +13,7 @@ const messages:Record<string,string>={
   CNES_AMBIGUOUS_SOURCE_IDENTITY:'A coleta possui vínculos indistinguíveis com dados diferentes. Confira a fonte antes de importar.',
   CNES_VERSION_CONFLICT:'O cadastro mudou desde a prévia. Confira novamente antes de gravar.',
   CNES_STALE_COLLECTION:'Esta coleta é anterior à última carga incorporada. Use uma coleta atual.',
-  CNES_ADMIN_REQUIRED:'Somente o Administrador pode importar e conferir cadastros nesta etapa.',
+  CNES_ADMIN_REQUIRED:'Somente a Administração do SGF pode atualizar e conferir os cadastros do CNES.',
   CNES_UNIT_INVALID:'CNES não disponível no catálogo de RH.',
   CNES_REGISTRY_LIMIT:'Limite de registros da unidade atingido. Solicite conferência técnica.',
   CNES_LEGACY_OUT_OF_UNIT:'O cadastro antigo indicado não pertence à unidade.',

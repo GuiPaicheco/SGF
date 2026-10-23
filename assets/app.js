@@ -152,6 +152,7 @@
     const name = firstAndLast.length > 1 ? `${firstAndLast[0]} ${firstAndLast.at(-1)}` : firstAndLast[0];
     const employee = Array.isArray(state.profile.servidor) ? state.profile.servidor[0] : state.profile.servidor;
     const context = state.activeContext;
+    if (state.profile.role === 'administrador') { headerUser.innerHTML = '<strong>Administração do SGF</strong><small>Gestão de unidades e acessos</small>'; return; }
     const contextLabel = context?.global ? 'Visão geral' : context?.cnes_name || context?.lotacao_name || employee?.lotacao?.name || state.profile.primary_lotacao?.name || 'Contexto a definir';
     const roleLabel = context?.institutional ? 'RH da unidade' : state.profile.role === 'servidor' ? (context?.position || employee?.cargo?.name || employee?.declared_position || 'Servidor') : (accessLabel(state.profile.role || '') || 'Escolha um perfil');
     headerUser.innerHTML = `<strong>${esc(name)}</strong><small>${esc(roleLabel)} · ${esc(contextLabel)}</small>${state.activeContext?.institutional&&state.rhState?.operator?`<small>Operador declarado: ${esc(state.rhState.operator.name)}</small>`:''}`;
