@@ -3,6 +3,7 @@ import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts
 import {verifiedSessionId,provisionRhAccount} from '../_shared/rh-accounts.mjs';
 import {limitedJson} from '../_shared/limited-json.mjs';
 import {calendarQuery,calendarWindow,bindingInput,birthdayInput} from '../_shared/rh-calendar.mjs';
+import {absenceInput,absenceReturnInput} from '../_shared/rh-absence.mjs';
 import {leaveOperation} from '../_shared/rh-leaves.mjs';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-sgf-role,x-sgf-cnes,x-sgf-lotacao','Access-Control-Allow-Methods':'POST, OPTIONS'};
@@ -30,6 +31,7 @@ const messages:Record<string,string>={
  RH_LEAVE_OVERLAP:'Este vínculo já tem afastamento ou pedido ativo nessas datas. Confira o calendário antes de continuar.',
  RH_LEAVE_CYCLE_IN_USE:'Já existe afastamento ativo para este vínculo e período aquisitivo.',RH_LEAVE_RIGHT_INVALID:'O direito ou saldo conhecido não corresponde a este vínculo e período, ou os dias já utilizados impedem nova programação.',
  RH_LEAVE_SPLIT_INVALID:'Confira as condições de fracionamento e o início do segundo período.',RH_LEAVE_NOT_FOUND:'Lançamento não encontrado nesta unidade.',
+ RH_ABSENCE_RETURN_REQUIRED:'Informe o retorno do afastamento antes de concluí-lo. Use Atualizar retorno no registro.',
  RH_LEAVE_NOT_ENDED:'O período ainda não terminou e não pode ser concluído agora.',
  RH_BINDING_INPUT_INVALID:'Selecione o vínculo, confirme a unidade polo e informe a justificativa.',
  RH_ENTRY_INVALID:'Cadastro CNES não encontrado.',RH_ENTRY_REVIEW_REQUIRED:'Confira a importação CNES ativa, o vínculo e a unidade polo antes de programar férias.',
@@ -69,6 +71,8 @@ Deno.serve(async request=>{
    if(payload.action==='launch-employees'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_launch_employees',{page_index:payload.page,search_text:payload.search.trim()}));}
    if(payload.action==='employee-profile'){if(!uuid.test(payload.entryId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_employee_profile',{target_entry:payload.entryId}));}
    if(payload.action==='save-birthday')return json(await rpc('rh_save_employee_birthday',birthdayInput(payload)));
+   if(payload.action==='record-absence')return json(await rpc('rh_record_absence',absenceInput(payload)));
+   if(payload.action==='set-absence-return')return json(await rpc('rh_set_absence_return',absenceReturnInput(payload)));
    if(payload.action==='create-occurrence') {
     const day=(v:unknown)=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
     if(!uuid.test(payload.entryId||'')||!uuid.test(payload.requestKey||'')||!['dayoff','folga'].includes(payload.type)||!day(payload.start)||!day(payload.end)

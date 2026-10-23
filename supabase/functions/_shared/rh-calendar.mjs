@@ -3,7 +3,7 @@ export function calendarQuery(payload) {
   ||!Number.isInteger(payload.page)||payload.page<0||payload.page>100
   ||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');
  const filters=payload.filters??{};if(!filters||typeof filters!=='object'||Array.isArray(filters))throw Error('RH_INPUT_INVALID');
- const allowed={position:null,cbo:null,team:null,review:['todos','pendente','conferido'],type:['todos','regulamentar','premio','banco_horas'],status:['todos','com_afastamento','sem_afastamento','programada','concluida','cancelada']};
+ const allowed={position:null,cbo:null,team:null,review:['todos','pendente','conferido'],type:['todos','regulamentar','premio','banco_horas','folga','dayoff','afastamento'],status:['todos','com_afastamento','sem_afastamento','programada','concluida','cancelada']};
  const selections=['full_name','position','cbo','team'];
  if(Object.entries(filters).some(([key,value])=>{
   if(key==='conflict_only')return typeof value!=='boolean';

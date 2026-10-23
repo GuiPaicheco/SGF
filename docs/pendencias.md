@@ -1,11 +1,26 @@
 # Pendências do SGF — revisão de 23/10/2026
 
+## Entrega atual — acabamento final e afastamentos (23/10)
+
+1. [x] Retirar classificação territorial dos feriados; manter apenas tipo e abrangência geral ou unidades selecionadas. Preservar o dado histórico sem pedir classificação em novos cadastros.
+2. [x] Atualização CNES com animação por etapa real e respeito a movimento reduzido.
+3. [x] Conferência em grupos de novos profissionais e cadastros alterados; comparação por campo, decisões individuais ou em lote e confirmação antes de salvar.
+4. [x] Unidade fixa na ficha CNES; voltar à lista para acessar outro estabelecimento.
+5. [x] Nome e cargo em destaque; dados completos organizados em campos, listas e tabelas, sem JSON visível. Identificação técnica de importação preservada.
+6. [x] Seleção de operador autorizado redesenhada somente visualmente, mantendo permissões e identificação existentes.
+7. [x] Folga e Afastamento: calendário clicável com dias não consecutivos; afastamento contínuo com início e retorno opcional; alteração posterior de retorno com versão, justificativa e histórico.
+8. [x] Calendário, consulta CNES e comprovante reconhecem afastamento sem previsão sem fabricar uma data final; detecção de sobreposição, idempotência, escopo e autoria no servidor.
+9. [x] Textos voltados ao RH e administrador, com orientações de uso e minimização de dados sensíveis.
+10. [x] 452 testes Node, 4 Python, build e ensaios SQL com rollback aprovados. Regressões de calendário anual/day-off, feriados por unidade e programação/revisão de férias aprovadas.
+11. [x] Supabase atualizado: migration 20261023171909, manage-rh v16 e manage-catalogs v13. Nenhuma senha alterada.
+12. [ ] Publicação GitHub/Vercel e conferência visual da versão publicada: administrador, importação, feriados, RH, lançamentos, calendário e comprovante. Registrar os limites dos testes sem confundir teste técnico com aceite institucional.
+
 ## Ajustes atuais — unidades, login e feriados por abrangência
 
 1. [x] Lista das unidades com apenas Acessar CNES; ficha completa, atualização principal via API, profissionais e day-off dentro da unidade, junto das ações administrativas.
 2. [x] Retirar envio PDF da interface e bloquear preview/apply de arquivos na API administrativa. Preservar parsers e migrations históricos sem oferecer o fluxo encerrado.
 3. [x] Login por seleção dos 42 estabelecimentos, com opção separada Administração; identificador correto enviado à autenticação e senhas atuais preservadas.
-4. [x] Feriados gerais ou específicos para uma/várias unidades, com classificação federal/estadual/municipal/institucional. Dados antigos ficam gerais, sem inventar classificação normativa.
+4. [x] Feriados gerais ou específicos para uma/várias unidades, sem classificação territorial (retirada no acabamento final). Dados antigos ficam gerais, sem inventar classificação normativa.
 5. [x] Excluir feriado fisicamente, com confirmação, versão e auditoria; recálculo atômico das férias úteis afetadas e isolamento dos calendários por unidade. Conflito impede gravação parcial.
 6. [x] Ensaios SQL sintéticos com rollback: isolamento, grupo de unidades, mesma data em escopos diferentes, exclusão física, auditoria e concorrência. Testes da interface/login adicionados.
 7. [x] Publicados migration 20261023164729, manage-catalogs v12 e manage-cnes v7; Vercel READY (c6c493e). Aprovados 447 testes Node, 4 Python, CI de banco vazio, ensaios SQL e restauração com comparação de integridade. Preservados os 11 feriados, sem alteração de senhas.

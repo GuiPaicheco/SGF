@@ -51,6 +51,7 @@ jobs:
           (printf 'begin;\n'; cat tests/cnes-api-rehearsal.sql; printf '\nrollback;\n') | docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1
           (printf 'begin;\n'; cat tests/calendar-year-dayoff-rehearsal.sql; printf '\nrollback;\n') | docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1
           (printf 'begin;\n'; cat tests/scoped-holidays-rehearsal.sql; printf '\nrollback;\n') | docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1
+          (printf 'begin;\n'; cat tests/final-absence-rehearsal.sql; printf '\nrollback;\n') | docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1
       - name: Restaurar backup sintético em banco novo e comparar integridade
         env:
           SGF_ISOLATED_DATABASE: 'yes'

@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';import {rea
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const esc=v=>String(v??'').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const tick=()=>new Promise(r=>setImmediate(r));
-function harness(file){const nodes=new Map(),lists=new Map(),app={innerHTML:'',setAttribute(){},querySelector(s){if(!nodes.has(s))nodes.set(s,{});return nodes.get(s);},querySelectorAll(s){return lists.get(s)||[];}};const root={SGFCnesSource:{sourceView:()=>'<h3>Estabelecimento completo</h3>'}};runInNewContext(read(file),{globalThis:root});return {root,app,nodes,lists};}
+function harness(file){const nodes=new Map(),lists=new Map(),app={innerHTML:'',setAttribute(){},querySelector(s){if(!nodes.has(s))nodes.set(s,{});return nodes.get(s);},querySelectorAll(s){return lists.get(s)||[];}};const root={SGFCnesSource:{renderData:()=>'<dl>Dados do cadastro</dl>',differences:()=>'<table>Alterações</table>',sourceView:()=>'<h3>Estabelecimento completo</h3>'}};runInNewContext(read(file),{globalThis:root});return {root,app,nodes,lists};}
 test('login lista exatamente 42 estabelecimentos sem expor senhas e mantém admin',()=>{
  const root={};runInNewContext(read('assets/unit-login.js'),{globalThis:root});const api=root.SGFUnitLogin,html=api.options(esc);
  assert.equal(api.units.length,42);assert.equal(new Set(api.units.map(x=>x.cnes)).size,42);assert.equal((html.match(/CNES /g)||[]).length,42);assert.match(html,/value="admin"/);assert.doesNotMatch(html,/123456|0123456789|password/);

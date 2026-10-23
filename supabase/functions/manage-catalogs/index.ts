@@ -65,7 +65,7 @@ Deno.serve(async request => {
       return json({id:data});
     }
     if(action==='calendar-list'){
-      const [events,units]=await Promise.all([admin.from('calendar_events').select('id,event_date,type,name,active,version,scope,unit_ids,jurisdiction').order('event_date',{ascending:false}).limit(2001),admin.from('cnes_units').select('id,code,name').eq('active',true).order('name')]);
+      const [events,units]=await Promise.all([admin.from('calendar_events').select('id,event_date,type,name,active,version,scope,unit_ids').order('event_date',{ascending:false}).limit(2001),admin.from('cnes_units').select('id,code,name').eq('active',true).order('name')]);
       if(events.error||units.error)throw events.error||units.error;
       if(events.data.length>2000)return json({error:'Há mais de 2000 datas. Solicite uma consulta segmentada à TI.'},400);
       return json({events:events.data,units:units.data});
