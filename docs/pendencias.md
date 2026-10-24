@@ -17,6 +17,14 @@ Esta é a lista atual. Itens concluídos foram transferidos para o [histórico](
 
 ## 02. Acompanhamento do piloto
 
+### Novo ponto de partida — limpeza autorizada em 23/10/2026
+
+- [x] Esvaziar dados operacionais: funcionários, vínculos, equipes, fontes/importações CNES, férias/folgas/afastamentos, aniversários, feriados, autorizações de operadores e históricos de uso. Preservar 42 contas RH e Administração com suas credenciais atuais. [Conferência da limpeza](LIMPEZA_BASE_20261023.md).
+- [ ] Administração consultar e incorporar os profissionais de cada unidade pelo CNES e autorizar os operadores que utilizarão o RH.
+- [ ] Administração cadastrar os feriados e pontos facultativos aplicáveis antes dos lançamentos reais, pois a base está sem datas cadastradas.
+
+Os testes e registros citados nos relatórios anteriores descrevem a situação antes desta limpeza. Os dados reais e de teste anteriores foram removidos por solicitação expressa.
+
 - [x] Atualizar a base com o GitHub e revisar identidade SGFS, início, login, cabeçalho, rodapé, navegação, filtros e apresentação dos formulários; conferir visualmente desktop, tablet e celular. [Relatório visual](REVISAO_VISUAL_SGFS_20261023.md).
 - [x] Conferência visual autenticada da Administração em produção: calendário mensal/intervalo, diretório, cadastro CNES e feriados; desktop e celular.
 
