@@ -22,7 +22,8 @@ Esta é a lista atual. Itens concluídos foram transferidos para o [histórico](
 ### Novo ponto de partida — limpeza autorizada em 23/10/2026
 
 - [x] Esvaziar dados operacionais: funcionários, vínculos, equipes, fontes/importações CNES, férias/folgas/afastamentos, aniversários, feriados, autorizações de operadores e históricos de uso. Preservar 42 contas RH e Administração com suas credenciais atuais. [Conferência da limpeza](LIMPEZA_BASE_20261023.md).
-- [ ] Administração consultar e incorporar os profissionais de cada unidade pelo CNES e autorizar os operadores que utilizarão o RH.
+- [x] Incorporar os profissionais dos 42 estabelecimentos pelo CNES: 2.102 vínculos e 2.063 pessoas em 24/10/2026, incluindo DAPS (230 vínculos). [Conferência da carga](IMPORTACAO_42_ESTABELECIMENTOS_20261024.md).
+- [ ] Administração autorizar os operadores responsáveis que utilizarão o RH em cada unidade.
 - [ ] Administração cadastrar os feriados e pontos facultativos aplicáveis antes dos lançamentos reais, pois a base está sem datas cadastradas.
 
 Os testes e registros citados nos relatórios anteriores descrevem a situação antes desta limpeza. Os dados reais e de teste anteriores foram removidos por solicitação expressa.

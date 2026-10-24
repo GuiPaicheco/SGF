@@ -29,8 +29,15 @@ async def collect_unit(cnes):
         raise HTTPException(429, 'Há consultas CNES em andamento. Aguarde e tente novamente.') from None
     try:
         async with asyncio.timeout(120):
-            async with httpx.AsyncClient(timeout=20, follow_redirects=False) as source:
-                result = await CNESService(source).consult(cnes, '310670', False)
+            for attempt in range(2):
+                # Uma falha transitória de uma seção não deve exigir repetir a ação.
+                # Reconsulta inteira, com cliente novo; nunca mescla coletas parciais.
+                async with httpx.AsyncClient(timeout=20, follow_redirects=False) as source:
+                    result = await CNESService(source).consult(cnes, '310670', False)
+                if result['metadados']['completo_no_escopo_solicitado']:
+                    break
+                if attempt == 0:
+                    await asyncio.sleep(0.3)
         if result['metadados']['completo_no_escopo_solicitado']:
             _cache[cnes] = (time.monotonic(), result)
         return result

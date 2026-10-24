@@ -27,6 +27,8 @@ O calendário e as exportações usam **D** para day-off e **L** para folga, man
 
 O cache Python dura até cinco minutos por instância, somente para resultados completos. Há limite de duas coletas simultâneas por instância, espera limitada e timeout total. Isso não é um limitador global distribuído. Cache não substitui persistência nem a conferência. Limites de leitura/payload precisam ser mantidos ao ampliar unidades.
 
+Uma resposta incompleta é reconsultada integralmente uma vez com cliente novo, dentro do limite total de 120 segundos. Não se combinam dados de respostas parciais; somente uma coleta completa pode ser incorporada e armazenada em cache.
+
 ## Execução e verificação
 
 Instalar `requirements.txt`; servir a função por `python -m uvicorn api.cnes:app`. O servidor estático Python simples não executa `/api/cnes`: para desenvolvimento integrado, usar a emulação Vercel ou proxy local para a função.

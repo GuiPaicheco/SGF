@@ -3,7 +3,7 @@ from unittest.mock import patch, AsyncMock
 import httpx
 from fastapi.testclient import TestClient
 from cnes_service.parsers import professionals, teams, members, LayoutError, link_teams
-from api.cnes import app
+from api.cnes import app, collect_unit, _cache
 
 
 class CnesTests(unittest.TestCase):
@@ -49,6 +49,28 @@ class CnesTests(unittest.TestCase):
                     response=client.get('/api/cnes?cnes=6305245',headers={'Authorization':'Bearer FICTICIO','apikey':'PUBLICA-FICTICIA'})
                 self.assertEqual(response.status_code,expected)
                 self.assertEqual(collect.await_count,1 if role=='administrador' else 0)
+
+
+class CnesCollectionTests(unittest.IsolatedAsyncioTestCase):
+    async def test_partial_collection_is_retried_whole_and_only_complete_is_cached(self):
+        partial = {'profissionais': ['PARCIAL'], 'metadados': {'completo_no_escopo_solicitado': False}}
+        complete = {'profissionais': ['COMPLETO'], 'metadados': {'completo_no_escopo_solicitado': True}}
+        _cache.clear()
+        with patch('api.cnes.CNESService') as service:
+            service.return_value.consult = AsyncMock(side_effect=[partial, complete])
+            self.assertEqual(await collect_unit('2126486'), complete)
+            self.assertEqual(await collect_unit('2126486'), complete)
+            self.assertEqual(service.return_value.consult.await_count, 2)
+        _cache.clear()
+
+    async def test_two_incomplete_attempts_are_not_cached_or_combined(self):
+        partial = {'metadados': {'completo_no_escopo_solicitado': False}}
+        _cache.clear()
+        with patch('api.cnes.CNESService') as service:
+            service.return_value.consult = AsyncMock(return_value=partial)
+            self.assertEqual(await collect_unit('2126486'), partial)
+            self.assertEqual(service.return_value.consult.await_count, 2)
+            self.assertNotIn('2126486', _cache)
 
 
 if __name__ == '__main__':
