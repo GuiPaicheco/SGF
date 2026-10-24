@@ -11,6 +11,7 @@ const identifier=(value,pattern,optional=false)=>{
   if(typeof value!=='string'||!pattern.test(value)) fail();return value;
 };
 const hours=value=>{if(typeof value!=='number'||!Number.isFinite(value)||value<0||value>168||Math.abs(Math.round(value*100)-value*100)>0.00001) fail();return value;};
+const optionalTeamHours=value=>value===null?null:hours(value);
 const day=value=>{
   if(value===null||value===undefined||value==='') return null;
   if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value)) fail();
@@ -40,7 +41,7 @@ export async function normalizeCollection(input,allowedCodes) {
   for(const raw of input.professionals) {
     if(!object(raw)) fail();
     const data={fullName:text(raw.fullName),cns:identifier(raw.cns,/^\d{15}$/),principalCns:identifier(raw.principalCns,/^\d{15}$/,true),
-      cbo:identifier(raw.cbo,/^\d{6}$/),occupation:text(raw.occupation),weeklyHours:hours(raw.weeklyHours),
+      cbo:identifier(raw.cbo,/^\d{4}[0-9A-Z]{2}$/),occupation:text(raw.occupation),weeklyHours:hours(raw.weeklyHours),
       hoursOther:hours(raw.hoursOther),hoursAmbulatory:hours(raw.hoursAmbulatory),hoursHospital:hours(raw.hoursHospital),
       relationship:text(raw.relationship),relationshipType:text(raw.relationshipType),relationshipSubtype:text(raw.relationshipSubtype),
       status:text(raw.status,80),sourceEntryDate:day(raw.sourceEntryDate),
@@ -69,11 +70,11 @@ export async function normalizeCollection(input,allowedCodes) {
     members+=team.members.length;if(members>10000) fail();
     for(const member of team.members) {
       if(!object(member)) fail();
-      const memberCns=identifier(member.cns,/^\d{15}$/),cbo=identifier(member.cbo,/^\d{6}$/);
+      const memberCns=identifier(member.cns,/^\d{15}$/),cbo=identifier(member.cbo,/^\d{4}[0-9A-Z]{2}$/);
       const enteredOn=day(member.enteredOn),leftOn=day(member.leftOn);
       if(enteredOn&&leftOn&&enteredOn>leftOn) fail();
       const assignment={ine,name,type,activatedOn,deactivatedOn,enteredOn,leftOn,
-        hoursOther:hours(member.hoursOther),hoursAmbulatory:hours(member.hoursAmbulatory),hoursHospital:hours(member.hoursHospital)};
+        hoursOther:optionalTeamHours(member.hoursOther),hoursAmbulatory:optionalTeamHours(member.hoursAmbulatory),hoursHospital:optionalTeamHours(member.hoursHospital)};
       const candidates=identities.get(`${memberCns}:${cbo}`)||[];
       if(candidates.length!==1) {pending++;continue;}
       const target=records.get(candidates[0]).sourceData.teams;

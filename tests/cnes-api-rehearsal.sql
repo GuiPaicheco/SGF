@@ -24,7 +24,7 @@ insert into private.cnes_registry_entries(id,cnes_unit_id,source_id,source_hash,
 values('f6000000-0000-0000-0000-000000000300','f6000000-0000-0000-0000-000000000100',repeat('a',64),repeat('b',64),'{"fullName":"OPERADOR FICTÍCIO","status":"ativo","cbo":"123456","teams":[]}');
 set local role service_role;
 reset role;
-update private.cnes_registry_entries set source_data=source_data||'{"cns":"900000000000031","relationshipType":"ESTATUTARIO EFETIVO","occupation":"OCUPAÇÃO TESTE","weeklyHours":40,"hoursOther":0,"hoursAmbulatory":40,"hoursHospital":0,"sourceEntryDate":"2020-01-01"}'
+update private.cnes_registry_entries set source_data=source_data||'{"cns":"900000000000031","cbo":"2231F9","relationshipType":"ESTATUTARIO EFETIVO","occupation":"OCUPAÇÃO TESTE","weeklyHours":40,"hoursOther":0,"hoursAmbulatory":40,"hoursHospital":0,"sourceEntryDate":"2020-01-01"}'
 where id='f6000000-0000-0000-0000-000000000300';
 set local role service_role;
 do $test$
@@ -54,6 +54,7 @@ begin
  payload:='{"cnes":"9999994","estabelecimento":{"cnes":"9999994","nome":"UNIDADE ATUALIZADA"},"profissionais":[],"equipes":[],"metadados":{"completo_no_escopo_solicitado":true}}';
  perform public.apply_cnes_api_update(actor,unit_id,items,jsonb_build_array(repeat('a',64)),repeat('e',64),now(),revision,payload);
  if (select count(*) from private.rh_leaves)<>before_count then raise exception 'LEAVES_CHANGED';end if;
+ if (select source_data->>'cbo' from private.cnes_registry_entries where id=entry_id)<>'2231F9' then raise exception 'ALPHANUMERIC_CBO_CHANGED';end if;
  if (select name from public.cnes_units where id=unit_id)<>'UNIDADE ATUALIZADA' then raise exception 'UNIT_NOT_UPDATED';end if;
  if public.view_cnes_source(actor,unit_id)->'source' is null then raise exception 'SOURCE_NOT_STORED';end if;
  begin perform public.apply_cnes_api_update(actor,unit_id,'[]','[]',repeat('f',64),now(),revision+1,payload);

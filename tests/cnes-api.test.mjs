@@ -11,6 +11,27 @@ test('API preserva dados e não inventa CPF, matrícula ou competência',async()
  assert.equal(n.items[0].sourceData.weeklyHours,40);assert.equal(n.competence,null);
  assert.equal(n.items[0].sourceData.registration,undefined);assert.equal(n.items[0].sourceData.cpf,undefined);
 });
+
+test('CBO legado alfanumérico do CNES é preservado sem excluir médico residente',async()=>{
+ const source={...data(),profissionais:[{...person,cbo:'2231F9 - MEDICO RESIDENTE'}]};
+ const n=await normalizeCollection(apiCollection(source,'6305245'),['6305245']);
+ assert.equal(n.items[0].sourceData.cbo,'2231F9');
+ assert.equal(n.items[0].sourceData.occupation,'MEDICO RESIDENTE');
+ for(const code of ['2231f9','ABCDEF','2231F','2231F99','2231;9']){
+  assert.throws(()=>apiCollection({...source,profissionais:[{...person,cbo:code+' - TESTE'}]},'6305245'));
+ }
+});
+
+test('horas ausentes na equipe permanecem desconhecidas sem alterar a jornada profissional',async()=>{
+ const source={...data(),equipes:[{ine:'0000000001',nome:'EQUIPE TESTE',tipo:'70',data_ativacao:'01/01/2020',data_desativacao:'',
+  profissionais:[{cns:person.cns,cbo:'123456',data_entrada:'01/01/2020',data_desligamento:'',ch_outras:'',ch_ambulatorial:'',ch_hospitalar:''}]}]};
+ const n=await normalizeCollection(apiCollection(source,'6305245'),['6305245']);
+ assert.equal(n.items[0].sourceData.weeklyHours,40);
+ assert.equal(n.items[0].sourceData.teams.length,1);
+ assert.equal(n.items[0].sourceData.teams[0].hoursOther,null);
+ assert.equal(n.items[0].sourceData.teams[0].hoursAmbulatory,null);
+ assert.equal(n.items[0].sourceData.teams[0].hoursHospital,null);
+});
 test('consulta parcial, unidade divergente ou falha de membros bloqueiam atualização',()=>{
  for(const d of [{...data(),cnes:'1111111'},{...data(),profissionais:null},{...data(),metadados:{completo_no_escopo_solicitado:false}},{...data(),equipes:[{profissionais:null}]}])assert.throws(()=>apiCollection(d,'6305245'));
 });
