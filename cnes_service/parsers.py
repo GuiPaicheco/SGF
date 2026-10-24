@@ -60,9 +60,13 @@ def professionals(html):
 
 
 def members(html):
+    doc = soup(html)
+    text = " ".join(doc.get_text(" ", strip=True).split())
+    if re.search(r"\bEquipe não possui Profissionais\b", text, re.I):
+        return []
     result = []
     header = False
-    for _, cells in rows(soup(html)):
+    for _, cells in rows(doc):
         if "Nome" in cells and "CNS" in cells and "CBO" in cells:
             header = True
         elif any(re.fullmatch(r"\d{15}", c) or re.fullmatch(r"\d{6}", c) for c in cells):
@@ -86,8 +90,13 @@ def teams(html):
             if not all(k in query for k in ["VUnidade", "Varea", "VTipo", "VMunicipio", "VSeqEq"]):
                 raise LayoutError("Chave da equipe incompleta")
             result.append({**dict(zip(TEAM_FIELDS, cells)), "_href": link["href"]})
-    if not result and "INE" not in doc.get_text():
-        raise LayoutError("Tabela de equipes não reconhecida")
+    if not result:
+        text = " ".join(doc.get_text(" ", strip=True).split())
+        # Secretarias e outros estabelecimentos podem não ter equipes.
+        # Somente a declaração explícita da fonte autoriza uma lista vazia.
+        no_teams = re.search(r"\bEstabelecimento não possui Equipes\b", text, re.I)
+        if not no_teams and "INE" not in text:
+            raise LayoutError("Tabela de equipes não reconhecida")
     return result
 
 

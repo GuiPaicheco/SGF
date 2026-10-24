@@ -2,6 +2,8 @@
 
 ## Contrato atual
 
+O CNES pode declarar explicitamente que um estabelecimento não possui equipes (caso da Secretaria/DAPS), ou que uma equipe não possui profissionais. Essas respostas são listas vazias válidas, não falha de layout. Sem equipe vinculada, o calendário apresenta **Não se aplica**. Páginas vazias, erros e limites de tempo continuam impedindo a incorporação de uma coleta incompleta.
+
 O Administrador consulta, confere e atualiza o cadastro público do CNES. O RH institucional só opera a própria unidade, com operador autorizado, e lança férias, folgas e day-offs. Não há exigência de CPF/matrícula nem criação de login do profissional na integração.
 
 1. **Atualizar CNES:** consulta autenticada na API Python, prévia de correções/inclusões e confirmação individual. A consulta não grava nada. Ausentes e removidos explicitamente são retidos sem reativação. Respostas incompletas são recusadas integralmente antes de qualquer mutação.

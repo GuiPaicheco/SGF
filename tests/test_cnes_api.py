@@ -2,11 +2,25 @@ import unittest
 from unittest.mock import patch, AsyncMock
 import httpx
 from fastapi.testclient import TestClient
-from cnes_service.parsers import professionals, LayoutError, link_teams
+from cnes_service.parsers import professionals, teams, members, LayoutError, link_teams
 from api.cnes import app
 
 
 class CnesTests(unittest.TestCase):
+    def test_explicit_no_teams_is_valid_for_secretariat(self):
+        html = '<html><title>CnesWeb</title><table><tr><td>Estabelecimento não possui Equipes</td></tr></table></html>'
+        self.assertEqual(teams(html), [])
+
+    def test_empty_or_error_team_page_is_not_no_teams(self):
+        for html in ['<html></html>', '<html>Serviço indisponível</html>', '<html>Não encontrado</html>']:
+            with self.subTest(html=html), self.assertRaises(LayoutError):
+                teams(html)
+
+    def test_explicit_team_without_members_is_valid(self):
+        self.assertEqual(members('<html><table><tr><td>Equipe não possui Profissionais</td></tr></table></html>'), [])
+        with self.assertRaises(LayoutError):
+            members('<html>Serviço indisponível</html>')
+
     def test_rejects_unknown_cnes_and_missing_session(self):
         with TestClient(app) as client:
             self.assertEqual(client.get('/api/cnes?cnes=123').status_code, 422)
