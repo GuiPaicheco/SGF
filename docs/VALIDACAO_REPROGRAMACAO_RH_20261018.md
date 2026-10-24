@@ -1,5 +1,7 @@
 # Edição e reprogramação pelo RH — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Sétimo bloco, código `89f568d`. Migração `20261018092805_rh_leave_revisions.sql` aplicada e `manage-rh` v4 ativa. A edição mantém o mesmo ID/protocolo e altera somente registros novos do RH que ainda estejam programados. Não transfere o beneficiário nem converte pedidos legados.
 
 ## Comportamento

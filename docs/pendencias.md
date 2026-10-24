@@ -4,6 +4,8 @@ Esta é a lista atual. Itens concluídos foram transferidos para o [histórico](
 
 ## 01. Preparação técnica desta versão
 
+- [x] Preparar o repositório público: README SGFS, índice e guias atuais, referências históricas identificadas, contribuição/segurança/privacidade e checagem de segredos/arquivos internos no CI. Licença institucional preservada.
+
 1. [x] Login: UBS em ordem alfabética, DAPS na penúltima opção e Administração do SGF na última.
 2. [x] Cabeçalho administrativo com Administração do SGF, independente do nome histórico da conta.
 3. [x] Credencial administrativa alterada e validada; anterior recusada. Nenhuma credencial armazenada no repositório.

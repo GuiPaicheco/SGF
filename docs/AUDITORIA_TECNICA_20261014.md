@@ -1,5 +1,7 @@
 # Auditoria técnica — SGF
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Data: 14/10/2026. Referência: código local a partir de `d781e54`. Perfis funcionais solicitados: **Servidor, RH/Diretor e Administrador**.
 
 ## Atualização — correções A01–A06

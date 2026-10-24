@@ -1,5 +1,7 @@
 # Homologação das regras de férias e folgas
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Roteiro para validação formal pelo RH. Registrar em cada caso a matrícula de teste, resultado esperado, resultado obtido, responsável e data.
 
 ## Casos obrigatórios

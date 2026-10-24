@@ -1,5 +1,7 @@
 # Histórico de pendências — snapshot de 08/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Este documento preserva o arquivo anterior à consolidação. Datas, restrições, status e checkboxes abaixo são históricos e podem estar superados. A única lista ativa está em [pendencias.md](pendencias.md). Recuperação e login da conta teste foram confirmados pelo usuário em 08/10/2026.
 
 ---

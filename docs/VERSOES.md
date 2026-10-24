@@ -1,5 +1,7 @@
 # Versões do SGF
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Decisão vigente — 07/10/2026
 
 O Supabase `ijhvbzomakbbxverqfqh` passa a ser o piloto compartilhado de produção/homologação do novo modelo, por autorização do responsável. Não há bancos independentes. Foram aplicados `multi_unit_pilot_release` (sete migrations locais) e `multi_unit_pilot_read_labels`, e publicadas sete Edge Functions. Os hotfixes de primeiro acesso abaixo foram incorporados.

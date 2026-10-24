@@ -1,5 +1,7 @@
 # Preservação e correção de histórico
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Procedimento técnico do piloto — 09/10/2026. Não substitui a política de retenção, base legal e autorização de tratamento da Prefeitura.
 
 ## 01. Desativar, não apagar

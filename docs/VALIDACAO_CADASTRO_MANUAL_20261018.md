@@ -1,5 +1,7 @@
 # Cadastro operacional e alternativa manual — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Décimo segundo bloco. Migração `20261018210032_manual_registry` e função `manage-cnes` v3 publicadas. Nenhum cadastro real foi criado, conferido, integrado ou autorizado durante o ensaio.
 
 ## Entregas

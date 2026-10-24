@@ -1,4 +1,4 @@
-name: Testes do SGF
+name: Testes do SGFS
 
 on:
   push:
@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Verificar conteúdo do repositório público
+        run: node scripts/check-public-repository.mjs
       - name: Executar testes automatizados
         run: node --test tests/*.test.mjs
       - uses: actions/setup-python@v5

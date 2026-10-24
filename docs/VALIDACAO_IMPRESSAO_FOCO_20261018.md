@@ -1,5 +1,7 @@
 # Impressão A4 e foco do RH — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Décimo bloco, código `15a2770`. Mudanças apenas no frontend e em ferramentas de verificação; nenhuma migração ou alteração de dados de produção.
 
 ## Impressão

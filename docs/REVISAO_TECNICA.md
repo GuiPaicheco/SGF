@@ -1,5 +1,7 @@
 # Revisão técnica para apresentação ao TI
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Data: 29/09/2026. Escopo: frontend, estilos, configuração de publicação, Edge Functions, migrations e documentação do repositório. A revisão local não acessou o banco remoto, usuários reais nem um deploy publicado. A migration nova ainda precisa ser executada e verificada em um banco de homologação; não havia Postgres ou Docker disponível localmente.
 
 **Atualização de 29/09/2026:** as três migrations novas foram aplicadas ao projeto Supabase conectado, e as Edge Functions alteradas foram publicadas. O login `admin` foi confirmado na interface local, assim como a leitura das áreas de solicitações, escala, notificações, inclusões, cadastros, acessos e perfis. Isso não substitui a homologação com contas de cada papel e dados fictícios; o frontend atualizado ainda não foi publicado no Netlify.

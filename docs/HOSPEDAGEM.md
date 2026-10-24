@@ -1,51 +1,34 @@
-# Hospedagem do SGF
+# Hospedagem do SGFS
 
-## Piloto atual — Vercel (09/10/2026)
+## Vercel
 
-Endereço: **https://sgfbetim.vercel.app**. Projeto `sgfbetim`, conectado ao repositório `GuiPaicheco/SGF`, branch de produção `main`. O backend permanece no Supabase atual; esta mudança de hospedagem não altera o banco.
+O destino atual é Vercel, projeto `sgfbetim`, branch `main`. O endereço institucional é [sgfbetim.vercel.app](https://sgfbetim.vercel.app/).
 
-O arquivo `vercel.json` define build `node scripts/build-static.mjs`, sem instalação de dependências, e publicação exclusiva de `dist`. O build copia apenas `index.html`, `logo.png` e os arquivos CSS/JS de `assets`. Documentos, migrations, funções, backups e `.env` não são publicados. Os cabeçalhos CSP e demais proteções foram mantidos e conferidos online; caminhos internos retornam HTTP 404.
+`vercel.json` configura:
 
-Cada atualização do `main` dispara uma publicação pelo Git integrado. Verifique o estado **Ready**, o commit e o endereço de produção no painel antes de considerar uma versão publicada. Não há segredos adicionais a cadastrar no Vercel: a chave publicável do frontend não é a chave de serviço do Supabase.
+- Build: `node scripts/build-static.mjs`.
+- Saída estática: `dist/`.
+- Função Python: `api/cnes.py`, incluindo `cnes_service/` e `config/rh-units.json`.
+- Cabeçalhos de segurança, CSP e cache.
 
-Para recuperação de senha por e-mail, conferir no Supabase Auth **Site URL** e **Redirect URLs**, incluindo `https://sgfbetim.vercel.app`. A publicação do frontend não configura automaticamente essa lista. O retorno atual foi autorizado e configurado; o usuário confirmou recuperação e login por e-mail em 08/10. Não repetir essa correção como pendência nem redefinir senhas para testes visuais. Mudança futura de domínio exige nova conferência.
+A função Python é empacotada separadamente; publicar apenas `dist/` em um servidor estático não disponibiliza `/api/cnes`.
 
-O Netlify anterior permanece preservado, mas com publicações pausadas por limite de créditos; não usar seu frontend legado contra o banco atualizado. Nenhum plano pago foi contratado.
+Use a configuração de ambiente da plataforma para o backend Python. Ao definir outro Supabase, ajuste também frontend, CSP e URLs do Auth; consulte [DESENVOLVIMENTO.md](DESENVOLVIMENTO.md). Não exponha segredos em variáveis públicas.
 
-## Configuração alternativa/histórica — Netlify
+## Supabase
 
-O SGF é uma aplicação estática. O Netlify deve publicar somente a pasta `dist`, gerada pelo comando definido em `netlify.toml`. Assim, migrations, funções Supabase e documentos internos não ficam acessíveis pelo site.
+Banco, Auth e Edge Functions são implantados separadamente da interface. O deploy Vercel não aplica migrations, não provisiona contas e não configura URLs de recuperação.
 
-O repositório foi conectado ao projeto Netlify `sgfbetim`, anteriormente publicado em `https://sgfbetim.netlify.app`. Essa configuração é histórica: publicações pausadas por créditos; o piloto vigente está no Vercel. Não usar o site antigo contra o banco atualizado.
+A chave publicável fica no cliente; chaves privilegiadas pertencem ao servidor. Os dados privados dependem das políticas RLS e das validações das funções, não do sigilo da URL do projeto.
 
-## Publicação recomendada
+## Netlify
 
-1. No Netlify, selecione **Add new site > Import an existing project** e conecte o repositório `GuiPaicheco/SGF`.
-2. Se a configuração não for detectada automaticamente, use:
-   - branch de produção: `main`;
-   - comando de build: o valor definido em `netlify.toml`;
-   - diretório de publicação: `dist`.
-3. Publique primeiro com o subdomínio temporário `*.netlify.app` e execute a validação abaixo.
-4. Depois de definir o domínio definitivo, configure no Supabase Auth:
-   - **Site URL** com a URL de produção;
-   - **Redirect URLs** com a URL de produção e as URLs de preview realmente utilizadas.
+`netlify.toml` permanece como alternativa de publicação estática. Usa o mesmo build e diretório de saída, mas não executa a função Python Vercel. Para oferecer a consulta CNES nessa hospedagem, seria necessário um backend compatível e uma integração própria; não declarar equivalência funcional automática.
 
-O frontend contém somente a URL do projeto e a chave publicável do Supabase. Nunca cadastre `SUPABASE_SERVICE_ROLE_KEY`, senhas ou outros segredos como variáveis expostas ao navegador ou no repositório.
+## Conferência após publicação
 
-## Validação após o deploy
+Confirme commit e estado do deploy; abra início, login e simulação. Faça leitura autenticada autorizada para conferir o calendário e a unidade. Verifique responsividade, console e exportações quando afetadas.
 
-- Abrir a tela inicial e confirmar que logo, estilos e JavaScript carregam sem erros.
-- Fazer uma simulação rápida sem login e confirmar que não há botão de envio nem coleta de dados pessoais.
-- Confirmar que `submit-request` rejeita envio sem sessão com HTTP 401.
-- Entrar como servidor, criar uma solicitação e consultar **Meus pedidos**.
-- Entrar pelo CPF com uma conta que possua Servidor, RH e Administrador; conferir a escolha do acesso, a troca entre áreas e o escopo de cada uma.
-- Conferir recuperação em conta de teste autorizada, sem alterar o administrador nem a conta preservada somente para repetir uma prova já concluída.
-- Confirmar no navegador que as respostas possuem CSP, `X-Content-Type-Options`, `X-Frame-Options` e `Referrer-Policy`.
-- Tentar acessar `/supabase/migrations/` e `/docs/`; esses caminhos não devem publicar arquivos internos.
-- Testar impressão e responsividade nos navegadores usados pela Prefeitura.
+Documentos, backups, migrations, configurações de editor e arquivos de ambiente não pertencem ao diretório servido. Não teste indisponibilidade criando dados, apagando registros ou redefinindo senhas reais.
 
-## Operação
-
-Cada `push` na branch `main` produzirá uma nova publicação quando o deploy contínuo estiver habilitado. Pull requests podem usar Deploy Previews. A pasta local `.netlify` e eventuais arquivos `.env` são ignorados pelo Git.
-
-Enquanto o domínio final não estiver definido, as Edge Functions aceitam requisições CORS de qualquer origem. A origem deve ser restringida após a homologação do domínio de produção e da política de previews.
+Veja [PUBLICACAO.md](PUBLICACAO.md) para a sequência de atualização e recuperação.

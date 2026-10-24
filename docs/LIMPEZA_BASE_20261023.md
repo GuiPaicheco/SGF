@@ -1,5 +1,7 @@
 # Limpeza da base — 23/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Executada a pedido do responsável para iniciar o sistema vazio, mantendo as unidades prontas para acesso e a Administração.
 
 ## Preservado

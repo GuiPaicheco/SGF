@@ -1,5 +1,7 @@
 # Validação técnica — bloco 01
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Data: 08/10/2026. Projeto compartilhado de homologação; não constitui aceite institucional.
 
 ## Evidências executadas

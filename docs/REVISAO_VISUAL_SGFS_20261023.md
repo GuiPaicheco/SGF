@@ -1,5 +1,7 @@
 # Revisão visual SGFS — 23/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Base atualizada por fast-forward para `468a8d4`, preservando os novos fluxos do GitHub.
 
 ## Resultado

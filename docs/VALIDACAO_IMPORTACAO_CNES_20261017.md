@@ -1,5 +1,7 @@
 # Bloco de conferência e importação CNES — 17/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Entrega técnica
 
 Administrador acessa **Cadastros → Conferência CNES**, seleciona uma unidade e envia o JSON gerado pelo coletor. A prévia informa inclusões, mudanças, registros iguais, ausências preservadas e associações de equipe pendentes. A incorporação exige confirmação e versão atual do cadastro. A lista tem páginas de 50 registros e formulário de ajustes municipais.

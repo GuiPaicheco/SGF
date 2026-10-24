@@ -1,77 +1,52 @@
-# Manual de uso do SGF
+# Manual de uso do SGFS
 
-Versão do piloto: 14/10/2026. Três perfis: Servidor, RH/Diretor e Administrador. Endereço atual: https://sgfbetim.vercel.app/. Não substitui as normas e o aceite da Prefeitura. Capturas/slides de 09/10 são históricos e ainda podem mostrar os nomes anteriores.
+Diretoria IV de Atenção Primária à Saúde · Prefeitura Municipal de Betim.
 
-## 01. Acessar e escolher o contexto
+## Entrar
 
-1. Clique em **Entrar no SGF**. Use CPF (com ou sem pontuação) ou e-mail cadastrado e sua senha.
-2. Sem conta, escolha **Solicitar acesso**. Preencha nome, e-mail, CPF e nascimento; adicione cada matrícula, cargo, jornada e CNES responsável. Unidade polo é opcional.
-3. Para cada CNES, escolha tipo e equipe filtrada daquela unidade. **Não se aplica** é a opção para atividades administrativas sem equipe assistencial. Só subdivisões de Secretaria usam lotação interna. Não é necessário INE.
-4. Após aprovação, siga a orientação de primeiro acesso exibida pelo sistema e troque a senha provisória por uma pessoal. Não compartilhe sua senha. Administradores têm requisitos próprios.
-5. Quando houver mais de um acesso, escolha perfil e vínculo/CNES/lotação. Trocar contexto não concede novas permissões.
-6. **Esqueceu a senha?** envia instruções ao e-mail da conta, se ela existir. Abra o link mais recente e conclua no próprio SGF. Não encaminhe o link ou a senha à TI.
+Na tela inicial, escolha **Entrar no SGFS**, selecione a unidade ou a Administração e informe sua senha. A simulação rápida funciona sem login e não cria registros.
 
-As tentativas de login são espaçadas em três segundos, sem limite cumulativo de tentativas. A logo e **Tela inicial** retornam ao início; **Sair** encerra a sessão. Dados em edição não equivalem a dados gravados: confira antes de sair ou recarregar.
+No acesso RH, identifique o operador autorizado. As abas operacionais aparecem após a identificação. Se não houver profissionais autorizados, a Administração precisa incorporar o cadastro e conceder a autorização. Não compartilhe senhas em chamados ou issues.
 
-## 02. Simular sem enviar
+## Administração
 
-Na tela inicial, abra **Simulação Rápida**. Escolha férias ou banco de horas, quantidade, contagem útil/corrida e cálculo a partir do início ou do retorno. Clique em **Ver resultado**. A estimativa pública não coleta dados pessoais, não considera aniversário e não comprova direito, saldo ou autorização.
+1. Abra **Cadastro das unidades** e escolha **Acessar CNES**.
+2. Consulte os dados do estabelecimento. Use **Atualizar CNES** para buscar a fonte.
+3. Confira as inclusões e alterações, tomando uma decisão para cada diferença antes de salvar.
+4. Autorize os profissionais que poderão se identificar como operadores do RH.
+5. Cadastre os feriados/pontos facultativos com a abrangência aplicável.
+6. Consulte o calendário escolhendo unidade e período.
 
-![Resultado público de exemplo](imagens/simulacao-bloco08.png)
+Atualizar o CNES preserva os afastamentos existentes. Um profissional ausente na consulta não é removido automaticamente. Remoção do uso ativo e redefinição de acesso são ações separadas, que exigem atenção e confirmação.
 
-## 03. Solicitar e acompanhar — Servidor
+## RH da unidade
 
-1. No acesso Servidor, abra uma nova solicitação e confira a matrícula escolhida. Direitos e saldo de outra matrícula não podem sustentar o pedido.
-2. Confira dados funcionais, modalidade e regras exibidas. Se houver impedimento, corrija os dados ou procure o RH; não tente contornar a validação.
-3. Informe os períodos e confira início, último dia e retorno no calendário.
-4. Quando houver mais de uma unidade autorizadora, atribua cada dia à atuação correspondente. Cada dia possui um responsável; não existe divisão de horas entre unidades no mesmo dia neste fluxo.
-5. Revise observações e envie. Acompanhe protocolo, situação, análise por unidade e histórico em **Meus pedidos**.
-6. Havendo pendência de distribuição/calendário, abra o detalhe e siga a ação disponibilizada. Correções dependem da situação do pedido e das permissões, não são edição livre de decisões já tomadas.
+Em **Férias e Cadastros**, encontre o profissional em ordem alfabética:
 
-Day-off de aniversário é exibido e contabilizado conforme a regra aplicável, não é uma modalidade solicitável. O comprovante registra o pedido; sozinho, não autoriza o afastamento.
+- **Lançar Férias:** informe modalidade, datas e dados conferidos do período aquisitivo, enquadramento e processo.
+- **Folga e Afastamento:** selecione dias de folga ou um período contínuo de afastamento. Informe o retorno quando conhecido e a referência administrativa.
+- **Cadastrar dayoff:** confirme dia e mês do aniversário conforme o procedimento institucional.
 
-## 04. Analisar — RH/Diretor
+Confira a prévia e o resultado antes de confirmar um lançamento. Não inclua diagnóstico, laudo ou detalhes de saúde nas observações. Os campos não substituem o processo administrativo.
 
-Confira primeiro o perfil e CNES/lotação ativos. Localize o protocolo por busca e filtros; abra **Ver detalhes**. Decisões pertencem à unidade responsável por aqueles dias; outra unidade não herda a autorização.
+## Calendário
 
-- **Aprovar:** registra a decisão; não inclui automaticamente no calendário.
-- **Recusar:** use motivo ativo e justificativa. Banco insuficiente pede saldo real e quantidade necessária; conflito pede funcionário/atuação, datas e explicação; Outros pede razão objetiva. RH/Diretor é um único acesso de gestão, limitado ao CNES/lotação concedido.
-- **Adicionar ao calendário:** é uma ação separada, quando a revisão e os recursos permitem. Banco insuficiente pode impedir a inclusão sem criar automaticamente uma recusa.
+Escolha mês ou intervalo, consulte e abra filtros adicionais quando necessário. Cargo, equipe e profissionais usam os dados cadastrados da unidade.
 
-Se aparecer conflito de versão, atualize, confira a ação do outro gestor e só então decida novamente. Não repita cegamente uma gravação. Arquivar na sua fila não cancela o pedido nem apaga o histórico.
+Os critérios de conflito entre pessoas são combinados: mesmo cargo e mesma equipe, por exemplo, restringem a comparação a quem coincidir nos dois critérios. Esses conflitos de equipe são alertas; sobreposição de registros do mesmo vínculo possui validações próprias.
 
-## 05. Ler o calendário e planejar a escala
+Em **Configurações da tabela**, escolha visualização longitudinal (por funcionário) ou nominal (por afastamento), oculte colunas e ajuste sua ordem. A tabela possui rolagem própria; unidade e período ajudam a identificar a consulta.
 
-Abra **Escala**, escolha mês ou intervalo de até 93 dias, CNES/lotação e filtros de cargo, equipe, função e situação. Clique em **Atualizar visão**.
+Use a legenda para interpretar as marcações. **I** indica início das férias; **F**, dias de férias; **D**, day-off. Exportações PDF e XLSX permitem compartilhar a consulta — verifique os destinatários e os dados incluídos antes do envio.
 
-**Calendário confirmado** mostra inclusões efetivas. **Planejamento e confirmados** também mostra pedidos provisórios. Cada linha representa uma atuação/vínculo; uma mesma pessoa pode aparecer em mais de uma unidade. “Sem afastamento confirmado” não significa disponível para trabalhar.
+## Conferir e corrigir
 
-Leia a legenda: I início, F fim, R retorno, A aniversário, H feriado e M escala mínima. Clique na data para composição do dia ou numa faixa para abrir o pedido. No celular, percorra as datas dentro da tabela; a página e seus formulários não precisam deslizar lateralmente.
+Abra o registro no calendário para conferir histórico e ações disponíveis. Alterações e cancelamentos precisam de justificativa. Consulte o [guia de operações](GUIA_OPERACOES_FINAIS.md) para retornos, afastamentos sem término e recálculos.
 
-RH/Diretor e Administrador podem ajustar escala mínima nominal com justificativa quando exigida. A sugestão usa histórico do mesmo dia da semana, respeitando vigência e afastamentos confirmados; confira antes de salvar. Um dia explicitamente vazio também é um planejamento registrado.
+O RH deve conferir normas e assentamentos fora do CNES. Dúvidas de acesso vão à Administração; decisões normativas, ao RH competente.
 
-Conflitos dependem da visão e do critério selecionados: cargo, equipe, cargo e equipe, função ou simultaneidade. São alertas de planejamento, não recusas automáticas. Conflito manual exige justificativa e deve ser resolvido/cancelado pelo fluxo próprio, preservando a autoria.
+## Preparação de uma base vazia
 
-## 06. Feriados e mudanças posteriores
+A Administração precisa incorporar os profissionais, autorizar operadores e cadastrar feriados antes dos lançamentos. A limpeza de 23/10/2026 foi uma ação excepcional autorizada; não é uma rotina do produto.
 
-Administrador usa **Cadastros → Feriados**. Incluir, mover ou desativar uma data pode recalcular pedidos compatíveis, mantendo início e quantidade. A contagem útil pode estender ou encurtar o período; não é necessariamente um dia corrido. Servidor e gestores recebem avisos internos. Legado incompatível, sobreposição ou unidade ambígua exige conferência explícita, sem atribuição inventada.
-
-![Tela de feriados](imagens/feriados-bloco08.png)
-
-## 07. Avisos, histórico e cadastros
-
-**Notificações** pertence ao perfil/contexto ativo; troque o acesso para consultar outro. Marcar leitura não altera o pedido. Avisos internos não significam envio de e-mail.
-
-**Histórico** informa ações, autor e contexto autorizados. Administrador consulta globalmente; RH/Diretor consulta seu escopo. Históricos antigos podem ter autoria/contexto incompletos. Não coloque senhas, links de recuperação ou dados pessoais desnecessários em justificativas.
-
-RH mantém os registros operacionais permitidos no contexto. Administrador mantém estrutura, equipes, cargos, funções, permissões, feriados e motivos de recusa. Direitos e saldo são conferidos **por matrícula**. Desativar preserva história; exclusão física não é o procedimento padrão.
-
-## 08. Comprovante e atendimento
-
-Treinamento completo: [14 slides no Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) ou [PowerPoint editável](apresentacao/SGF_Treinamento_20261009_final.pptx). Exemplos modernos fictícios e resultados do ciclo em [VALIDACAO_BLOCO_08.md](VALIDACAO_BLOCO_08.md).
-
-Abra o comprovante pelo pedido e use **Imprimir / salvar em PDF**. As assinaturas são do servidor solicitante e do RH ou Chefia Imediata que autorizou o período. Confira situação e procedimento da unidade antes de entregar. O exemplo abaixo está cancelado: serve somente para demonstrar o formato, não uma autorização válida.
-
-![Comprovante de pedido fictício cancelado](imagens/comprovante-teste-bloco08.png)
-
-Direitos, saldo, datas e decisões: consulte a norma vigente indicada pelo RH; persistindo dúvida, procure o RH. Falha do sistema: Administradores/TI da Prefeitura de Betim. Informe operação, protocolo quando necessário, horário e mensagem, nunca senha. Referências legais ainda aguardam ratificação em [HOMOLOGACAO_REGRAS.md](HOMOLOGACAO_REGRAS.md).
+Exemplos, capturas e treinamentos de fluxos anteriores são históricos e não devem orientar o uso atual.

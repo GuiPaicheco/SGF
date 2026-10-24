@@ -1,5 +1,7 @@
 # Coleta CNES para conferência
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 O coletor consulta as páginas oficiais do CNES de profissionais, equipes e integrantes. Ele não grava no banco. A segunda etapa, também implementada em 17/10, permite ao Administrador incorporar seu arquivo no **cadastro CNES em conferência** pelo painel. O novo fluxo de lançamentos RH ainda está em implementação.
 
 ## Executar

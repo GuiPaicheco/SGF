@@ -1,5 +1,7 @@
 # Bloco 07 — históricos e reconstrução
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## 01. Reconciliação sem inferência
 
 Inventário do piloto em 09/10/2026: sete solicitações, seis contextuais e uma legada cancelada; duas decisões legadas preservadas; nenhuma escala mínima legada; nenhuma solicitação moderna sem distribuição diária; nenhum servidor sem vínculo. Treze notificações e 61 eventos de auditoria não têm contexto CNES. Ausência de contexto não significa corrupção: avisos pessoais e ações administrativas globais não devem receber uma unidade inventada.

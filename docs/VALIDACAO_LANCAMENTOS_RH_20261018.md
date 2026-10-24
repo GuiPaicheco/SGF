@@ -1,5 +1,7 @@
 # Lançamentos diretos do RH — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Entrega técnica do quinto bloco, commits `d4ae58a` e `8c691c2`. Migração `20261018081927_rh_direct_leaves.sql` aplicada e `manage-rh` v3 publicada. CI do código: [execução 39111075794 aprovada](https://github.com/GuiPaicheco/SGF/actions/runs/39111075794).
 
 ## Comportamento entregue

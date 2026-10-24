@@ -1,5 +1,7 @@
 # Validação técnica do bloco 04
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Data: 09/10/2026. Ambiente: piloto compartilhado, sem aceite institucional.
 
 ## 01. Correções

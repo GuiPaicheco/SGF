@@ -1,5 +1,7 @@
 # Validação do bloco 05 — notificações e auditoria
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 09/10/2026. Escopo: piloto compartilhado autorizado, não aceite institucional de produção.
 
 ## 01. Alterações implementadas

@@ -1,5 +1,7 @@
 # Bloco 02 — evidências técnicas e limites
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Data: 08/10/2026. Ambiente: piloto compartilhado autorizado, Supabase `ijhvbzomakbbxverqfqh`. Não constitui homologação institucional.
 
 ## 01. Implementação

@@ -25,4 +25,4 @@
 7. Consulte o **Calendário da Unidade**, ajuste período/filtros e consulte a legenda. Afastamentos sem previsão continuam visíveis nos meses seguintes. O retorno não é um dia afastado.
 8. Abra o registro para conferir histórico, comprovante ou cancelar com justificativa. Um afastamento sem término informado não pode ser concluído; informe o retorno antes.
 
-O SGF registra e organiza os atos conferidos pelo RH; não substitui a concessão formal nem presume saldo ou direito a partir do CNES. Dúvidas sobre normas e assentamentos devem ser encaminhadas ao RH responsável; problemas de acesso e uso do sistema, à administração do SGF ou TI da Prefeitura de Betim.
+O SGFS registra e organiza os atos conferidos pelo RH; não substitui a concessão formal nem presume saldo ou direito a partir do CNES. Dúvidas sobre normas e assentamentos devem ser encaminhadas ao RH responsável; problemas de acesso e uso do sistema, à administração do SGFS ou TI da Prefeitura de Betim.

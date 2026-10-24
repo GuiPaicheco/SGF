@@ -1,5 +1,7 @@
 # Mensagens e recusas — bloco 06
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Versão técnica: 2026-10-09.1. Catálogo executável: `supabase/functions/_shared/user-guidance.ts`; mensagens retornam código, categoria, explicação, canal de apoio e versão. Erro interno desconhecido não expõe resposta SQL ao navegador.
 
 ## 01. Conferência antes do envio

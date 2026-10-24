@@ -1,8 +1,9 @@
 [build]
-  command = "mkdir -p dist/assets && cp index.html logo.png dist/ && cp assets/*.css assets/*.js dist/assets/"
+  command = "node scripts/build-static.mjs"
   publish = "dist"
 
 [build.environment]
+  NODE_VERSION = "24"
   TZ = "America/Sao_Paulo"
 
 [[headers]]

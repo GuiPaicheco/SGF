@@ -1,5 +1,7 @@
 # Validação do bloco 03 — solicitações e gestão por unidade
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Atualização: 08/10/2026. Concluído tecnicamente no escopo atual do piloto; não representa aceite institucional.
 
 ## 01. Implementação

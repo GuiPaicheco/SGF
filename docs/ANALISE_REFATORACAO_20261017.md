@@ -1,5 +1,7 @@
 # Análise para refatoração — 17/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Base e alcance
 
 Repositório local atualizado de `73066d9` para `2bfd432` (`origin/main`), por fast-forward de 89 commits. A árvore estava limpa antes da atualização. Nenhuma alteração em banco, contas, senhas ou publicação foi realizada nesta análise.

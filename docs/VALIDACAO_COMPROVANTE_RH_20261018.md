@@ -1,5 +1,7 @@
 # Comprovante do RH — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Sexto bloco: comprovante disponível no detalhe do lançamento RH. Implementação principal no commit `6994408`; publicação Vercel confirmada pelo status do commit.
 
 ## Entrega

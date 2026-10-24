@@ -1,5 +1,7 @@
 # Viabilidade de CNES e Supabase — 17/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Pesquisa de planejamento. Nenhum profissional importado, conta provisionada ou dado remoto alterado.
 
 ## CNES: primeiro ensaio na UBS Amazonas

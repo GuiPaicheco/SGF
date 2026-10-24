@@ -1,5 +1,7 @@
 # Prévia RH pela data de retorno — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Nono bloco, código `9f89ba5`. Migração `20261018112843_rh_return_date_preview.sql` aplicada e `manage-rh` v6 publicada. O cálculo integra programação e edição sem alterar registros históricos nem o cálculo do fluxo legado.
 
 ## Comportamento

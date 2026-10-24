@@ -1,5 +1,7 @@
 # Filtros e revisão do calendário — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Oitavo bloco, código `1617ba4`. Migração `20261018094038_rh_calendar_filters.sql` aplicada e `manage-rh` v5 publicada. Consulta continua restrita ao CNES do RH; Administrador escolhe explicitamente a unidade.
 
 ## Entrega

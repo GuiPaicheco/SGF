@@ -1,5 +1,7 @@
 # Validação da primeira entrega CNES — 17/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Entregue
 
 - Catálogo versionado de 42 logins/CNES (41 UBS e Secretaria), sem credenciais.

@@ -1,5 +1,7 @@
 # Conferência final da interface — 23/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Escopo implementado
 
 - Feriados sem classificação territorial; tipos e abrangência preservados.

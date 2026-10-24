@@ -1,5 +1,7 @@
 # Revisão da versão piloto — 23/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Escopo e método
 
 Base: origin/main b4218cc, em worktree limpa antes desta revisão. Inspeção de 64 arquivos próprios de execução (JS/MJS/TS/CSS/HTML, sem fornecedores), revisão da API Python e das dependências fixadas, revisão dos fluxos críticos, testes automatizados e consultas de integridade/permissão no Supabase. Não equivale a uma prova formal de cada caminho possível nem a um pentest independente.

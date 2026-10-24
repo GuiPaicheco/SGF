@@ -1,5 +1,7 @@
 # Treinamento do SGF
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Roteiro de apoio para uma apresentação de 35 a 45 minutos destinada à equipe de TI da Prefeitura de Betim e aos futuros usuários do sistema.
 
 Versão: 09/10/2026, modelo de múltiplos vínculos/CNES. Deck final de 14 slides disponível no Canva e em PowerPoint, conforme links ao final. Manual de consulta: [MANUAL_USO.md](MANUAL_USO.md). Exercícios e aceite: [GUIA_HOMOLOGACAO.md](GUIA_HOMOLOGACAO.md).

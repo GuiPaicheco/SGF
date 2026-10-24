@@ -1,5 +1,7 @@
 # Entrada e navegação centradas no RH — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Décimo primeiro bloco. A prioridade passa a ser funcionalidade operacional, com atualização visual a cada entrega; manual e treinamento ficam depois.
 
 ## Entrega

@@ -1,5 +1,7 @@
 # Integração cadastral e calendário mensal RH — 17/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Escopo entregue
 
 Este bloco entrega a integração administrativa do cadastro CNES conferido a um vínculo funcional e a consulta mensal por unidade. **Não entrega ainda a gravação direta de afastamentos.** A decisão atualizada sobre folgas foi incorporada à fila BH01–BH05 antes de implementar essa gravação.

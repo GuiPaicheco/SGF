@@ -1,5 +1,7 @@
 # Histórico de pendências — até a preparação do piloto de 23/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Entrega atual — acabamento final e afastamentos (23/10)
 
 1. [x] Retirar classificação territorial dos feriados; manter apenas tipo e abrangência geral ou unidades selecionadas. Preservar o dado histórico sem pedir classificação em novos cadastros.

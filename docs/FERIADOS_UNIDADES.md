@@ -20,7 +20,7 @@ O calendário RH, a prévia e a gravação usam o mesmo escopo. A simulação p�
 
 ## Login e senhas
 
-Escolha um dos 42 estabelecimentos ou **Administração do SGF** e informe a senha correspondente. A lista é pública e não contém senhas; escolher uma unidade não concede autorização.
+Escolha um dos 42 estabelecimentos ou **Administração do SGFS** e informe a senha correspondente. A lista é pública e não contém senhas; escolher uma unidade não concede autorização.
 
 Nenhuma senha existente foi alterada. A redefinição administrativa atual ainda utiliza 123456 e exige confirmação. Recomenda-se substituir esse processo por senha inicial aleatória, exclusiva por unidade e com troca obrigatória; a adoção e a comunicação das novas credenciais dependem de decisão do responsável. Não derivar senhas de CNES, nome da unidade ou datas públicas.
 

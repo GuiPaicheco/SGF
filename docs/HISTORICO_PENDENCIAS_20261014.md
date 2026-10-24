@@ -1,5 +1,7 @@
 # Histórico de pendências — plano anterior à gestão pelo RH
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 > Arquivado em 17/10/2026. Retrata o planejamento anterior à mudança de escopo. Não é fila ativa; seus checkboxes, prioridades e instruções de execução foram substituídos por [pendencias.md](pendencias.md). Texto original preservado abaixo.
 
 ## Pendências do SGF (texto original)

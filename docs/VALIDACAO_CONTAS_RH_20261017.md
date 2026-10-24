@@ -1,5 +1,7 @@
 # Contas institucionais e operadores — 17/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 ## Entrega
 
 As 42 contas (41 UBS e DAPS) foram provisionadas pelo Administrador autenticado, usando Supabase Auth Admin e a senha definida pelo responsável, fornecida somente durante a execução. Nenhuma senha ou token foi salvo em arquivo, Git ou log. Contas antigas, TESTE, três servidores legados e seus dados foram preservados.

@@ -13,3 +13,11 @@ output/pdf/
 __pycache__/
 .pytest_cache/
 .venv/
+.vscode/
+output/
+tmp/
+*.log
+*.pem
+*.key
+*.dump
+*.backup

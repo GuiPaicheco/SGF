@@ -1,5 +1,7 @@
 # Lotações e códigos CNES para importação
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 [Link da Planilha que fiz](https://docs.google.com/spreadsheets/d/1mzvbSTsKbBd6LlE7kSt4QCud_tWwghC6yCkInNUeE2g/edit?usp=sharing)
 
 | CNES | Unidade/lotação |

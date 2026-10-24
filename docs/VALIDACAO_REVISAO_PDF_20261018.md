@@ -1,5 +1,7 @@
 # Revisão urgente CNES/PDF e calendário — 18/10/2026
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Migração `20261018223409_cnes_pdf_workspace`; `manage-cnes` v5 e `manage-rh` v7. Requisitos atuais substituem a alternativa manual anterior. Complementos: migrações `20261018224014_cnes_reactivation_integrity` e `20261018224958_cnes_competence_guard`. Retirada dos fluxos antigos: `access-auth` v15, `manage-catalogs` v11 e `submit-request` v13.
 
 O PDF fornecido foi lido localmente: 40 profissionais, três equipes e 24 relações de equipe por CNS/CBO. Nomes, descrições de ocupação e totais de horas dos 40 registros foram comparados com extração independente por pdfplumber, sem divergências nesses campos. Não foi versionado o PDF nem dados reais extraídos. Emissão 18/10/2026, atualização local 31/08/2026 e nacional 13/10/2026 são datas diferentes; a competência exige confirmação administrativa.

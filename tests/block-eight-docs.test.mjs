@@ -35,10 +35,11 @@ test('arquivos publicados decodificam UTF-8 estrito e não contêm mojibake', ()
   }
 });
 
-test('manual atual referencia imagens reais e distingue aprovação de calendário', () => {
+test('manual atual descreve Administração e RH sem orientar o fluxo legado', () => {
   const manual = read('docs/MANUAL_USO.md');
-  assert.match(manual, /não inclui automaticamente no calendário/);
-  assert.match(manual, /não é uma modalidade solicitável/);
+  assert.match(manual, /operador autorizado/);
+  assert.match(manual, /não cria registros/);
+  assert.match(manual, /Atualizar o CNES preserva os afastamentos existentes/);
   for (const match of manual.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) {
     assert.ok(existsSync(new URL(`docs/${match[1]}`, root)), match[1]);
   }
@@ -49,5 +50,5 @@ test('aceite nominal e homologação normativa não são substituídos por teste
   assert.match(guide, /Caso não executado nunca conta como aprovado/);
   assert.match(guide, /Não assinar automaticamente/);
   assert.match(guide, /Nenhum descarte foi autorizado/);
-  assert.match(read('docs/HOSPEDAGEM.md'), /usuário confirmou recuperação e login por e-mail em 08\/10/);
+  assert.match(read('docs/HOSPEDAGEM.md'), /não provisiona contas/);
 });

@@ -1,5 +1,7 @@
 # Pendências do SGF — gestão pelo RH e DAPS
 
+> **Referência histórica/técnica:** este documento registra uma etapa anterior. Confira o [índice atual](README.md) antes de usar seus procedimentos; telas, acessos e contagens podem ter mudado.
+
 Atualização: **18/10/2026**. Única fila ativa. Substitui o planejamento baseado em solicitações dos servidores. Itens marcados representam decisões ou entregas técnicas, conforme a descrição; itens abertos continuam pendentes. Coletor e cadastro CNES em conferência foram implementados. Contas RH e operadores foram publicados e validados com sessão real; lançamentos diretos, horas declaradas e encerramento estão publicados tecnicamente; comprovante RH entregue tecnicamente; edição/reprogramação entregue; conferência de PDF e homologação seguem pendentes.
 
 Plano anterior arquivado em [HISTORICO_PENDENCIAS_20261014.md](HISTORICO_PENDENCIAS_20261014.md), somente para consulta. Seus checkboxes não formam outra fila ativa. A [análise técnica anterior](ANALISE_REFATORACAO_20261017.md) deve ser interpretada conforme este novo escopo.
