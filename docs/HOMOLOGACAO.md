@@ -17,9 +17,12 @@ O build bloqueia publicação em outro projeto Vercel. A API CNES exige a refer�
 Supabase de homologação. Frontend, CSP e recuperação apontam para homologação.
 Não usar scripts históricos de piloto, reset ou importação com credenciais de produção.
 
-As migrations enviadas via MCP possuem timestamps gerados pelo serviço; antes de
-usar `supabase db push`, conferir e reconciliar o histórico com os arquivos locais.
+O histórico de migrations foi alinhado às 89 versões dos arquivos locais.
 As funções são publicadas separadamente do frontend.
 
 Para promover uma funcionalidade, revisar somente os commits funcionais em PR;
 preservar URL, chaves, guardas e identificação próprios de cada ambiente.
+
+Auth: Site URL e retorno permitido configurados exclusivamente para homologação.
+Validação: 462 testes JavaScript e 9 testes Python aprovados; login e leitura
+administrativa no Supabase verificados. Nenhuma alteração no deploy de produção.
