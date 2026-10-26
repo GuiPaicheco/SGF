@@ -1,3 +1,5 @@
+// A branch de homologação só pode ser publicada no projeto Vercel isolado.
+if (process.env.VERCEL_PROJECT_ID && process.env.VERCEL_PROJECT_ID !== 'prj_qTQe6R789JZCnA8D3cLUKDpmIOPB') throw Error('Publicação de homologação bloqueada fora do projeto isolado.');
 import { mkdir, copyFile, readdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { versionPublicAssets, versionModuleAsset } from './version-public-assets.mjs';
 import { fileURLToPath } from 'node:url';

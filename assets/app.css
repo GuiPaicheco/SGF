@@ -1396,3 +1396,5 @@ th {
     .app { padding-top: 1.25rem; }
   }
 }
+
+.homologacao-banner { background: #854d0e; color: #fff; padding: 10px 16px; text-align: center; font: 700 14px system-ui, sans-serif; }

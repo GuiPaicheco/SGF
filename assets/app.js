@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const SUPABASE_URL = 'https://ijhvbzomakbbxverqfqh.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_9upWl4mCzsfuaPE1_gOFkw_9Im-Y4sJ';
+  const SUPABASE_URL = 'https://pouluaiadcgppxbzqdjw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_D9tIiTtwf2z7VpGKqVrQ9A_6qp8Spfc';
   const RULE_START = '2025-12-02';
   const HOLIDAYS = new Set();
   const CALENDAR_EVENTS = new Map();
