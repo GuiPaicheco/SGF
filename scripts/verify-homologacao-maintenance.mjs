@@ -14,7 +14,7 @@ const key=js.match(/const SUPABASE_KEY = '([^']+)'/)[1];
 let token;
 const call=async(name,payload,{role='administrador',auth=true}={})=>{
  const r=await fetch(backend+'/functions/v1/'+name,{method:'POST',headers:{'Content-Type':'application/json',apikey:key,...(auth&&token?{Authorization:'Bearer '+token}:{}),'x-sgf-role':role},body:JSON.stringify(payload)});
- return {status:r.status,body:await r.json()};
+ const text=await r.text();let body={};try{body=JSON.parse(text);}catch{}return {status:r.status,body};
 };
 try{
  const login=await call('access-auth',{action:'login',identifier:env.ADMIN_EMAIL,password:env.ADMIN_PASSWORD},{auth:false});

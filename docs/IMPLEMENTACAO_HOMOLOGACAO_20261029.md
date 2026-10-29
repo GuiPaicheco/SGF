@@ -78,3 +78,13 @@ Reutilizados `calendar_events.jurisdiction`, `source_url`, `private.rh_leaves`, 
 Fontes normativas novamente consultadas: [Lei 7.989/2025](https://legislativo.camarabetim.mg.gov.br/NormaJuridica/ShowNormaJuridica/85241), [Decreto 51.744/2025](https://legislativo.camarabetim.mg.gov.br/NormaJuridica/ShowNormaJuridica/85298), [Estatuto consolidado](https://legislativo.camarabetim.mg.gov.br/DocumentoNormaJuridica/ShowDocumentoNormaJuridica/2279) e [Portal do Servidor](https://servidor.betim.digital/servidores/beneficios/ferias). O decreto usa período concessivo na transição e o portal, aquisitivo. Essa diferença continua para RH/Jurídico; nenhuma retroatividade foi aplicada.
 
 Advisors após as migrations: nenhum ERROR; 30 INFO de RLS habilitada sem políticas em tabelas internas já restritas e um WARN preexistente de proteção contra senhas vazadas desabilitada. Nenhum controle foi desabilitado para eliminar aviso. [Orientação oficial de proteção de senha](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+
+## Verificação após publicação
+
+O frontend foi publicado no projeto Vercel de homologação e chegou ao estado READY. O domínio público de homologação recebeu a versão da branch; não foi promovido nenhum recurso para `sgfbetim`.
+
+O teste no navegador encontrou uma segunda divergência de acesso: o alias cadastrado da conta administrativa não correspondia à opção Administração enviada pela UI. Foi alinhado apenas o alias dessa conta de homologação, com auditoria, preservando o ID e a credencial Auth. O login pela própria tela passou após esse ajuste.
+
+No site implantado, o navegador confirmou login administrativo, calendário DAPS, relatório de conciliação, feriados com classificação, contas/operadores e histórico de ações, sem erros JavaScript e com todas as chamadas Supabase observadas limitadas a `pouluaiadcgppxbzqdjw`. O teste por API foi repetido com o recurso temporário de recuperação encerrado (410 autenticado). As nove datas originais permanecem, e os ensaios SQL completos foram repetidos com rollback após os testes de senha.
+
+A restauração integral permanece pendente: não foi encontrado Docker disponível neste workspace Windows para executar o roteiro local existente. Não foi criado ou restaurado nenhum banco sobre produção.

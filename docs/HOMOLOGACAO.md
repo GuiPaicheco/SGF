@@ -26,3 +26,6 @@ preservar URL, chaves, guardas e identificação próprios de cada ambiente.
 Auth: Site URL e retorno permitido configurados exclusivamente para homologação.
 Validação: 462 testes JavaScript e 9 testes Python aprovados; login e leitura
 administrativa no Supabase verificados. Nenhuma alteração no deploy de produção.
+
+
+Manutenção de 29/10/2026: veja [implementação, testes e pendências](IMPLEMENTACAO_HOMOLOGACAO_20261029.md). A conta administrativa foi redefinida por autorização expressa e seu alias alinhado à UI, exclusivamente neste ambiente. Credencial vigente permanece somente no arquivo local ignorado pelo Git. O teste institucional sintético de senha terminou com a conta de teste bloqueada e histórico preservado.
