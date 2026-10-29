@@ -15,7 +15,7 @@ const policies: Record<string,Record<string,string[]>>={
   },
   catalogs:{list:operators,history:operators,'save-employee':operators,
     'save-location':['administrador'],'save-reference':['administrador'],
-    'calendar-list':['administrador'],'calendar-save':['administrador'],'calendar-delete':['administrador'],
+    'calendar-list':['administrador'],'calendar-preview':['administrador'],'calendar-save':['administrador'],'calendar-delete':['administrador'],
     'organization-list':['administrador'],'organization-save':['administrador']},
   inclusions:{list:operators,approve:operators,reject:operators},
   access:{list:operators,approve:operators,reject:operators}

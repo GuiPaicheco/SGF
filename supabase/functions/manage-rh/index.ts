@@ -1,3 +1,4 @@
+import {changeOwnUnitPassword} from '../_shared/unit-password.mjs';
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2';
 import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts';
 import {verifiedSessionId,provisionRhAccount} from '../_shared/rh-accounts.mjs';
@@ -10,6 +11,11 @@ const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'au
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const messages:Record<string,string>={
+ RH_CURRENT_PASSWORD_INVALID:'A senha atual não foi confirmada. Confira a credencial da unidade.',
+ RH_PASSWORD_CHANGED_AUDIT_PENDING:'A senha foi alterada; é necessário entrar novamente. A auditoria complementar precisa de conferência pelo Administrador.',
+ RH_PASSWORD_CHANGED_SESSION_PENDING:'A senha foi alterada. Saia e entre novamente; solicite ao Administrador a conferência do encerramento das sessões.',
+ RH_LEAVE_STARTED_REVIEW_REQUIRED:'Férias já iniciadas exigem retificação ou interrupção administrativa autorizada. Edição e cancelamento comuns estão bloqueados.',
+ RH_CALENDAR_STARTED_REVIEW_REQUIRED:'A alteração afetaria férias já iniciadas. Solicite revisão administrativa.',
  RH_LEAVE_MODALITY_DISABLED:'Banco de horas e complementação de férias foram encerrados. Use férias regulamentares ou férias-prêmio.',
  RH_LEAVE_CONFIRMATION_REQUIRED:'Confirme os assentamentos, a anuência da chefia e a concordância com o fracionamento.',
  RH_LEAVE_REGIME_REQUIRED:'Confirme o regime jurídico. Vínculo cedido ou especial exige análise específica do RH.',
@@ -65,6 +71,17 @@ Deno.serve(async request=>{
    if(request.headers.get('x-sgf-role')!=='rh'||profile.roles.length!==1||profile.roles[0]!=='rh')throw Error('RH_NOT_ALLOWED');
    const session=verifiedSessionId(token,actor);
    const rpc=async(name:string,args:Record<string,unknown>={})=>{const {data,error}=await auth.rpc(name,{target_profile:actor,target_session:session,...args});if(error)throw error;return data;};
+   if(payload.action==='change-own-password'){
+    const reauth=createClient(url,Deno.env.get('SUPABASE_ANON_KEY')!,{auth:{persistSession:false,autoRefreshToken:false}});
+    return json(await changeOwnUnitPassword(payload,{
+     authorize:async()=>{const selection=await rpc('rh_session_state');if(!selection.operator)throw Error('RH_OPERATOR_REQUIRED');return {...selection,profile_id:actor};},
+     limit:async()=>{const {data,error}=await auth.rpc('begin_access_attempt',{target_key:'unit-password:'+actor,target_window_seconds:900,target_max_failures:5,target_cooldown_seconds:3});if(error||!data.allowed)throw Error('RH_LEAVE_RATE_LIMIT');},
+     reauthenticate:async(currentPassword:string)=>{const {data,error}=await reauth.auth.signInWithPassword({email:identity.user.email!,password:currentPassword});if(error||!data.session)throw Error('RH_CURRENT_PASSWORD_INVALID');return {access_token:data.session.access_token,user_id:data.user.id};},
+     update:async(_token:string,password:string)=>{const {error}=await reauth.auth.updateUser({password});if(error)throw Error('RH_PASSWORD_INVALID');},
+     audit:async(selection:any)=>{const {error}=await auth.from('audit_events').insert({actor_id:actor,actor_role:'rh',action:'rh_unit_password_changed',entity_type:'profile',entity_id:actor,context_cnes_unit_id:profile.institutional_cnes_unit_id,reason:'Troca da senha da própria unidade após confirmação da senha atual.',new_value:{operator_name:selection.operator.name,operator_grant_id:selection.operator.id,declared_identity:true}});if(error)throw Error('RH_AUTH_UNAVAILABLE');},
+     signOut:async(accessToken:string,scope:'local'|'global')=>{const {error}=await auth.auth.admin.signOut(accessToken,scope);if(error)throw Error('RH_AUTH_UNAVAILABLE');},
+    }));
+   }
    if(payload.action==='session')return json(await rpc('rh_session_state'));
    if(payload.action==='select-operator'){if(!uuid.test(payload.grantId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_select_operator',{target_grant:payload.grantId}));}
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
@@ -80,12 +97,14 @@ Deno.serve(async request=>{
     return json(await rpc('rh_create_occurrence',{target_entry:payload.entryId,request_key:payload.requestKey,occurrence_type:payload.type,start_day:payload.start,end_day:payload.end,reference:payload.reference.trim(),notes:payload.notes||''}));
    }
    if(payload.action==='registry'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>100)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_unit_registry',{page_index:payload.page}));}
+   if(payload.action==='reconciliation-report'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>10000)throw Error('RH_INPUT_INVALID');return json(await rpc('rh_reconciliation_report',{target_cnes:null,page_index:payload.page}));}
    if(payload.action==='calendar')return json(await rpc('rh_calendar_window',{target_cnes:null,...calendarWindow(payload)}));
    if(isLeaveAction){const operation=leaveOperation(payload);return json(await rpc(operation.name,{target_cnes:null,...operation.args}));}
    throw Error('RH_NOT_ALLOWED');
   }
   const context=await validateAccessContext(auth,request,actor,profile.roles);
   if(context.role!=='administrador'||!context.global)throw Error('RH_NOT_ALLOWED');
+  const adminSession=verifiedSessionId(token,actor);
   const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{...contextHeaders(context),'x-sgf-actor':actor}}});
   const rpc=async(name:string,args:Record<string,unknown>={})=>{const {data,error}=await db.rpc(name,{actor_id:actor,...args});if(error)throw error;return data;};
   if(payload.action==='directory') {
@@ -102,9 +121,10 @@ Deno.serve(async request=>{
    if(error)throw error;return json(data);
   }
   if(payload.action==='calendar') {
-   const {data,error}=await db.rpc('rh_calendar_window',{target_profile:actor,target_session:null,target_cnes:unit.id,...calendarWindow(payload)});
+   const {data,error}=await db.rpc('rh_calendar_window',{target_profile:actor,target_session:adminSession,target_cnes:unit.id,...calendarWindow(payload)});
    if(error)throw error;return json(data);
   }
+  if(payload.action==='reconciliation-report'){if(!Number.isInteger(payload.page)||payload.page<0||payload.page>10000)throw Error('RH_INPUT_INVALID');const {data,error}=await db.rpc('rh_reconciliation_report',{target_profile:actor,target_session:adminSession,target_cnes:unit.id,page_index:payload.page});if(error)throw error;return json(data);}
   if(payload.action==='binding-options') {
    if(!uuid.test(payload.entryId||''))throw Error('RH_INPUT_INVALID');
    return json(await rpc('rh_registry_bond_options',{target_entry:payload.entryId}));

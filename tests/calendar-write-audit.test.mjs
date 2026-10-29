@@ -4,10 +4,9 @@ import {readFile} from 'node:fs/promises';
 const edge=await readFile(new URL('../supabase/functions/manage-catalogs/index.ts',import.meta.url),'utf8');
 const sql=await readFile(new URL('../supabase/migrations/20261005170000_unit_request_workflow.sql',import.meta.url),'utf8');
 test('gravação de calendário encaminha identidade autenticada e valida data real',()=>{
-  assert.match(edge,/scoped\.rpc\('manage_scoped_calendar_event'/);
+  assert.match(edge,/'preview_scoped_calendar_event':'manage_scoped_calendar_event'/);
   assert.match(edge,/expected_version:payload.version/);
-  assert.match(edge,/toISOString\(\)\.slice\(0,10\)!==eventDate/);
-  assert.match(edge,/name.length>200/);
+  assert.match(edge,/validCalendarInput\(payload\)/);
 });
 test('consulta do RH isola lotação interna mesmo com CNES compartilhado',()=>{
   assert.match(edge,/assignments = location.is_internal_allocation \? assignments.eq\('internal_lotacao_id', context.lotacaoId\) : assignments.is\('internal_lotacao_id', null\)/);

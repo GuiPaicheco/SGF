@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 import { contextHeaders, validateAccessContext } from '../_shared/access-context.ts';
+import { validCalendarInput } from '../_shared/calendar-input.mjs';
 import { actionAllowed } from '../_shared/action-policy.ts';
-
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sgf-role, x-sgf-bond, x-sgf-cnes, x-sgf-lotacao',
@@ -11,7 +11,6 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
   status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
 const digits = (value: unknown) => String(value ?? '').replace(/\D/g, '');
-
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
@@ -30,7 +29,7 @@ Deno.serve(async request => {
     const scoped = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers: { ...contextHeaders(context), 'x-sgf-actor': identity.user.id } } });
     const payload = await request.json();
     const action = String(payload.action ?? 'list');
-    if(!['calendar-list','calendar-save','calendar-delete'].includes(action))return json({error:'Esta configuração foi retirada. Utilize Cadastro das unidades para atualizar pelo CNES.'},410);
+    if(!['calendar-list','calendar-save','calendar-delete','calendar-preview'].includes(action))return json({error:'Esta configuração foi retirada. Utilize Cadastro das unidades para atualizar pelo CNES.'},410);
     if(!actionAllowed('catalogs',action,context.role)) return json({error:'Seu perfil não permite executar esta ação.'},403);
     const scopeIds = context.global ? [] : [context.lotacaoId!];
     const employeesInContext = async () => {
@@ -48,7 +47,6 @@ Deno.serve(async request => {
       if (error) throw error;
       return [...new Set((data || []).map(item => (Array.isArray(item.bond) ? item.bond[0] : item.bond)?.servidor_id).filter(Boolean))];
     };
-
     if (action === 'organization-list') {
       const [units, teams, types, mappings] = await Promise.all([
         admin.from('cnes_units').select('id,code,name,active,version').order('name'),
@@ -65,20 +63,19 @@ Deno.serve(async request => {
       return json({id:data});
     }
     if(action==='calendar-list'){
-      const [events,units]=await Promise.all([admin.from('calendar_events').select('id,event_date,type,name,active,version,scope,unit_ids').order('event_date',{ascending:false}).limit(2001),admin.from('cnes_units').select('id,code,name').eq('active',true).order('name')]);
+      const [events,units]=await Promise.all([admin.from('calendar_events').select('id,event_date,type,name,active,version,scope,unit_ids,jurisdiction,source_url').order('event_date',{ascending:false}).limit(2001),admin.from('cnes_units').select('id,code,name').eq('active',true).order('name')]);
       if(events.error||units.error)throw events.error||units.error;
       if(events.data.length>2000)return json({error:'Há mais de 2000 datas. Solicite uma consulta segmentada à TI.'},400);
       return json({events:events.data,units:units.data});
     }
-    if(action==='calendar-save'){
-      const eventDate=payload.event_date,name=payload.name;
-      if(typeof eventDate!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(eventDate)||!Number.isFinite(Date.parse(eventDate))||new Date(eventDate).toISOString().slice(0,10)!==eventDate||typeof name!=='string'||!name.trim()||name.length>200)return json({error:'Informe data válida e nome de até 200 caracteres.'},400);
+    if(action==='calendar-save'||(action==='calendar-preview'&&payload.operation==='save')){
+      if(!validCalendarInput(payload))return json({error:'Confira a data, nome, classificação, fonte oficial e abrangência.'},400);
     }
-    if(['calendar-save','calendar-delete'].includes(action)){
-      const {data,error}=await scoped.rpc('manage_scoped_calendar_event',{actor_id:identity.user.id,operation:action==='calendar-delete'?'delete':'save',target_id:payload.id||null,expected_version:payload.version||null,item:payload});
+    if(['calendar-save','calendar-delete','calendar-preview'].includes(action)){
+      if(action==='calendar-preview'&&!['save','delete'].includes(payload.operation))return json({error:'Operação inválida.'},400);
+      const {data,error}=await scoped.rpc(action==='calendar-preview'?'preview_scoped_calendar_event':'manage_scoped_calendar_event',{actor_id:identity.user.id,operation:action==='calendar-preview'?payload.operation:action==='calendar-delete'?'delete':'save',target_id:payload.id||null,expected_version:payload.version||null,item:payload});
       if(error)throw error;return json(data);
     }
-
     if (action === 'list') {
       let employeeQuery = admin.from('servidores').select('id,full_name,matricula,cpf,birth_date,admission_date,employment_type,weekly_hours,team_name,active,profile_id,lotacao:lotacoes!servidores_lotacao_id_fkey(id,code,name),cargo:cargos(id,name),funcao:funcoes(id,name)').order('full_name');
       let locationQuery = admin.from('lotacoes').select('id,code,name,unit_type,parent_id,is_internal_allocation,active,version').order('name');
@@ -101,7 +98,6 @@ Deno.serve(async request => {
       if(bondError) throw bondError;
       return json({ employees, bonds:bonds || [], locations: locationsResult.data, positions: positionsResult.data, functions: functionsResult.data, managers: profilesResult.data, managerScopes: scopesResult.data, actorRole });
     }
-
     if (action === 'history') {
       const employeeId = String(payload.id ?? '');
       if (!employeeId) return json({ error: 'Servidor inválido.' }, 400);
@@ -111,7 +107,6 @@ Deno.serve(async request => {
       if (error) throw error;
       return json({ history: data || [] });
     }
-
     if (action === 'save-location') {
       const { data, error } = await scoped.rpc('save_organization_registry', { actor_id: identity.user.id, registry_kind:'location', item:payload });
       if (error) throw error; return json({ id: data });
@@ -136,7 +131,7 @@ Deno.serve(async request => {
     }
     return json({ error: 'Ação inválida.' }, 400);
   } catch (error) {
-    console.error('manage-catalogs', error);
+    console.error('manage-catalogs: operação recusada');
     const message = error instanceof Error ? error.message : String((error as {message?:string})?.message || '');
     if (message.includes('REGISTRY_VERSION_CONFLICT')) return json({error:'O cadastro mudou em outra sessão. Atualize antes de salvar.'},409);
     if (/CNES_REQUIRED|CNES_INVALID/.test(message)) return json({error:'Selecione um CNES ativo e válido (sete dígitos).'},400);
@@ -146,7 +141,10 @@ Deno.serve(async request => {
     if (/ALLOCATION_IN_USE|SECRETARIAT_IN_USE|TEAM_IN_USE/.test(message)) return json({error:'Esta alteração invalidaria atuações existentes. Regularize os vínculos antes de mudar a estrutura.'},409);
     if (/INTERNAL_ALLOCATION_REQUIRES_SECRETARIAT|PARENT_CYCLE|PARENT_NOT_FOUND|TEAM_TYPE_INVALID|INVALID_RESPONSIBLE/.test(message)) return json({error:'Confira Secretaria superior, hierarquia, tipo de equipe e responsáveis ativos.'},400);
     if (/CALENDAR_INPUT_INVALID|CALENDAR_SCOPE_INVALID/.test(message)) return json({error:'Confira a data, a classificação, a abrangência e as unidades selecionadas.'},400);
+    if(message.includes('CALENDAR_PREVIEW_CHANGED'))return json({error:'O calendário ou os registros mudaram. Gere e confira outra prévia.'},409);
+    if(message.includes('RH_CALENDAR_STARTED_REVIEW_REQUIRED'))return json({error:'A mudança afetaria férias iniciadas ou passadas. É necessária revisão administrativa; nenhuma alteração foi gravada.'},409);
     if (message.includes('RH_DAYOFF_RECALC_CONFLICT'))return json({error:'A alteração criaria conflito entre afastamentos ou parcelas. Ajuste a programação antes de salvar; nenhuma alteração foi gravada.'},409);
+    if (message.includes('CALENDAR_DUPLICATED'))return json({error:'Já existe uma data desse tipo para a abrangência selecionada.'},409);
     if (message.includes('CALENDAR_NOT_FOUND'))return json({error:'Data não encontrada. Atualize a lista.'},404);
     if (message.includes('CALENDAR_VERSION_CONFLICT')) return json({ error: 'Outro administrador alterou esta data. Atualize o calendário antes de salvar.' }, 409);
     if (message === 'INVALID_ACCESS_CONTEXT') return json({ error: 'Selecione novamente o perfil e o local de atuação.' }, 403);
