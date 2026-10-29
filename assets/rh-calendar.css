@@ -1,3 +1,4 @@
+.rh-calendar-card .control{max-width:100%;min-width:0}.rh-calendar-card .field{min-width:0}
 .rh-calendar-wrap{max-height:72vh;max-width:100%;overflow:auto;overscroll-behavior:contain;margin-block:1rem;}
 .rh-calendar{border-collapse:separate;border-spacing:0;font-size:.82rem;}
 .rh-calendar caption{text-align:left;padding:.75rem;font-weight:700;}
@@ -101,3 +102,5 @@
 .rh-conflict-options{border:1px solid var(--line,#dce5e0);border-radius:8px;display:grid;gap:.7rem;padding:1rem;}
 .rh-conflict-options small{line-height:1.4;color:var(--muted);}
 @media print{.rh-calendar-meta{display:none!important;}.rh-calendar caption{position:static;width:auto;height:auto;clip-path:none;background:white;color:black;}.rh-calendar .rh-record-col{min-width:0;max-width:none;}}
+
+.rh-vacation-day{font:inherit;color:inherit;background:transparent;border:0;cursor:pointer;min-width:28px;min-height:32px;padding:2px}.rh-vacation-day:focus-visible{outline:3px solid #126747;outline-offset:-2px}.rh-vacation-dialog{max-width:min(38rem,calc(100vw - 2rem));max-height:85vh;overflow:auto;border:2px solid #126747;border-radius:12px;padding:1.25rem;color:#163d30}.rh-vacation-dialog::backdrop{background:rgb(0 0 0 / .4)}

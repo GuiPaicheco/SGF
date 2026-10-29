@@ -31,5 +31,5 @@ test('ficha e diferenças CNES apresentam campos amigáveis e escapam conteúdo 
 test('contrato final preserva revisão explícita, unidade fixa e operador apenas visual',async()=>{
  const units=await readFile(new URL('../assets/rh-units-ui.js',import.meta.url),'utf8'),holidays=await readFile(new URL('../assets/holidays-ui.js',import.meta.url),'utf8'),detail=await readFile(new URL('../assets/rh-leave-ui.js',import.meta.url),'utf8');
  assert.match(units,/reviewGroup\('added'/);assert.match(units,/reviewGroup\('changed'/);assert.match(units,/reviewed<preview.changes.length/);assert.doesNotMatch(units,/JSON.stringify|<pre\b|unit-select/);
- assert.doesNotMatch(holidays,/name="jurisdiction"|id="holiday-jurisdiction"/);assert.match(detail,/Atualizar previsão de retorno/);assert.match(detail,/Sem previsão de término/);
+ assert.match(holidays,/id="holiday-jurisdiction"/);assert.match(holidays,/calendar-preview/);assert.match(detail,/Atualizar previsão de retorno/);assert.match(detail,/Sem previsão de término/);
 });

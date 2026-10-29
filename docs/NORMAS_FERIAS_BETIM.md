@@ -52,6 +52,13 @@ Aceites repetidos foram retirados: novos planos registram `confirmation_collecti
 
 ## Lançamento direto e cadastro de aniversário
 
-O botão Lançar no calendário executa prévia validada e gravação transacional usando o digest e a mesma chave de reenvio. A interface não exige uma segunda confirmação. O Número do processo ou memorando permanece obrigatório; a data de comunicação não é solicitada no formulário simplificado e permanece nula quando ausente. Nesse caso o plano registra `notice_verified=false`: não se presume comunicação na data da digitação nem cumprimento de 60/45/30 dias. A conferência de antecedência é externa, conforme os documentos administrativos. O contrato anterior com data declarada mantém a verificação correspondente.
+Na homologação de 29/10/2026, o formulário apresenta a prévia validada antes da confirmação da gravação transacional. O digest e a chave de reenvio permanecem os mesmos para conferir uma resposta de rede incerta. O Número do processo ou memorando permanece obrigatório; a data de comunicação não é solicitada no formulário simplificado e permanece nula quando ausente. Nesse caso o plano registra `notice_verified=false`: não se presume comunicação na data da digitação nem cumprimento de 60/45/30 dias. A conferência de antecedência é externa, conforme os documentos administrativos. O contrato anterior com data declarada mantém a verificação correspondente.
 
 Aniversário cadastrado pelo RH é somente dia/mês por vínculo da unidade, separado do CNES e protegido por escopo, versão e auditoria. Não cria day-off nem reescreve férias. A regra que eventualmente exclua esse dia do cálculo depende de fundamento municipal, ainda pendente. Visões nominal e longitudinal e respectivos CSV/PDF mostram períodos, sobreposições e retornos dos registros já existentes; Lançar Folga permanece desabilitado.
+
+
+## Conferência normativa em 29/10/2026 — homologação
+
+A Lei 7.989/2025 e o Decreto 51.744/2025 foram novamente consultados nas fontes oficiais acima. O decreto, art. 1º, parágrafo único, usa a expressão período concessivo; o Portal do Servidor orienta a transição pela conclusão do período aquisitivo. O alcance dessa diferença permanece para validação do RH/Jurídico. Não houve migração retroativa nem recálculo em massa neste trabalho.
+
+O art. 12 do Decreto 51.744/2025 exige necessidade formal demonstrada pelo Secretário para retorno antecipado e reprogramação do remanescente. A edição/cancelamento comuns estão bloqueados para férias já iniciadas; interrupção e retificação exigem fluxo próprio, sem converter gozo ocorrido em período jamais usufruído. A tabela de regras existente permanece versionada nos planos e não foi substituída por regras federais ou CLT para estatutários.

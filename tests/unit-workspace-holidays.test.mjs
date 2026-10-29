@@ -15,10 +15,10 @@ test('unidades mostram só Acessar CNES na lista e ficha/dados/dayoff dentro, se
 });
 test('feriado específico exige unidade e exclusão envia id e versão, não active=false',async()=>{
  const h=harness('assets/holidays-ui.js'),calls=[],event={id:'event',version:4,event_date:'2028-06-06',name:'Data teste',type:'feriado',scope:'general',unit_ids:[],jurisdiction:'municipal'};
- await h.root.SGFHolidays.mount({app:h.app,esc,isCurrent:()=>true,request:async p=>{calls.push(p);return {events:[event],units:[{id:'u',name:'Unidade teste',code:'6305245'}]};}});
+ await h.root.SGFHolidays.mount({app:h.app,esc,isCurrent:()=>true,request:async p=>{calls.push(p);return {digest:'a'.repeat(64),events:[event],units:[{id:'u',name:'Unidade teste',code:'6305245'}]};}});
  assert.doesNotMatch(h.app.innerHTML,/Data ativa|Inativar/);assert.match(h.app.innerHTML,/Específico/);
  for(const [key,value] of Object.entries({event_date:'2028-06-06',type:'feriado',name:'Data teste',scope:'units',jurisdiction:'municipal'}))h.app.querySelector('#holiday-'+key).value=value;
  h.app.querySelector('#holiday-form').onsubmit({preventDefault(){}});assert.match(h.app.innerHTML,/Selecione pelo menos uma unidade/);assert.equal(calls.length,1);
- const button={dataset:{holidayDelete:'event'}};h.lists.set('[data-holiday-delete]',[button]);h.app.querySelector('#holiday-new').onclick();button.onclick();await h.app.querySelector('#holiday-confirm-delete').onclick();await tick();
+ const button={dataset:{holidayDelete:'event'}};h.lists.set('[data-holiday-delete]',[button]);h.app.querySelector('#holiday-new').onclick();button.onclick();await h.app.querySelector('#holiday-confirm-delete').onclick();await tick();assert.equal(calls.some(x=>x.action==='calendar-delete'),false);await h.app.querySelector('#holiday-commit').onclick();await tick();
  const deletion=calls.find(x=>x.action==='calendar-delete');assert.equal(deletion.id,'event');assert.equal(deletion.version,4);assert.equal(deletion.active,undefined);
 });

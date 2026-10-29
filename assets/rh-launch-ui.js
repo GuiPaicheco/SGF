@@ -11,7 +11,7 @@ async function mount({app,esc,request,isCurrent,onBack,viewState={}}){
  app.querySelector('#rh-launch-search').onsubmit=e=>{e.preventDefault();if(busy)return;search=app.querySelector('#rh-launch-name').value.trim();page=0;load(true);};
  if(data){app.querySelector('#rh-launch-prev').onclick=()=>{if(!busy&&page){page--;load();}};app.querySelector('#rh-launch-next').onclick=()=>{if(!busy&&(page+1)*50<data.total){page++;load();}};
  for(const button of app.querySelectorAll?.('[data-occurrence-entry]')||[])button.onclick=()=>{if(!busy&&isCurrent())(button.dataset.occurrenceType==='dayoff'?root.SGFRhEmployee:root.SGFRhOccurrence).open({app,esc,request,isCurrent,entryId:button.dataset.occurrenceEntry,type:button.dataset.occurrenceType,onBack:()=>load(true)});};
- for(const button of app.querySelectorAll?.('[data-launch-entry]')||[])button.onclick=()=>{if(busy||!isCurrent())return;const entryId=button.dataset.launchEntry;if(!data.employees.some(x=>x.entry_id===entryId&&x.binding_confirmed))return;root.SGFRhLeave.open({app,esc,request,isCurrent,entryId,cnes:null,onBack});};}
+ for(const button of app.querySelectorAll?.('[data-launch-entry]')||[])button.onclick=()=>{if(busy||!isCurrent())return;const entryId=button.dataset.launchEntry;if(!data.employees.some(x=>x.entry_id===entryId&&x.binding_confirmed))return;root.SGFRhLeave.open({app,esc,request,isCurrent,entryId,cnes:null,onBack:saved=>saved?onBack(saved):load(true)});};}
  }
  await load();
 }

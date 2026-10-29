@@ -1,6 +1,6 @@
 (function(root){
 'use strict';
-const date=value=>value?value.slice(8,10)+'/'+value.slice(5,7)+'/'+value.slice(0,4):'Sem previsão';
+const date=value=>value?value.slice(8,10)+'/'+value.slice(5,7)+'/'+value.slice(0,4):'Não informado';
 const iso=d=>d.toISOString().slice(0,10);
 function monthDays(month){const [y,m]=month.split('-').map(Number),first=new Date(Date.UTC(y,m-1,1)),count=new Date(Date.UTC(y,m,0)).getUTCDate();return {offset:first.getUTCDay(),dates:Array.from({length:count},(_,i)=>iso(new Date(Date.UTC(y,m-1,i+1))))};}
 async function open({app,esc,request,isCurrent,entryId,onBack}){

@@ -36,13 +36,13 @@ async function form(ui,request,editing){await ui.api.open({app:ui.app,esc,reques
 test('formulário não oferece banco, horas extras, matrícula ou nascimento obrigatório',async()=>{
  const ui=harness();await form(ui,async()=>resources);assert.doesNotMatch(ui.app.innerHTML,/value="banco_horas"|availableHours|extraHours|Matrícula|name="birthDate"/);assert.match(ui.app.innerHTML,/O que é período aquisitivo/);assert.equal(ui.app.querySelector('#rh-leave-acquisitionStart'),null);assert.equal(ui.app.querySelector('#rh-leave-admissionDate'),null);assert.doesNotMatch(ui.app.innerHTML,/name="managerConsent"|name="employeeConsent"|name="eligibilityConfirmed"/);
 });
-test('um clique valida, grava e encaminha ao calendário no intervalo salvo',async()=>{
- const ui=harness(),calls=[];const request=async p=>{calls.push(p);return p.action==='leave-resources'?resources:p.action==='preview-leave'?preview:{id};};await form(ui,request);await ui.submit('#rh-leave-form');
+test('prévia exige confirmação explícita antes de gravar e encaminhar ao calendário',async()=>{
+ const ui=harness(),calls=[];const request=async p=>{calls.push(p);return p.action==='leave-resources'?resources:p.action==='preview-leave'?preview:{id};};await form(ui,request);await ui.submit('#rh-leave-form');assert.deepEqual(calls.map(x=>x.action),['leave-resources','preview-leave']);assert.equal(ui.saved.length,0);await ui.submit('#rh-leave-confirm');
  assert.deepEqual(calls.map(x=>x.action),['leave-resources','preview-leave','create-leave']);assert.equal(calls[2].digest,preview.digest);assert.equal(ui.saved[0].start,'2027-03-01');assert.equal(ui.saved[0].end,'2027-04-05');assert.equal(ui.saved[0].leaveId,id);
 });
 test('falha de conexão oferece reenvio com a mesma chave, sem duplicar o lançamento',async()=>{
  const ui=harness(),creates=[];const request=async p=>{if(p.action==='leave-resources')return resources;if(p.action==='preview-leave')return preview;if(p.action==='create-leave'){creates.push(p);if(creates.length===1)throw Error('Falha de conexão');return{id};}};
- await form(ui,request);await ui.submit('#rh-leave-form');assert.equal(ui.app.querySelector('#rh-leave-edit').disabled,true);await ui.submit('#rh-leave-confirm');assert.deepEqual(creates[0],creates[1]);assert.equal(ui.saved.length,1);
+ await form(ui,request);await ui.submit('#rh-leave-form');await ui.submit('#rh-leave-confirm');assert.equal(ui.app.querySelector('#rh-leave-edit').disabled,true);await ui.submit('#rh-leave-confirm');assert.deepEqual(creates[0],creates[1]);assert.equal(ui.saved.length,1);
 });
 test('trocar modalidade revela quinquênio, parcelas 30/60 e conferência de impedimentos',async()=>{
  const ui=harness();await form(ui,async()=>resources);ui.set('#rh-leave-type','premio');ui.change('#rh-leave-type');assert.equal(ui.app.querySelector('#rh-leave-split').value,'30-60');assert.ok(ui.app.querySelector('#rh-leave-prizeCycle'));assert.ok(ui.app.querySelector('#rh-leave-healthLeaveDays'));assert.doesNotMatch(ui.app.innerHTML,/90 dias corridos/);
